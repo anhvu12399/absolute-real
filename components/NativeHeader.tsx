@@ -89,15 +89,20 @@ export function NativeHeader({
   const logoUrl = logo || defaultLogo;
 
   return (
-    <header id="masthead" className="site-header header-4">
-      <div className={`col-full-nav ${mobileNavOpen ? "mobile-toggled" : ""}`}>
-        <div className="site-branding">
-          <Link href="/" className="custom-logo-link" aria-label="Absolute Asia Tours Home">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoUrl} alt="Absolute Asia Tours" className="custom-logo" width={205} height={98} />
-          </Link>
+    <>
+      <header id="masthead" className="site-header">
+        <div className="menu-overlay"></div>
+        <div className="main-header col-full">
+          <div className="site-branding">
+            <Link href="/" className="custom-logo-link" aria-label="Absolute Asia Tours Home">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logoUrl} alt="Absolute Asia Tours" className="custom-logo" width={205} height={98} />
+            </Link>
+          </div>
         </div>
+      </header>
 
+      <div className={`col-full-nav ${mobileNavOpen ? "mobile-toggled" : ""}`}>
         <button
           type="button"
           className="menu-toggle"
@@ -183,6 +188,6 @@ export function NativeHeader({
           </p>
         </div>
       </div>
-    </header>
+    </>
   );
 }
