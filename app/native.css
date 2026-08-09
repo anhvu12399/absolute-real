@@ -339,131 +339,192 @@
   padding-left: 4px !important;
 }
 
-/* --- Tour Item & Hotel Card Layouts --- */
-.home-suggest,
-.home-travel.boxhotel,
-.home-escape {
-  padding: 80px 0 !important;
-}
-
-.home-suggest {
-  background: #f6f2eb !important;
-}
-
-.home-travel.boxhotel {
-  background: #ffffff !important;
-}
-
-.home-escape {
-  background: #f6f2eb !important;
-}
-
-.home-title {
-  text-align: center !important;
-  max-width: 800px !important;
-  margin: 0 auto 50px !important;
-}
-
-.home-title h2 {
-  font-family: "Playfair Display", Georgia, serif !important;
-  font-size: clamp(28px, 3vw, 42px) !important;
-  font-weight: 500 !important;
-  color: #00223a !important;
-  margin-bottom: 16px !important;
-  line-height: 1.25 !important;
-}
-
-.home-title p {
-  font-family: "Mulish", sans-serif !important;
-  font-size: 16px !important;
-  color: #555555 !important;
-  line-height: 1.65 !important;
-  margin: 0 !important;
-}
-
+/* --- Full-Bleed Overlay Tour Cards & 6-Col Hotel Grid --- */
 .home-suggest .aat-track {
-  padding: 20px 0 40px !important;
+  padding: 30px 0 50px !important;
 }
 
-.home-suggest .tour-item,
-.home-travel.boxhotel .cate-list ul li {
-  background: #ffffff !important;
+.home-suggest .tour-item {
+  position: relative !important;
+  height: 420px !important;
   border-radius: 8px !important;
   overflow: hidden !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-  display: flex !important;
-  flex-direction: column !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18) !important;
+  transition: transform 0.4s ease, box-shadow 0.4s ease !important;
 }
 
-.home-suggest .tour-item:hover,
-.home-travel.boxhotel .cate-list ul li:hover {
-  transform: translateY(-6px) !important;
-  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.15) !important;
+.home-suggest .tour-item:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3) !important;
 }
 
-.home-suggest .tour-item a,
-.home-travel.boxhotel .cate-list ul li a {
+.home-suggest .tour-item a {
   display: block !important;
+  width: 100% !important;
+  height: 100% !important;
   position: relative !important;
   text-decoration: none !important;
-  color: #1c3545 !important;
+  color: #ffffff !important;
 }
 
-.home-suggest .tour-item img,
-.home-travel.boxhotel .cate-list ul li img {
+.home-suggest .tour-item img {
   width: 100% !important;
-  height: 240px !important;
+  height: 100% !important;
   object-fit: cover !important;
-  display: block !important;
-  transition: transform 0.4s ease !important;
+  position: absolute !important;
+  inset: 0 !important;
+  transition: transform 0.6s ease !important;
 }
 
-.home-suggest .tour-item:hover img,
-.home-travel.boxhotel .cate-list ul li:hover img {
-  transform: scale(1.05) !important;
+.home-suggest .tour-item:hover img {
+  transform: scale(1.08) !important;
 }
 
-.home-suggest .tour-item span,
-.home-travel.boxhotel .cate-list ul li span {
-  font-family: "Playfair Display", Georgia, serif !important;
-  font-size: 18px !important;
-  font-weight: 600 !important;
-  color: #00223a !important;
-  display: block !important;
-  padding: 16px 20px 8px !important;
-  line-height: 1.35 !important;
+.home-suggest .tour-item a::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0.88) 100%) !important;
+  z-index: 1 !important;
 }
 
-.home-suggest .tour-item .add {
+.home-suggest .tour-item .duration-badge {
+  position: absolute !important;
+  top: 24px !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 2 !important;
+  text-align: center !important;
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.5px !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8) !important;
+}
+
+.home-suggest .tour-item p.add {
+  position: absolute !important;
+  bottom: 85px !important;
+  left: 16px !important;
+  right: 16px !important;
+  z-index: 2 !important;
+  text-align: center !important;
   font-family: "Montserrat", sans-serif !important;
   font-size: 11px !important;
+  font-weight: 600 !important;
   text-transform: uppercase !important;
-  letter-spacing: 1px !important;
-  color: #b48b4d !important;
-  padding: 0 20px !important;
-  margin: 0 0 12px !important;
-}
-
-.home-suggest .tour-item .cate-post {
-  padding: 12px 20px 16px !important;
-  border-top: 1px solid #f0f0f0 !important;
-  margin-top: auto !important;
-}
-
-.home-suggest .tour-item .cate-post .time {
-  font-size: 13px !important;
-  color: #666666 !important;
+  letter-spacing: 2px !important;
+  color: #e0d5c1 !important;
   margin: 0 !important;
+  padding: 0 !important;
 }
 
+.home-suggest .tour-item span.title {
+  position: absolute !important;
+  bottom: 24px !important;
+  left: 16px !important;
+  right: 16px !important;
+  z-index: 2 !important;
+  text-align: center !important;
+  font-family: "Playfair Display", Georgia, serif !important;
+  font-size: 17px !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+  line-height: 1.35 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8) !important;
+}
+
+.home-suggest .tour-item .icon-arrow {
+  display: none !important;
+}
+
+/* --- Section 4: 6-Column Hotel Grid --- */
 .home-travel.boxhotel .cate-list ul {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
-  gap: 30px !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 16px !important;
   list-style: none !important;
   padding: 0 !important;
-  margin: 30px 0 !important;
+  margin: 40px 0 !important;
+}
+
+@media (max-width: 1200px) {
+  .home-travel.boxhotel .cate-list ul {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-travel.boxhotel .cate-list ul {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+.home-travel.boxhotel .cate-list ul li.item {
+  position: relative !important;
+  height: 260px !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+  transition: transform 0.4s ease, box-shadow 0.4s ease !important;
+}
+
+.home-travel.boxhotel .cate-list ul li.item:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.22) !important;
+}
+
+.home-travel.boxhotel .cate-list ul li.item a {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  text-decoration: none !important;
+}
+
+.home-travel.boxhotel .cate-list ul li.item img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  position: absolute !important;
+  inset: 0 !important;
+  transition: transform 0.5s ease !important;
+}
+
+.home-travel.boxhotel .cate-list ul li.item:hover img {
+  transform: scale(1.08) !important;
+}
+
+.home-travel.boxhotel .cate-list ul li.item a::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.88) 100%) !important;
+  z-index: 1 !important;
+}
+
+.home-travel.boxhotel .cate-list ul li.item span {
+  position: absolute !important;
+  bottom: 20px !important;
+  left: 12px !important;
+  right: 12px !important;
+  z-index: 2 !important;
+  text-align: center !important;
+  font-family: "Playfair Display", Georgia, serif !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+  line-height: 1.3 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+  padding: 0 !important;
+}
+
+.home-travel.boxhotel .cate-list ul li.item .icon-arrow {
+  display: none !important;
 }
 
 .home-travel.boxhotel .btn-link {
@@ -473,9 +534,10 @@
 
 .home-travel.boxhotel .btn-link a {
   display: inline-block !important;
-  background: #b48b4d !important;
-  color: #ffffff !important;
-  padding: 12px 32px !important;
+  background: transparent !important;
+  border: 1px solid #b48b4d !important;
+  color: #192b3e !important;
+  padding: 12px 36px !important;
   border-radius: 4px !important;
   font-family: "Montserrat", sans-serif !important;
   font-size: 13px !important;
@@ -483,12 +545,34 @@
   letter-spacing: 1.5px !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
-  transition: background 0.3s ease !important;
+  transition: all 0.3s ease !important;
 }
 
 .home-travel.boxhotel .btn-link a:hover {
-  background: #00223a !important;
+  background: #b48b4d !important;
+  color: #ffffff !important;
 }
+
+/* --- Right Side Fixed Vertical CHAT WITH US Button --- */
+.chat-with-us {
+  position: fixed !important;
+  right: -42px !important;
+  top: 50% !important;
+  transform: translateY(-50%) rotate(-90deg) !important;
+  background: #001f35 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  padding: 8px 18px !important;
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  z-index: 9999 !important;
+  cursor: pointer !important;
+  border-radius: 4px 4px 0 0 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
 
 
 

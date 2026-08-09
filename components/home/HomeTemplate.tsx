@@ -14,7 +14,7 @@ function TourItem({ post }: { post: PostCard }) {
         {post.featuredMedia ? (
           <WpImage
             src={post.featuredMedia.url}
-            alt={post.featuredMedia.alt}
+            alt={post.featuredMedia.alt || post.title}
             images={{
               [post.featuredMedia.url]: {
                 ...post.featuredMedia,
@@ -27,13 +27,11 @@ function TourItem({ post }: { post: PostCard }) {
             sizes="(max-width: 768px) 90vw, 320px"
           />
         ) : null}
-        <span>{post.title}</span>
-        <i className="fas fa-arrow-right" aria-hidden="true" />
+        <span className="duration-badge">{post.duration}</span>
+        <p className="add">{post.categories?.map((term) => term.name).join(", ")}</p>
+        <span className="title">{post.title}</span>
+        <i className="fas fa-arrow-right icon-arrow" aria-hidden="true" />
       </a>
-      <p className="add">{post.categories?.map((term) => term.name).join(", ")}</p>
-      <div className="cate-post">
-        <p className="time">{post.duration}</p>
-      </div>
     </div>
   );
 }
@@ -46,7 +44,7 @@ function CardLink({ post, as = "div" }: { post: PostCard; as?: "div" | "li" }) {
         {post.featuredMedia ? (
           <WpImage
             src={post.featuredMedia.url}
-            alt={post.featuredMedia.alt}
+            alt={post.featuredMedia.alt || post.title}
             images={{
               [post.featuredMedia.url]: {
                 ...post.featuredMedia,
@@ -60,7 +58,7 @@ function CardLink({ post, as = "div" }: { post: PostCard; as?: "div" | "li" }) {
           />
         ) : null}
         <span>{post.title}</span>
-        <i className="fas fa-arrow-right" aria-hidden="true" />
+        <i className="fas fa-arrow-right icon-arrow" aria-hidden="true" />
       </a>
     </Tag>
   );
@@ -116,33 +114,6 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
         </div>
       </section>
 
-      {blogs.length > 0 && (
-        <section className="home-travel">
-          <div className="home-container">
-            <Html className="home-title" html={acf.sec03_title} />
-            <div className="list-posts">
-              {blogs.map((post) => (
-                <CardLink key={post.id} post={post} />
-              ))}
-            </div>
-            <div className="cate-list">
-              <ul>
-                {categories.map((term) => (
-                  <TermTile key={term.id} term={term} images={images} field="banner" />
-                ))}
-              </ul>
-            </div>
-            <div className="btn-link">
-              {(acf.links_sec03 ?? []).map((link, index) => (
-                <a key={index} href={toLocalHref(link.url_sec03)}>
-                  <span>{link.text_links_sec03}</span>
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       <section className="home-suggest">
         <div className="home-container">
           {acf.sec05_title ? (
@@ -193,6 +164,47 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
           </div>
         </div>
       </section>
+
+      <section className="home-suggest sec-explore">
+        <div className="home-container">
+          <div className="home-title">
+            <h2>Explore these tour ideas, tailored just for you.</h2>
+            <p>Find your ideal vacation with our suggested tours. Whether it's beaches, mountains, or cultural experiences you're after, we've got options to suit your interests and budget.</p>
+          </div>
+          <SnapCarousel className="tours-slider tour-slider" label="Tour ideas">
+            {tours.slice().reverse().map((post) => (
+              <TourItem key={`explore-${post.id}`} post={post} />
+            ))}
+          </SnapCarousel>
+        </div>
+      </section>
+
+      {blogs.length > 0 && (
+        <section className="home-travel">
+          <div className="home-container">
+            <Html className="home-title" html={acf.sec03_title} />
+            <div className="list-posts">
+              {blogs.map((post) => (
+                <CardLink key={post.id} post={post} />
+              ))}
+            </div>
+            <div className="cate-list">
+              <ul>
+                {categories.map((term) => (
+                  <TermTile key={term.id} term={term} images={images} field="banner" />
+                ))}
+              </ul>
+            </div>
+            <div className="btn-link">
+              {(acf.links_sec03 ?? []).map((link, index) => (
+                <a key={index} href={toLocalHref(link.url_sec03)}>
+                  <span>{link.text_links_sec03}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {inspirations.length > 0 && (
         <section className="home-escape">
@@ -280,6 +292,10 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
           </div>
         </div>
       </section>
+
+      <button className="chat-with-us" type="button">
+        CHAT WITH US
+      </button>
     </>
   );
 }
