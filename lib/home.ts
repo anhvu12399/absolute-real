@@ -298,10 +298,140 @@ const DEFAULT_HOTELS: PostCard[] = [
   },
 ];
 
+const DEFAULT_BLOGS: PostCard[] = [
+  {
+    id: 15032,
+    type: "blogs",
+    slug: "the-new-144-day-visa-free-era-for-china-travel",
+    path: "/blogs/best-private-asia-luxury-tours-for-americans/",
+    title: "The New 144-Hour Visa-Free Era for China Travel",
+    excerpt: "",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-pixabay-533931.jpg",
+      width: 800,
+      height: 500,
+      alt: "China Travel",
+    },
+    duration: "",
+    price: "",
+    categories: [],
+  },
+  {
+    id: 10029,
+    type: "blogs",
+    slug: "best-private-asia-luxury-tours-for-americans",
+    path: "/blogs/best-private-asia-luxury-tours-for-americans/",
+    title: "Best Private Asia Luxury Tours for Americans",
+    excerpt: "",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2024/12/andara-resort-and-villas-05.jpg",
+      width: 800,
+      height: 500,
+      alt: "Luxury Tours",
+    },
+    duration: "",
+    price: "",
+    categories: [],
+  },
+  {
+    id: 15174,
+    type: "blogs",
+    slug: "the-best-time-to-have-fascinating-experiences-in-thailand",
+    path: "/blogs/best-private-asia-luxury-tours-for-americans/",
+    title: "The Best Time to Have Fascinating Experiences in Thailand",
+    excerpt: "",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2026/05/Aman_Amanfayun1-1024x636.jpg",
+      width: 800,
+      height: 500,
+      alt: "Thailand Travel",
+    },
+    duration: "",
+    price: "",
+    categories: [],
+  },
+];
+
+const DEFAULT_CATEGORIES: TermCard[] = [
+  {
+    id: 71,
+    taxonomy: "category",
+    slug: "indonesia",
+    name: "Indonesia",
+    description: "",
+    count: 23,
+    path: "/indonesia/",
+    acf: { banner: "https://www.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-pixabay-533931.jpg" },
+  },
+  {
+    id: 61,
+    taxonomy: "category",
+    slug: "vietnam",
+    name: "Vietnam",
+    description: "",
+    count: 50,
+    path: "/vietnam-tours/",
+    acf: { banner: "https://www.absoluteasiatours.com/wp-content/uploads/2026/08/Golden-Ha-Long-Bay-Yacht-Panorama-1024x455.jpg" },
+  },
+  {
+    id: 62,
+    taxonomy: "category",
+    slug: "thailand",
+    name: "Thailand",
+    description: "",
+    count: 40,
+    path: "/thailand-tours/",
+    acf: { banner: "https://www.absoluteasiatours.com/wp-content/uploads/2024/12/andara-resort-and-villas-05.jpg" },
+  },
+  {
+    id: 63,
+    taxonomy: "category",
+    slug: "cambodia",
+    name: "Cambodia",
+    description: "",
+    count: 30,
+    path: "/cambodia-tours/",
+    acf: { banner: "https://www.absoluteasiatours.com/wp-content/uploads/2026/05/Aman_Amanfayun6.jpg" },
+  },
+  {
+    id: 65,
+    taxonomy: "category",
+    slug: "japan",
+    name: "Japan",
+    description: "",
+    count: 35,
+    path: "/japan-tours/",
+    acf: { banner: "https://www.absoluteasiatours.com/wp-content/uploads/2026/08/Golden-Ha-Long-Bay-Yacht-Panorama-990x440.jpg" },
+  },
+  {
+    id: 67,
+    taxonomy: "category",
+    slug: "china",
+    name: "China",
+    description: "",
+    count: 25,
+    path: "/china-tours/",
+    acf: { banner: "https://www.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-pixabay-533931.jpg" },
+  },
+];
+
 async function getPosts(ids?: number[]): Promise<PostCard[]> {
   if (!ids?.length) return [];
   try {
-    return await api<PostCard[]>(`/absolute-asia/v1/posts?include=${ids.join(",")}`);
+    const raw = await api<any[]>(`/absolute-asia/v1/content-batch?include=${ids.join(",")}`);
+    if (!Array.isArray(raw)) return [];
+    return raw.map((item) => ({
+      id: item.id,
+      type: item.type || "post",
+      slug: item.slug,
+      path: item.path || `/${item.slug}/`,
+      title: item.title || "",
+      excerpt: item.excerpt || "",
+      featuredMedia: item.featuredMedia || null,
+      duration: item.acf?.duration || item.acf?.subtitle || item.excerpt || "",
+      price: item.acf?.price || "",
+      categories: item.categories || [],
+    }));
   } catch {
     return [];
   }
@@ -381,8 +511,8 @@ export const getHomeData = cache(async (): Promise<HomeData> => {
 
   const tours = toursRes.length > 0 ? toursRes : DEFAULT_TOURS;
   const hotels = hotelsRes.length > 0 ? hotelsRes : DEFAULT_HOTELS;
-  const blogs = blogsRes;
-  const categories = categoriesRes;
+  const blogs = blogsRes.length > 0 ? blogsRes : DEFAULT_BLOGS;
+  const categories = categoriesRes.length > 0 ? categoriesRes : DEFAULT_CATEGORIES;
   const inspirations = inspirationsRes;
 
   const images = await getImageMap([
