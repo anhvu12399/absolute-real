@@ -1,3 +1,173 @@
-.native-container{width:min(1500px,86vw);margin-inline:auto}.native-header{position:relative;z-index:20;background:#fff;border-top:1px solid #222}.native-header__inner{width:min(1620px,90vw);height:118px;margin:auto;display:flex;align-items:center;gap:42px}.native-logo{display:block;width:205px;flex:0 0 205px}.native-logo img{width:205px;height:98px;object-fit:contain}.native-nav{display:flex;align-items:center;justify-content:center;gap:34px;flex:1;height:100%}.native-nav__item{height:100%;display:flex;align-items:center;position:relative}.native-nav__item>a{font:600 14px/1.2 Mulish,Arial,sans-serif;text-decoration:none;color:#001f35;white-space:nowrap}.native-submenu{position:absolute;left:-24px;top:88px;min-width:260px;padding:18px 0;background:#fff;box-shadow:0 16px 40px #001f3524;opacity:0;visibility:hidden;transform:translateY(8px);transition:.2s}.native-nav__item:hover .native-submenu,.native-nav__item:focus-within .native-submenu{opacity:1;visibility:visible;transform:none}.native-submenu a{display:block;padding:9px 24px;text-decoration:none;font-size:14px}.native-phone{display:flex;flex-direction:column;text-align:right}.native-phone small{font-size:12px}.native-phone a{font-weight:700;text-decoration:none}.native-hero{height:min(760px,calc(100vh - 118px));min-height:580px;position:relative;overflow:hidden;background:#001f35}.native-hero__slide{position:absolute;inset:0;opacity:0;transition:opacity 1s;pointer-events:none}.native-hero__slide.is-active{opacity:1;pointer-events:auto}.native-hero__slide>img{object-fit:cover}.native-hero__shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 12%,#2c2a2a 100%)}.native-hero__copy{position:absolute;left:7vw;right:7vw;bottom:105px;color:#fff;text-align:center}.native-hero__copy h1{font:500 clamp(48px,5.2vw,86px)/1.05 "Playfair Display",Georgia,serif;margin:0 0 12px}.native-hero__copy p{font-size:clamp(17px,1.35vw,23px);margin:0}.native-hero__dots{position:absolute;z-index:3;left:0;right:0;bottom:46px;display:flex;justify-content:center;gap:10px}.native-hero__dots button{width:9px;height:9px;padding:0;border:1px solid #fff;border-radius:50%;background:transparent}.native-hero__dots button.is-active{background:#fff}.native-quicklinks{display:grid;grid-template-columns:repeat(3,1fr);background:#f7f4ee}.native-quicklinks a{min-height:76px;padding:0 42px;display:flex;align-items:center;justify-content:space-between;border-right:1px solid #d9d0c0;text-decoration:none}.native-intro{display:grid;grid-template-columns:1.05fr 1fr;gap:7vw;padding-block:110px}.native-rich h3,.native-rich h2,.native-section__title h2{font:500 clamp(38px,4vw,68px)/1.1 "Playfair Display",Georgia,serif;color:#00223a;margin:0 0 28px}.native-rich p{font-size:18px;line-height:1.8}.native-intro__images{display:grid;grid-template-columns:1fr 1fr;gap:22px}.native-image-card{position:relative;min-height:490px;overflow:hidden}.native-image-card img{object-fit:cover}.native-image-card:after,.native-card:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,#001f35db)}.native-image-card span,.native-card h3{position:absolute;z-index:2;left:26px;right:26px;bottom:28px;color:#fff;font:600 27px/1.2 "Playfair Display",Georgia,serif}.native-section{padding:105px 0}.native-section--cream{background:#f6f2eb}.native-section__title{text-align:center;max-width:950px;margin:0 auto 50px}.native-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}.native-card{position:relative;height:430px;overflow:hidden;background:#00223a;text-decoration:none}.native-card img{width:100%;height:100%;object-fit:cover}.native-card h3{margin:0}.native-pill-links{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;margin-top:40px}.native-pill-links a{padding:12px 22px;border:1px solid #b28d55;text-decoration:none}.native-tour-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(300px,31%);gap:24px;overflow-x:auto;padding-bottom:18px}.native-tour{text-decoration:none;border:1px solid #e5dfd5}.native-tour img{width:100%;height:300px;object-fit:cover}.native-tour h3{font:600 26px/1.2 "Playfair Display",Georgia,serif;margin:22px 24px 10px}.native-tour p{margin:0 24px 24px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.native-reviews{padding:100px 0;background:#00223a;color:#fff}.native-reviews h2{text-align:center;font:500 52px "Playfair Display",Georgia,serif}.native-review-row{display:grid;grid-template-columns:repeat(3,1fr);gap:25px}.native-review-row article{display:flex;gap:18px;padding:28px;background:#fff;color:#1c3545}.native-review-row img{border-radius:50%;object-fit:cover}.native-review-row small{display:block}.native-review-row p{font-size:14px;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}.native-difference{padding:90px 7vw;background:#364d5c;color:#fff;text-align:center}.native-difference__list{display:flex;justify-content:center;gap:30px}.native-specialist{padding:80px 7vw}.native-footer{background:#001f35;color:#fff;padding:70px 7vw 28px}.native-footer a{color:inherit}.native-footer img{max-width:100%;height:auto}
-@media(max-width:1100px){.native-header__inner{height:92px}.native-logo,.native-logo img{width:160px}.native-logo{flex-basis:160px}.native-nav{gap:18px}.native-phone{display:none}.native-intro{grid-template-columns:1fr}.native-card{height:360px}}
-@media(max-width:760px){.native-header__inner{height:auto;min-height:84px;flex-wrap:wrap;padding:10px 0}.native-logo,.native-logo img{width:132px;height:64px}.native-logo{flex-basis:132px}.native-nav{order:2;justify-content:flex-start;width:100%;height:auto;overflow-x:auto}.native-submenu{display:none}.native-hero{height:520px;min-height:0}.native-hero__copy h1{font-size:45px}.native-quicklinks,.native-intro__images,.native-card-grid,.native-review-row{grid-template-columns:1fr}.native-intro,.native-section{padding-block:68px}.native-image-card{min-height:410px}.native-tour-row{grid-auto-columns:84%}.native-difference__list{display:block}}
+/*
+ * Layout-only replacements for the JavaScript carousels the theme used to load.
+ * Card styling still comes from the theme stylesheets (plus_T.css, plus_V.css,
+ * responsive_*.css) via their original class names - only the track mechanics
+ * live here, because Swiper's, Owl's and Slick's own CSS is no longer loaded.
+ */
+
+/* --- Hero: crossfade, previously Swiper effect:"fade" --- */
+.home-banner .swiper.aat-fade {
+  position: relative;
+  overflow: hidden;
+}
+
+.home-banner .swiper.aat-fade .swiper-wrapper {
+  display: block;
+  position: relative;
+  min-height: 750px;
+}
+
+.home-banner .swiper.aat-fade .swiper-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease-in-out;
+}
+
+.home-banner .swiper.aat-fade .swiper-slide-active {
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+}
+
+.home-banner .swiper.aat-fade .swiper-slide img.img-banner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-banner .swiper-pagination {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  width: 100%;
+}
+
+.home-banner .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+.home-banner .swiper-pagination-bullet-active {
+  background: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-banner .swiper.aat-fade .swiper-slide {
+    transition: none;
+  }
+}
+
+/* --- Rows: scroll-snap, previously Owl Carousel and Slick --- */
+.aat-carousel {
+  position: relative;
+}
+
+.aat-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+.aat-track::-webkit-scrollbar {
+  display: none;
+}
+
+.aat-track > * {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: calc((100% - 60px) / 4);
+  min-width: 240px;
+}
+
+.aat-track.reviews > * {
+  width: calc((100% - 40px) / 3);
+  min-width: 280px;
+}
+
+.aat-track:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+.aat-nav {
+  position: absolute;
+  top: 40%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 50%;
+  background: #fff;
+  color: #192b3e;
+  cursor: pointer;
+}
+
+.aat-nav[disabled] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.aat-prev {
+  left: -18px;
+}
+
+.aat-next {
+  right: -18px;
+}
+
+/* --- Background tiles: ACF images are URLs, so next/image replaces the
+       inline background-image the PHP template used. --- */
+.home-intro .right .wrap.aat-tile {
+  position: relative;
+  overflow: hidden;
+}
+
+.home-intro .right .wrap.aat-tile img.aat-tile-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-intro .right .wrap.aat-tile > a {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 1000px) {
+  .aat-track > * {
+    width: calc((100% - 20px) / 2);
+  }
+
+  .aat-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .aat-track > *,
+  .aat-track.reviews > * {
+    width: 85%;
+  }
+
+  .home-banner .swiper.aat-fade .swiper-wrapper {
+    min-height: 520px;
+  }
+}
