@@ -95,15 +95,7 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
           <div className="right">
             {(acf.images_list ?? []).map((item, index) => (
               <div className="item-content" key={index}>
-                <div className="wrap aat-tile">
-                  <WpImage
-                    src={item.image_sec02}
-                    images={images}
-                    alt={item.text_img_sec02 ?? ""}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="aat-tile-bg"
-                  />
+                <div className="wrap" style={{ backgroundImage: `url(${item.image_sec02})` }}>
                   <a href={toLocalHref(item.link_sec02)} className="overlay" aria-hidden="true" tabIndex={-1} />
                   <a href={toLocalHref(item.link_sec02)} className="icon-item" aria-hidden="true" tabIndex={-1}>
                     <i className="fas fa-arrow-right" />
@@ -169,19 +161,32 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
         </div>
       </section>
 
-      <section className="home-suggest sec-explore">
-        <div className="home-container">
-          <div className="home-title">
-            <h2>Explore these tour ideas, tailored just for you.</h2>
-            <p>Find your ideal vacation with our suggested tours. Whether it's beaches, mountains, or cultural experiences you're after, we've got options to suit your interests and budget.</p>
+      {inspirations.length > 0 && (
+        <section className="home-suggest sec-explore">
+          <div className="home-container">
+            <Html className="home-title" html={acf.sec04_title} />
+            <div className="list-posts">
+              {inspirations.map((term) => (
+                <div className="item" key={term.id}>
+                  <a href={term.path ?? "#"}>
+                    <WpImage
+                      src={term.acf?.featured as string | undefined}
+                      images={images}
+                      alt={term.name}
+                      sizes="(max-width: 768px) 90vw, 320px"
+                    />
+                    <span>{term.name}</span>
+                    <i className="fas fa-arrow-right" aria-hidden="true" />
+                  </a>
+                </div>
+              ))}
+            </div>
+            <div className="btn-link">
+              <a href={toLocalHref(acf.button_link_sec04)}>{acf.button_text_sec04}</a>
+            </div>
           </div>
-          <SnapCarousel className="tours-slider tour-slider" label="Tour ideas">
-            {tours.slice().reverse().map((post) => (
-              <TourItem key={`explore-${post.id}`} post={post} />
-            ))}
-          </SnapCarousel>
-        </div>
-      </section>
+        </section>
+      )}
 
       {blogs.length > 0 && (
         <section className="home-travel">
@@ -205,33 +210,6 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
                   <span>{link.text_links_sec03}</span>
                 </a>
               ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {inspirations.length > 0 && (
-        <section className="home-escape">
-          <div className="home-container">
-            <Html className="home-title" html={acf.sec04_title} />
-            <div className="list-posts">
-              {inspirations.map((term) => (
-                <div className="item" key={term.id}>
-                  <a href={term.path ?? "#"}>
-                    <WpImage
-                      src={term.acf?.featured as string | undefined}
-                      images={images}
-                      alt={term.name}
-                      sizes="(max-width: 768px) 90vw, 320px"
-                    />
-                    <span>{term.name}</span>
-                    <i className="fas fa-arrow-right" aria-hidden="true" />
-                  </a>
-                </div>
-              ))}
-            </div>
-            <div className="btn-link">
-              <a href={toLocalHref(acf.button_link_sec04)}>{acf.button_text_sec04}</a>
             </div>
           </div>
         </section>
