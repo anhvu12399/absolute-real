@@ -270,7 +270,8 @@ display:flex;visibility:visible;opacity:1
 }
 
 export async function GET(request: NextRequest) {
-  const upstream = new URL(request.nextUrl.pathname, `${wordpressOrigin()}/`);
+  const upstreamPath = request.nextUrl.pathname.replace(/^\/legacy/, "") || "/";
+  const upstream = new URL(upstreamPath, `${wordpressOrigin()}/`);
   upstream.search = request.nextUrl.search;
 
   try {

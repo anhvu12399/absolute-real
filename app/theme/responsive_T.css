@@ -1,0 +1,245 @@
+@media (max-width: 1440px) {
+  .wpforms-recaptcha-container.wpforms-is-recaptcha {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 1366px) {
+}
+
+@media (max-width: 1280px) {
+  .enquiry-slide-in.right-0 {
+    width: 30%;
+  }
+
+  #menu-primary-menu
+    > li:nth-child(3)
+    .sub-menu
+    > li:nth-child(3)
+    .sub-menu
+    > li
+    span
+    span {
+    flex: 0 0 60%;
+  }
+
+  .copyright p {
+    text-align: center;
+  }
+}
+
+@media (max-width: 1024px) {
+  #nav-menu-item-11137,
+  #nav-menu-item-10783,
+  #nav-menu-item-10784,
+  #nav-menu-item-10786,
+  #nav-menu-item-10787,
+  #nav-menu-item-10791,
+  #nav-menu-item-10789,
+  #nav-menu-item-10780 {
+    width: 20%;
+  }
+
+  .enquiry-slide-in.right-0 {
+    width: 40%;
+  }
+
+  #nav-menu-item-10785,
+  #nav-menu-item-10788,
+  #nav-menu-item-10790,
+  #nav-menu-item-10781 {
+    width: 50%;
+  }
+
+  #nav-menu-item-10787 li {
+    margin-left: 10px;
+  }
+
+  #nav-menu-item-10792 {
+    margin-right: 30px;
+  }
+
+  #nav-menu-item-10789 .sub-menu,
+  #nav-menu-item-10791 .sub-menu {
+    width: 100%;
+  }
+
+  #nav-menu-item-10789,
+  #nav-menu-item-10791 {
+    display: flex;
+    justify-content: center;
+  }
+
+  #nav-menu-item-10789 .sub-menu li,
+  #nav-menu-item-10791 .sub-menu li {
+    display: flex;
+    justify-content: center;
+  }
+
+  #nav-menu-item-10791 #nav-menu-item-11141 {
+    width: 100%;
+  }
+
+  #nav-menu-item-10790 .sub-menu-wrapper .container .sub-menu {
+    width: 95%;
+  }
+
+  #wpforms-8516-field_33 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .wpforms-recaptcha-container.wpforms-is-recaptcha {
+    margin-top: 25px;
+  }
+
+  .wpforms-submit-container {
+    justify-content: center;
+    display: flex;
+  }
+}
+
+@media (max-width: 991px) {
+  #nav-menu-item-10780,
+  #nav-menu-item-11137,
+  #nav-menu-item-10781,
+  #nav-menu-item-10783,
+  #nav-menu-item-10784,
+  #nav-menu-item-10785,
+  #nav-menu-item-10786,
+  #nav-menu-item-10787,
+  #nav-menu-item-10788,
+  #nav-menu-item-10789,
+  #nav-menu-item-10790,
+  #nav-menu-item-10791 {
+    width: 100%;
+  }
+
+  #nav-menu-item-10776 .sub-menu-wrapper .sub-menu,
+  #nav-menu-item-10777 .sub-menu-wrapper .sub-menu,
+  #nav-menu-item-10779 .sub-menu-wrapper .sub-menu {
+    height: 100% !important;
+  }
+
+  #nav-menu-item-10789,
+  #nav-menu-item-10791 {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .enquiry-slide-in.right-0 {
+    width: 45%;
+  }
+}
+
+@media (max-width: 736px) {
+}
+
+@media (max-width: 601px) {
+  #wpforms-8516-field_33 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  #wpforms-11278-field_92-container {
+    flex: 0 0 35%;
+    max-width: 100%;
+  }
+
+  .contact-us-frm .choose-gender,
+  .contact-us-frm .sec-passenger + div + div .currency {
+    flex: 0 0 40%;
+    max-width: 30%;
+  }
+
+  .grid-footer {
+    justify-content: center;
+  }
+
+  .road-line li {
+    text-align: center;
+  }
+
+  ul.road-line {
+    column-gap: 20px;
+  }
+
+  .enquiry-slide-in.right-0 {
+    width: 55%;
+  }
+}
+
+@media (max-width: 480px) {
+  #wpforms-8516-field_33 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  #wpforms-11278-field_92-container {
+    flex: 0 0 35%;
+    max-width: 100%;
+  }
+
+  #wpforms-11278-field_31 li {
+    justify-content: center;
+  }
+
+  .contact-us-frm .choose-gender,
+  .contact-us-frm .sec-passenger + div + div .currency {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+
+  div.wpforms-container-full .wpforms-field.choose-cities ul {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  ul.road-line {
+    justify-content: center;
+    width: 300px !important;
+  }
+
+  .enquiry-slide-in.right-0 {
+    width: 100%;
+  }
+
+  #content .contact-us-frm .type-travel ul {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wpforms-field-layout-columns.wpforms-field-layout-preset-50-50 {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 414px) {
+}
+
+@media (max-width: 375px) {
+  .contact-us-frm .wpforms-page > div:not(div:first-child) {
+    padding: 0 10px !important;
+  }
+
+  #wpforms-11278-field_76-container
+    .wpforms-field-layout-columns.wpforms-field-layout-preset-50-50 {
+    gap: 0;
+  }
+
+  .page-template-contact-us .container form {
+    margin: 30px 20px;
+  }
+}
+
+@media (max-width: 320px) {
+  .page-template-contact-us .container form {
+    margin: 20px 0px;
+  }
+
+  #wpforms-11278-field_50 li,
+  #wpforms-11278-field_33 li {
+    margin-left: -20px;
+  }
+
+  .page-template-booking-tours .contact-us-frm .container {
+    padding: 15px 0;
+  }
+}
