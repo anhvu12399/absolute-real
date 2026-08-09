@@ -415,6 +415,24 @@ const DEFAULT_CATEGORIES: TermCard[] = [
   },
 ];
 
+function getDurationStr(item: any): string {
+  if (typeof item.acf?.duration === "string" && item.acf.duration.trim()) {
+    return item.acf.duration.trim();
+  }
+  if (typeof item.acf?.tour_price?.duration === "string" && item.acf.tour_price.duration.trim()) {
+    return item.acf.tour_price.duration.trim();
+  }
+  if (typeof item.acf?.time === "string" && item.acf.time.trim()) {
+    return item.acf.time.trim();
+  }
+  return "";
+}
+
+function cleanTitle(str?: string): string {
+  if (!str) return "";
+  return str.replace(/<[^>]*>/g, "").trim();
+}
+
 async function getPosts(ids?: number[]): Promise<PostCard[]> {
   if (!ids?.length) return [];
   try {
@@ -425,11 +443,11 @@ async function getPosts(ids?: number[]): Promise<PostCard[]> {
       type: item.type || "post",
       slug: item.slug,
       path: item.path || `/${item.slug}/`,
-      title: item.title || "",
-      excerpt: item.excerpt || "",
+      title: cleanTitle(item.title),
+      excerpt: cleanTitle(item.excerpt),
       featuredMedia: item.featuredMedia || null,
-      duration: item.acf?.duration || item.acf?.subtitle || item.excerpt || "",
-      price: item.acf?.price || "",
+      duration: getDurationStr(item),
+      price: typeof item.acf?.tour_price?.price === "string" ? item.acf.tour_price.price : item.acf?.price || "",
       categories: item.categories || [],
     }));
   } catch {

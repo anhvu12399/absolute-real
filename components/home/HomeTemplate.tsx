@@ -31,11 +31,11 @@ function TourItem({ post }: { post: PostCard }) {
         <i className="fas fa-arrow-right" aria-hidden="true" />
       </a>
       <p className="add">{post.categories?.map((term) => term.name).join(", ")}</p>
-      <div className="cate-post">
-        <p className="time">
-          {post.duration}
-        </p>
-      </div>
+      {post.duration ? (
+        <div className="cate-post">
+          <p className="time">{post.duration}</p>
+        </div>
+      ) : null}
     </div>
   );
 }

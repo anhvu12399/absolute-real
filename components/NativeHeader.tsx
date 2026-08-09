@@ -131,8 +131,22 @@ export function NativeHeader({
                       }`}
                       onMouseEnter={() => hasChildren && setOpenMenuId(item0.id)}
                       onMouseLeave={() => hasChildren && setOpenMenuId(null)}
+                      onClick={(e) => {
+                        if (hasChildren) {
+                          setOpenMenuId(isOpen ? null : item0.id);
+                        }
+                      }}
                     >
-                      <Link href={toLocalHref(item0.url)} target={item0.target || undefined}>
+                      <Link
+                        href={toLocalHref(item0.url)}
+                        target={item0.target || undefined}
+                        onClick={(e) => {
+                          if (hasChildren) {
+                            // On click, if it has a submenu, toggle the dropdown instead of page jump
+                            setOpenMenuId(isOpen ? null : item0.id);
+                          }
+                        }}
+                      >
                         <span>{item0.title}</span>
                         {hasChildren && <i className="fas fa-chevron-down nav-arrow" aria-hidden="true" />}
                       </Link>
