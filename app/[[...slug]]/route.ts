@@ -6,11 +6,62 @@ import { NextRequest, NextResponse } from "next/server";
 
 const DEFAULT_ORIGIN = "https://origin.absoluteasiatours.com";
 
+// Must stay in sync with next.config.ts -> images.deviceSizes.
+// /_next/image rejects any `w` value outside deviceSizes u imageSizes with a 400.
+const DEVICE_SIZES = [320, 480, 640, 750, 828, 1080, 1200, 1600, 1920];
+
+const OWN_HOST = /^(?:www\.)?absoluteasiatours\.com$/i;
+const OPTIMIZABLE = /\.(?:avif|jpe?g|png|webp)(?:[?#]|$)/i;
+
 function wordpressOrigin() {
   return (process.env.WORDPRESS_RENDER_ORIGIN || DEFAULT_ORIGIN).replace(/\/$/, "");
 }
 
-function rewriteInternalNavigation(html: string, previewOrigin: string) {
+/**
+ * Strips the FastPixel CDN wrapper, if present, returning the underlying URL.
+ */
+function unwrapFastPixel(value: string) {
+  const decoded = value.replace(/&amp;/g, "&").trim();
+  const accelerated = decoded.match(/^https:\/\/cdn\.fastpixel\.io\/fp\/[^/]+\/(.+)$/i);
+  if (!accelerated) return decoded;
+  try {
+    return `https://${decodeURIComponent(accelerated[1])}`;
+  } catch {
+    return decoded;
+  }
+}
+
+/**
+ * Own-domain assets become root-relative so they keep working both on the
+ * Vercel preview host and after the production domain is cut over. The
+ * /wp-content and /wp-includes rewrites in next.config.ts serve them.
+ * Third-party URLs are returned untouched.
+ */
+function restoreAssetUrl(value: string) {
+  const restored = unwrapFastPixel(value);
+  try {
+    const url = new URL(restored, "https://www.absoluteasiatours.com");
+    if (OWN_HOST.test(url.hostname)) {
+      return `${url.pathname}${url.search}${url.hash}` || "/";
+    }
+  } catch {}
+  return restored;
+}
+
+/**
+ * Returns a root-relative path for own-domain assets, or null for anything
+ * hosted elsewhere (which /_next/image can only serve via remotePatterns).
+ */
+function ownAssetPath(value: string) {
+  const restored = unwrapFastPixel(value);
+  try {
+    const url = new URL(restored, "https://www.absoluteasiatours.com");
+    if (OWN_HOST.test(url.hostname)) return `${url.pathname}${url.search}`;
+  } catch {}
+  return null;
+}
+
+function rewriteInternalNavigation(html: string) {
   const productionHosts = [
     "https://www.absoluteasiatours.com",
     "https://absoluteasiatours.com",
@@ -21,8 +72,8 @@ function rewriteInternalNavigation(html: string, previewOrigin: string) {
   return productionHosts.reduce((result, host) => {
     const escaped = host.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     return result.replace(
-      new RegExp(`(<a\\b[^>]*?href=["'])${escaped}(?=\\/|["'])`, "gi"),
-      `$1${previewOrigin}`,
+      new RegExp(`(<a\\b[^>]*?href=["'])${escaped}(/|(?=["']))`, "gi"),
+      (_match, prefix: string, slash: string) => `${prefix}${slash || "/"}`,
     );
   }, html);
 }
@@ -36,49 +87,134 @@ function addPreviewRobots(html: string) {
 function removePreviewRecaptchaError(html: string) {
   if (process.env.VERCEL_ENV === "production") return html;
   return html
-    .replace(
-      /<script\b(?=[^>]*\bid=["']wpforms-recaptcha-js["'])[^>]*>[\s\S]*?<\/script>/gi,
-      "",
-    )
-    .replace(
-      /<script\b(?=[^>]*\bid=["']wpforms-recaptcha-js-after["'])[^>]*>[\s\S]*?<\/script>/gi,
-      "",
+    .replace(/<script\b(?=[^>]*\bid=["']wpforms-recaptcha-js["'])[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<script\b(?=[^>]*\bid=["']wpforms-recaptcha-js-after["'])[^>]*>[\s\S]*?<\/script>/gi, "");
+}
+
+/**
+ * FIX 1 - Image handling now runs BEFORE the FastPixel URL restore, so the
+ * original CDN URL in data-fpo-src is still intact and parseable.
+ * FIX 2 - /_next/image (no trailing slash; /_next/image/ is a 404).
+ * FIX 3 - only widths from DEVICE_SIZES are emitted, so the optimizer never
+ * answers 400 for an arbitrary declared width.
+ * FIX 4 - falls back to `src` when data-fpo-src is absent, so plain WordPress
+ * images are handled too.
+ */
+function optimizeImagesWithVercel(html: string) {
+  let result = html.replace(/<img\b[^>]*>/gi, (tag) => {
+    const source =
+      tag.match(/\sdata-fpo-src=(["'])(.*?)\1/i)?.[2] ||
+      tag.match(/\ssrc=(["'])(.*?)\1/i)?.[2];
+    if (!source) return tag;
+
+    const path = ownAssetPath(source);
+    // Data URIs, placeholders and third-party hosts are left alone.
+    if (!path || path.startsWith("data:")) return tag;
+
+    const stripped = tag
+      .replace(/\sdata-fpo-src=(["'])(.*?)\1/i, "")
+      .replace(/\sdata-fpo-sources=(["'])(.*?)\1/i, "")
+      .replace(/\ssrcset=(["'])(.*?)\1/i, "")
+      .replace(/\ssizes=(["'])(.*?)\1/i, "")
+      .replace(/\sloading=(["'])(.*?)\1/i, "")
+      .replace(/\sdecoding=(["'])(.*?)\1/i, "")
+      .replace(/\ssrc=(["'])(.*?)\1/i, ` src="${path}"`);
+
+    // Vercel intentionally rejects SVG optimization. Keep SVG/GIF and other
+    // vector/animated assets on their original URL so icons never become a
+    // broken-image question mark.
+    if (!OPTIMIZABLE.test(path)) {
+      return stripped.replace(/\s*\/?>$/, ' loading="lazy" decoding="async">');
+    }
+
+    const declaredWidth = Number(tag.match(/\swidth=(["'])(\d+)\1/i)?.[2] || 1920);
+    const ceiling = Math.min(Math.max(declaredWidth, 640), 1920);
+    const candidates = DEVICE_SIZES.filter((width) => width <= ceiling);
+    if (candidates.length === 0) candidates.push(DEVICE_SIZES[0]);
+
+    const srcset = candidates
+      .map((width) => {
+        const optimized = `/_next/image?url=${encodeURIComponent(path)}&w=${width}&q=75`;
+        return `${optimized.replace(/&/g, "&amp;")} ${width}w`;
+      })
+      .join(", ");
+
+    const priority = /\b(?:custom-logo|img-banner|swiper-slide-active)\b/i.test(stripped);
+    const compactImage = /\b(?:avatar|social|icon|custom-logo)\b/i.test(stripped);
+    const sizes = compactImage
+      ? "(max-width: 768px) 96px, 180px"
+      : declaredWidth <= 400
+      ? `${declaredWidth}px`
+      : `(max-width: 768px) 100vw, ${Math.min(declaredWidth, 1920)}px`;
+
+    return stripped.replace(
+      /\s*\/?>$/,
+      ` srcset="${srcset}" sizes="${sizes}" loading="${priority ? "eager" : "lazy"}" decoding="async"${
+        priority ? ' fetchpriority="high"' : ""
+      }>`,
     );
-}
+  });
 
-function restoreAssetUrl(value: string, previewOrigin: string) {
-  const decodedValue = value.replace(/&amp;/g, "&");
-  const accelerated = decodedValue.match(
-    /^https:\/\/cdn\.fastpixel\.io\/fp\/[^/]+\/(.+)$/i,
+  // Preloads for the FastPixel CDN are useless once images are re-pointed.
+  result = result.replace(
+    /<link\b(?=[^>]*\brel=(["'])preload\1)(?=[^>]*\bas=(["'])image\2)(?=[^>]*cdn\.fastpixel\.io)[^>]*>/gi,
+    "",
   );
-
-  let restored = decodedValue;
-  if (accelerated) {
-    try {
-      restored = `https://${decodeURIComponent(accelerated[1])}`;
-    } catch {
-      restored = decodedValue;
-    }
-  }
-
-  try {
-    const url = new URL(restored);
-    if (/^(?:www\.)?absoluteasiatours\.com$/i.test(url.hostname)) {
-      return `${previewOrigin}${url.pathname}${url.search}${url.hash}`;
-    }
-  } catch {}
-  return restored;
+  return result;
 }
 
-function restoreThemeAssetsAndScripts(html: string, previewOrigin: string) {
+/**
+ * FIX 5 - FastPixel moves the real background URL into data-fpo-lazybg and
+ * leaves a placeholder in the style attribute. The previous version deleted the
+ * attribute without restoring the URL, which silently dropped every CSS
+ * background image (home-intro tiles, banner-page headers, escape section).
+ */
+function restoreLazyBackgrounds(html: string) {
+  return html.replace(/<[a-z][a-z0-9-]*\b[^>]*\sdata-fpo-lazybg=(["'])(.*?)\1[^>]*>/gi, (tag) => {
+    const raw = tag.match(/\sdata-fpo-lazybg=(["'])(.*?)\1/i)?.[2];
+    let updated = tag.replace(/\sdata-fpo-lazybg=(["'])(.*?)\1/i, "");
+    if (!raw) return updated;
+
+    // The attribute is sometimes a JSON payload rather than a bare URL.
+    const candidate = raw.trim().startsWith("{") || raw.trim().startsWith("[")
+      ? (() => {
+          try {
+            const parsed = JSON.parse(raw.replace(/&quot;/g, '"'));
+            const found = JSON.stringify(parsed).match(/https?:\\?\/\\?\/[^"\\]+/)?.[0];
+            return found ? found.replace(/\\\//g, "/") : null;
+          } catch {
+            return null;
+          }
+        })()
+      : raw;
+    if (!candidate) return updated;
+
+    const target = restoreAssetUrl(candidate);
+    if (!/^(?:\/|https?:)/.test(target)) return updated;
+    const declaration = `background-image:url('${target}')`;
+
+    if (/\sstyle=(["'])/i.test(updated)) {
+      return updated.replace(/\sstyle=(["'])(.*?)\1/i, (_m, quote: string, css: string) => {
+        const cleaned = css.replace(/background-image\s*:\s*url\([^)]*\)\s*;?/gi, "").trim();
+        const prefix = cleaned ? (cleaned.endsWith(";") ? cleaned : `${cleaned};`) : "";
+        return ` style=${quote}${prefix}${declaration}${quote}`;
+      });
+    }
+    return updated.replace(/\s*\/?>$/, ` style="${declaration}">`);
+  });
+}
+
+function restoreThemeAssetsAndScripts(html: string) {
   // FastPixel/WP Meteor changes scripts to a non-executable MIME type and may
   // delay them for a full day. That prevents the original theme menu, sliders,
   // galleries and accordions from initializing on the Vercel frontend.
   // Also restore FastPixel URLs embedded inside inline CSS (@font-face,
   // background-image and flag sprites), not only src/href attributes.
-  let result = html.replace(
+  let result = restoreLazyBackgrounds(html);
+
+  result = result.replace(
     /https:\/\/cdn\.fastpixel\.io\/fp\/[^/"'()\s<]+\/[^"'()\s<]+/gi,
-    (url) => restoreAssetUrl(url, previewOrigin),
+    (url) => restoreAssetUrl(url),
   );
 
   result = result.replace(
@@ -90,8 +226,10 @@ function restoreThemeAssetsAndScripts(html: string, previewOrigin: string) {
     const delayedSource = tag.match(/\sdata-wpmeteor-src=(["'])(.*?)\1/i)?.[2];
     let updated = tag;
     if (delayedSource) {
-      const source = restoreAssetUrl(delayedSource, previewOrigin);
-      updated = updated.replace(/\sdata-wpmeteor-src=(["'])(.*?)\1/i, ` src="${source}"`);
+      updated = updated.replace(
+        /\sdata-wpmeteor-src=(["'])(.*?)\1/i,
+        ` src="${restoreAssetUrl(delayedSource)}"`,
+      );
     }
     updated = updated
       .replace(/\sdata-wpmeteor-type=(["'])(.*?)\1/gi, "")
@@ -102,138 +240,33 @@ function restoreThemeAssetsAndScripts(html: string, previewOrigin: string) {
   result = result.replace(/<link\b[^>]*>/gi, (tag) => {
     const href = tag.match(/\shref=(["'])(.*?)\1/i)?.[2];
     if (!href) return tag;
-    return tag.replace(
-      /\shref=(["'])(.*?)\1/i,
-      ` href="${restoreAssetUrl(href, previewOrigin)}"`,
-    );
+    return tag.replace(/\shref=(["'])(.*?)\1/i, ` href="${restoreAssetUrl(href)}"`);
   });
 
-  // Backgrounds already contain their original WordPress URL; only the
-  // FastPixel marker remains after its loader is removed.
   return result
-    .replace(/\sdata-fpo-(?:lazybg|backgrounds|fonts|overrides|reduced|required)=(["'])(.*?)\1/gi, "")
-    .replace(/\sdata-fpo-(?:lazybg|backgrounds|fonts|overrides|reduced|required)(?=[\s>])/gi, "");
+    .replace(/\sdata-fpo-(?:backgrounds|fonts|overrides|reduced|required)=(["'])(.*?)\1/gi, "")
+    .replace(/\sdata-fpo-(?:backgrounds|fonts|overrides|reduced|required)(?=[\s>])/gi, "");
 }
 
+/**
+ * FIX 6 - The injected click handler is gone. dsmart-child/js/main.js already
+ * toggles `.open-menu` on `.menu .menu-item`; a second document-level listener
+ * toggling the same class ran last and cancelled it out, so the mega menu never
+ * stayed open. The over-aggressive rules (min-height:420px, width:100vw, and
+ * forcing third-level sub-menus permanently visible) are gone too - they were
+ * what broke the panel layout. What remains only makes the theme's own
+ * `.open-menu` state visible, in case FastPixel stripped the original rule.
+ */
 function injectMenuCompatibility(html: string) {
   const style = `<style id="aat-menu-compat">
-@media (min-width:993px){
-body .main-navigation.hover-intent ul.menu>li.menu-item-has-children:hover>.sub-menu-wrapper,
-body .main-navigation ul.menu>li.menu-item-has-children.aat-menu-open>.sub-menu-wrapper{
-display:block!important;visibility:visible!important;opacity:1!important;z-index:9999!important;transform:scale(1)!important;pointer-events:auto!important;width:100vw!important;left:0!important;right:0!important
+body .main-navigation ul.menu > li.menu-item-has-children.open-menu > .sub-menu-wrapper{
+display:block;visibility:visible;opacity:1;z-index:9999;pointer-events:auto
 }
-body .main-navigation ul.menu>li.menu-item-has-children:hover>.sub-menu-wrapper>.container>ul.sub-menu,
-body .main-navigation ul.menu>li.menu-item-has-children.aat-menu-open>.sub-menu-wrapper>.container>ul.sub-menu,
-body .main-navigation ul.menu>li.menu-item-has-children.open-menu>.sub-menu-wrapper>.container>ul.sub-menu{
-display:flex!important;visibility:visible!important;opacity:1!important;position:relative!important;left:0!important;top:0!important;width:100vw!important;min-height:420px!important;height:auto!important;overflow:visible!important
-}
-body .main-navigation ul.menu>li>.sub-menu-wrapper>.container>ul.sub-menu>li>.sub-menu-wrapper,
-body .main-navigation ul.menu>li>.sub-menu-wrapper>.container>ul.sub-menu>li>.sub-menu-wrapper>div>ul.sub-menu{
-display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;left:0!important;top:0!important;height:auto!important
-}
-}
-body .main-navigation ul.menu li.menu-item-has-children.aat-menu-open>.sub-menu-wrapper,
-body .main-navigation ul.menu li.menu-item-has-children.open-menu>.sub-menu-wrapper{
-display:block!important;visibility:visible!important;opacity:1!important;z-index:9999!important;pointer-events:auto!important
+body .main-navigation ul.menu > li.menu-item-has-children.open-menu > .sub-menu-wrapper > .container > ul.sub-menu{
+display:flex;visibility:visible;opacity:1
 }
 </style>`;
-  const script = `<script id="aat-menu-compat-js">
-document.addEventListener("click",function(event){
-var trigger=event.target.closest(".main-navigation li.menu-item-has-children > .caret,.main-navigation li.menu-item-has-children > a:not([href])");
-if(!trigger)return;
-event.preventDefault();event.stopPropagation();
-var item=trigger.closest("li.menu-item-has-children");
-var wasOpen=item.classList.contains("aat-menu-open");
-item.parentElement.querySelectorAll(":scope > li.aat-menu-open").forEach(function(el){el.classList.remove("aat-menu-open","open-menu")});
-if(!wasOpen)item.classList.add("aat-menu-open","open-menu");
-});
-document.addEventListener("click",function(event){
-if(!event.target.closest(".main-navigation"))document.querySelectorAll(".main-navigation .aat-menu-open").forEach(function(el){el.classList.remove("aat-menu-open","open-menu")});
-});
-</script>`;
-  let result = html.includes("</head>") ? html.replace("</head>", `${style}</head>`) : html;
-  return result.includes("</body>") ? result.replace("</body>", `${script}</body>`) : result;
-}
-
-function originalImageUrl(fastPixelUrl: string) {
-  try {
-    const decoded = decodeURIComponent(fastPixelUrl);
-    const match = decoded.match(
-      /\/(www\.absoluteasiatours\.com|absoluteasiatours\.com|amazingbiketours\.com)(\/[^?#\s"']+)/i,
-    );
-    return match ? `https://${match[1]}${match[2]}` : fastPixelUrl;
-  } catch {
-    return fastPixelUrl;
-  }
-}
-
-function optimizeImagesWithVercel(html: string) {
-  const widths = [320, 480, 640, 750, 828, 1080, 1200, 1600, 1920];
-  let result = html.replace(/<img\b[^>]*>/gi, (tag) => {
-    const source = tag.match(/\sdata-fpo-src=(["'])(.*?)\1/i)?.[2];
-    if (!source) return tag;
-
-    const original = originalImageUrl(source.replace(/&amp;/g, "&"));
-    if (
-      !/^https:\/\/(?:www\.)?absoluteasiatours\.com\//i.test(original) &&
-      !/^https:\/\/amazingbiketours\.com\//i.test(original)
-    ) return tag;
-
-    // Vercel intentionally rejects SVG optimization. Keep SVG/GIF and other
-    // vector/animated assets on their original URL so icons never become a
-    // broken-image question mark.
-    if (!/\.(?:avif|jpe?g|png|webp)(?:[?#]|$)/i.test(original)) {
-      return tag
-        .replace(/\ssrc=(["'])(.*?)\1/i, ` src="${original}"`)
-        .replace(/\sdata-fpo-src=(["'])(.*?)\1/i, "")
-        .replace(/\sdata-fpo-sources=(["'])(.*?)\1/i, "")
-        .replace(/\ssrcset=(["'])(.*?)\1/i, "")
-        .replace(/\ssizes=(["'])(.*?)\1/i, "")
-        .replace(/\sloading=(["'])(.*?)\1/i, "")
-        .replace(/\sdecoding=(["'])(.*?)\1/i, "")
-        .replace(/>$/, ' loading="lazy" decoding="async">');
-    }
-
-    const declaredWidth = Number(tag.match(/\swidth=(["'])(\d+)\1/i)?.[2] || 1920);
-    const maximumWidth = Math.min(Math.max(declaredWidth, 640), 1920);
-    const candidates = widths.filter((width) => width <= maximumWidth);
-    if (!candidates.includes(maximumWidth)) candidates.push(maximumWidth);
-    const srcset = [...new Set(candidates)]
-      .sort((a, b) => a - b)
-      .map((width) => {
-        const optimized = `/_next/image/?url=${encodeURIComponent(original)}&w=${width}&q=75`;
-        return `${optimized.replace(/&/g, "&amp;")} ${width}w`;
-      })
-      .join(", ");
-
-    let updated = tag
-      .replace(/\ssrc=(["'])(.*?)\1/i, ` src="${original}"`)
-      .replace(/\sdata-fpo-src=(["'])(.*?)\1/i, "")
-      .replace(/\sdata-fpo-sources=(["'])(.*?)\1/i, "")
-      .replace(/\sloading=(["'])(.*?)\1/i, "")
-      .replace(/\ssrcset=(["'])(.*?)\1/i, "")
-      .replace(/\ssizes=(["'])(.*?)\1/i, "")
-      .replace(/\sdecoding=(["'])(.*?)\1/i, "");
-
-    const priority = /\b(?:custom-logo|img-banner|swiper-slide-active)\b/i.test(updated);
-    const compactImage = /\b(?:avatar|social|icon|custom-logo)\b/i.test(updated);
-    const sizes = compactImage
-      ? "(max-width: 768px) 96px, 180px"
-      : declaredWidth <= 400
-      ? `${declaredWidth}px`
-      : `(max-width: 768px) 100vw, ${Math.min(declaredWidth, 1920)}px`;
-    updated = updated.replace(
-      />$/,
-      ` srcset="${srcset}" sizes="${sizes}" loading="${priority ? "eager" : "lazy"}" decoding="async"${priority ? ' fetchpriority="high"' : ""}>`,
-    );
-    return updated;
-  });
-
-  result = result.replace(
-    /<link\b(?=[^>]*\brel=(["'])preload\1)(?=[^>]*\bas=(["'])image\2)(?=[^>]*cdn\.fastpixel\.io)[^>]*>/gi,
-    "",
-  );
-  return result;
+  return html.includes("</head>") ? html.replace("</head>", `${style}</head>`) : html;
 }
 
 export async function GET(request: NextRequest) {
@@ -263,9 +296,11 @@ export async function GET(request: NextRequest) {
     }
 
     let html = await response.text();
-    html = rewriteInternalNavigation(html, request.nextUrl.origin);
-    html = restoreThemeAssetsAndScripts(html, request.nextUrl.origin);
+    html = rewriteInternalNavigation(html);
+    // Order matters: images must be read while data-fpo-src still holds the
+    // original FastPixel URL, before the global URL restore rewrites it.
     html = optimizeImagesWithVercel(html);
+    html = restoreThemeAssetsAndScripts(html);
     html = injectMenuCompatibility(html);
     html = removePreviewRecaptchaError(html);
     html = addPreviewRobots(html);
