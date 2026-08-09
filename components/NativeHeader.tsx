@@ -89,7 +89,7 @@ export function NativeHeader({
   const logoUrl = logo || defaultLogo;
 
   return (
-    <>
+    <div className="header-wrapper" style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100 }}>
       <header id="masthead" className="site-header">
         <div className="menu-overlay"></div>
         <div className="main-header col-full">
@@ -188,6 +188,6 @@ export function NativeHeader({
           </p>
         </div>
       </div>
-    </>
+    </div>
   );
 }
