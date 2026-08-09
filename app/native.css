@@ -258,3 +258,85 @@
   gap: 20px !important;
 }
 
+/* --- Mega Menu (Submenuwrap Walker) Styling --- */
+.header-4 .main-navigation ul.menu > li.menu-item-has-children {
+  position: relative;
+}
+
+.header-4 .main-navigation ul.menu > li.menu-item > a .nav-arrow {
+  margin-left: 6px;
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.header-4 .main-navigation ul.menu > li.menu-item-has-children .sub-menu-wrapper {
+  display: none;
+  position: fixed;
+  top: 90px;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  background: #ffffff !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+  z-index: 99999 !important;
+  padding: 40px 6vw !important;
+  border-top: 1px solid #e0d5c1;
+}
+
+.header-4 .main-navigation ul.menu > li.menu-item-has-children:hover .sub-menu-wrapper,
+.header-4 .main-navigation ul.menu > li.menu-item-has-children.open-menu .sub-menu-wrapper {
+  display: block !important;
+}
+
+.header-4 .sub-menu-wrapper .container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.header-4 .sub-menu-wrapper ul.sub-menu {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  gap: 40px !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.header-4 .sub-menu-wrapper ul.sub-menu > li.menu-item > a {
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  color: #b48b4d !important;
+  display: block !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 12px !important;
+  border-bottom: 2px solid #b48b4d !important;
+}
+
+.header-4 .sub-menu-wrapper ul.sub-menu > li.menu-item ul.sub-menu {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.header-4 .sub-menu-wrapper ul.sub-menu > li.menu-item ul.sub-menu li a {
+  font-family: "Mulish", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: #192b3e !important;
+  text-transform: none !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+
+.header-4 .sub-menu-wrapper ul.sub-menu > li.menu-item ul.sub-menu li a:hover {
+  color: #b48b4d !important;
+  padding-left: 4px !important;
+}
+
+

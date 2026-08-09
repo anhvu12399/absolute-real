@@ -20,11 +20,52 @@ function toLocalHref(url?: string | null) {
 }
 
 const DEFAULT_MENU: MenuItem[] = [
-  { id: 1, parent: 0, title: "DESTINATIONS", url: "/destinations", target: "", classes: [], order: 1 },
-  { id: 2, parent: 0, title: "TRIP IDEAS", url: "/travel-ideas", target: "", classes: [], order: 2 },
-  { id: 3, parent: 0, title: "INSPIRATIONS", url: "/inspirations", target: "", classes: [], order: 3 },
-  { id: 4, parent: 0, title: "TAILOR-MADE", url: "/tailor-made-tours", target: "", classes: [], order: 4 },
-  { id: 5, parent: 0, title: "ABOUT US", url: "/about-us", target: "", classes: [], order: 5 },
+  // Roots
+  { id: 1, parent: 0, title: "DESTINATIONS", url: "/destinations/", target: "", classes: [], order: 1 },
+  { id: 2, parent: 0, title: "TRIP IDEAS", url: "/travel-ideas/", target: "", classes: [], order: 2 },
+  { id: 3, parent: 0, title: "INSPIRATIONS", url: "/inspirations/", target: "", classes: [], order: 3 },
+  { id: 4, parent: 0, title: "TAILOR-MADE", url: "/tailor-made-tours/", target: "", classes: [], order: 4 },
+  { id: 5, parent: 0, title: "ABOUT US", url: "/about-us/", target: "", classes: [], order: 5 },
+
+  // DESTINATIONS -> Level 1 & 2
+  { id: 10, parent: 1, title: "SOUTHEAST ASIA", url: "/destinations/southeast-asia/", target: "", classes: [], order: 1 },
+  { id: 101, parent: 10, title: "Vietnam Tours", url: "/vietnam-tours/", target: "", classes: [], order: 1 },
+  { id: 102, parent: 10, title: "Cambodia Tours", url: "/cambodia-tours/", target: "", classes: [], order: 2 },
+  { id: 103, parent: 10, title: "Thailand Tours", url: "/thailand-tours/", target: "", classes: [], order: 3 },
+  { id: 104, parent: 10, title: "Laos Tours", url: "/laos-tours/", target: "", classes: [], order: 4 },
+  { id: 105, parent: 10, title: "Bali Tours", url: "/bali-tours/", target: "", classes: [], order: 5 },
+  { id: 106, parent: 10, title: "Philippines Tours", url: "/philippines-tours/", target: "", classes: [], order: 6 },
+
+  { id: 11, parent: 1, title: "INDIA & THE HIMALAYAS", url: "/destinations/india-himalayas/", target: "", classes: [], order: 2 },
+  { id: 111, parent: 11, title: "India Tours", url: "/india-tours/", target: "", classes: [], order: 1 },
+  { id: 112, parent: 11, title: "Nepal Tours", url: "/nepal-tours/", target: "", classes: [], order: 2 },
+  { id: 113, parent: 11, title: "Bhutan Tours", url: "/bhutan-tours/", target: "", classes: [], order: 3 },
+  { id: 114, parent: 11, title: "Sri Lanka Tours", url: "/sri-lanka-tours/", target: "", classes: [], order: 4 },
+  { id: 115, parent: 11, title: "Tibet Tours", url: "/tibet-tours/", target: "", classes: [], order: 5 },
+
+  { id: 12, parent: 1, title: "NORTH ASIA", url: "/destinations/north-asia/", target: "", classes: [], order: 3 },
+  { id: 121, parent: 12, title: "Japan Tours", url: "/japan-tours/", target: "", classes: [], order: 1 },
+  { id: 122, parent: 12, title: "China Tours", url: "/china-tours/", target: "", classes: [], order: 2 },
+  { id: 123, parent: 12, title: "South Korea Tours", url: "/south-korea-tours/", target: "", classes: [], order: 3 },
+
+  // TRIP IDEAS -> Level 1 & 2
+  { id: 20, parent: 2, title: "BY EXPERIENCE", url: "/travel-ideas/", target: "", classes: [], order: 1 },
+  { id: 201, parent: 20, title: "Luxury Honeymoon", url: "/trip-ideas/luxury-honeymoon/", target: "", classes: [], order: 1 },
+  { id: 202, parent: 20, title: "Family Vacations", url: "/trip-ideas/family-vacations/", target: "", classes: [], order: 2 },
+  { id: 203, parent: 20, title: "Cultural Heritage", url: "/trip-ideas/cultural-heritage/", target: "", classes: [], order: 3 },
+  { id: 204, parent: 20, title: "Beach Escapes", url: "/trip-ideas/beach-escapes/", target: "", classes: [], order: 4 },
+
+  // INSPIRATIONS -> Level 1 & 2
+  { id: 30, parent: 3, title: "TRAVEL INSPIRATIONS", url: "/inspirations/", target: "", classes: [], order: 1 },
+  { id: 301, parent: 30, title: "Best Time to Visit", url: "/inspiration/best-time-to-visit/", target: "", classes: [], order: 1 },
+  { id: 302, parent: 30, title: "Multi-Country Tours", url: "/inspiration/multi-country/", target: "", classes: [], order: 2 },
+  { id: 303, parent: 30, title: "Luxury Cruises", url: "/inspiration/luxury-cruises/", target: "", classes: [], order: 3 },
+
+  // ABOUT US -> Level 1 & 2
+  { id: 50, parent: 5, title: "ABOUT ABSOLUTE ASIA", url: "/about-us/", target: "", classes: [], order: 1 },
+  { id: 501, parent: 50, title: "Our Story & Vision", url: "/about-us/", target: "", classes: [], order: 1 },
+  { id: 502, parent: 50, title: "Meet The Team", url: "/meet-the-team/", target: "", classes: [], order: 2 },
+  { id: 503, parent: 50, title: "Client Reviews", url: "/reviews/", target: "", classes: [], order: 3 },
 ];
 
 export function NativeHeader({
@@ -88,6 +129,7 @@ export function NativeHeader({
                     >
                       <Link href={toLocalHref(item0.url)} target={item0.target || undefined}>
                         <span>{item0.title}</span>
+                        {hasChildren && <i className="fas fa-chevron-down nav-arrow" aria-hidden="true" />}
                       </Link>
 
                       {hasChildren && (
