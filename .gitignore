@@ -1,0 +1,18 @@
+# Dependencies and Next.js build output
+node_modules/
+.next/
+out/
+
+# Local environment and Vercel project linkage
+.vercel/
+.env*
+!.env.example
+
+# Local caches and logs
+*.log
+*.tsbuildinfo
+.DS_Store
+
+# Audit downloads, captured production HTML, and local deliverables
+work/
+outputs/
