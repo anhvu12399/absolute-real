@@ -27,11 +27,15 @@ function TourItem({ post }: { post: PostCard }) {
             sizes="(max-width: 768px) 90vw, 320px"
           />
         ) : null}
-        <span className="duration-badge">{post.duration}</span>
-        <p className="add">{post.categories?.map((term) => term.name).join(", ")}</p>
-        <span className="title">{post.title}</span>
-        <i className="fas fa-arrow-right icon-arrow" aria-hidden="true" />
+        <span>{post.title}</span>
+        <i className="fas fa-arrow-right" aria-hidden="true" />
       </a>
+      <p className="add">{post.categories?.map((term) => term.name).join(", ")}</p>
+      <div className="cate-post">
+        <p className="time">
+          {post.duration}
+        </p>
+      </div>
     </div>
   );
 }
@@ -58,7 +62,7 @@ function CardLink({ post, as = "div" }: { post: PostCard; as?: "div" | "li" }) {
           />
         ) : null}
         <span>{post.title}</span>
-        <i className="fas fa-arrow-right icon-arrow" aria-hidden="true" />
+        <i className="fas fa-arrow-right" aria-hidden="true" />
       </a>
     </Tag>
   );
