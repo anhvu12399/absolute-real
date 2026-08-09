@@ -19,11 +19,19 @@ function toLocalHref(url?: string | null) {
   }
 }
 
+const DEFAULT_MENU: MenuItem[] = [
+  { id: 1, parent: 0, title: "DESTINATIONS", url: "/destinations", target: "", classes: [], order: 1 },
+  { id: 2, parent: 0, title: "TRIP IDEAS", url: "/travel-ideas", target: "", classes: [], order: 2 },
+  { id: 3, parent: 0, title: "INSPIRATIONS", url: "/inspirations", target: "", classes: [], order: 3 },
+  { id: 4, parent: 0, title: "TAILOR-MADE", url: "/tailor-made-tours", target: "", classes: [], order: 4 },
+  { id: 5, parent: 0, title: "ABOUT US", url: "/about-us", target: "", classes: [], order: 5 },
+];
+
 export function NativeHeader({
   logo,
   menu = [],
-  phoneLabel = "Talk to an expert: ",
-  phone = "+84 963 874 729",
+  phoneLabel = "Call Us: ",
+  phone = "+1 315 998 1998",
 }: {
   logo?: string;
   menu?: MenuItem[];
@@ -33,7 +41,8 @@ export function NativeHeader({
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  const level0 = menu.filter((item) => item.parent === 0);
+  const activeMenu = menu.length > 0 ? menu : DEFAULT_MENU;
+  const level0 = activeMenu.filter((item) => item.parent === 0);
 
   const defaultLogo = "https://www.absoluteasiatours.com/wp-content/uploads/2024/07/cropped-Absolute-Asia-Tours-FINAL-03.png";
   const logoUrl = logo || defaultLogo;
@@ -64,7 +73,7 @@ export function NativeHeader({
             <div className="menu-primary-menu-container">
               <ul className="menu">
                 {level0.map((item0) => {
-                  const level1 = menu.filter((child) => child.parent === item0.id);
+                  const level1 = activeMenu.filter((child) => child.parent === item0.id);
                   const hasChildren = level1.length > 0;
                   const isOpen = openMenuId === item0.id;
 
@@ -86,7 +95,7 @@ export function NativeHeader({
                           <div className="container">
                             <ul className="sub-menu">
                               {level1.map((item1) => {
-                                const level2 = menu.filter((grandchild) => grandchild.parent === item1.id);
+                                const level2 = activeMenu.filter((grandchild) => grandchild.parent === item1.id);
                                 const hasSubChildren = level2.length > 0;
 
                                 return (
