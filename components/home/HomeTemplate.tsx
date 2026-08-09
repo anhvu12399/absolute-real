@@ -110,6 +110,36 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
         </div>
       </section>
 
+      <section className="home-travel">
+        <div className="home-container">
+          <Html className="home-title" html={acf.sec03_title} />
+          <div className="list-posts">
+            {blogs.map((post) => (
+              <CardLink key={post.id} post={post} />
+            ))}
+          </div>
+          <div className="cate-list">
+            <ul>
+              {categories.map((term) => (
+                <TermTile key={term.id} term={term} images={images} field="banner" />
+              ))}
+            </ul>
+          </div>
+          <div className="btn-link">
+            {(acf.links_sec03?.length ? acf.links_sec03 : [
+              { text_links_sec03: "View All Offers", url_sec03: "/travel-ideas/" },
+              { text_links_sec03: "View All Destinations", url_sec03: "/destinations/" },
+              { text_links_sec03: "View All Blogs", url_sec03: "/blogs/" },
+              { text_links_sec03: "Luxury Mekong River Cruises", url_sec03: "/cruises/" },
+            ]).map((link, index) => (
+              <a key={index} href={toLocalHref(link.url_sec03)}>
+                <span>{link.text_links_sec03}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="home-suggest">
         <div className="home-container">
           {acf.sec05_title ? (
@@ -187,36 +217,6 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
           </div>
         </section>
       )}
-
-      <section className="home-travel">
-        <div className="home-container">
-          <Html className="home-title" html={acf.sec03_title} />
-          <div className="list-posts">
-            {blogs.map((post) => (
-              <CardLink key={post.id} post={post} />
-            ))}
-          </div>
-          <div className="cate-list">
-            <ul>
-              {categories.map((term) => (
-                <TermTile key={term.id} term={term} images={images} field="banner" />
-              ))}
-            </ul>
-          </div>
-          <div className="btn-link">
-            {(acf.links_sec03?.length ? acf.links_sec03 : [
-              { text_links_sec03: "View All Offers", url_sec03: "/travel-ideas/" },
-              { text_links_sec03: "View All Destinations", url_sec03: "/destinations/" },
-              { text_links_sec03: "View All Blogs", url_sec03: "/blogs/" },
-              { text_links_sec03: "Luxury Mekong River Cruises", url_sec03: "/cruises/" },
-            ]).map((link, index) => (
-              <a key={index} href={toLocalHref(link.url_sec03)}>
-                <span>{link.text_links_sec03}</span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <section className="home-reviews">
         <div className="sec-rv">
