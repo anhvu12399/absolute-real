@@ -31,3 +31,31 @@ export type ContentRecord = {
   acf?: Record<string, unknown>;
   seo?: SeoData;
 };
+
+export type ItineraryDay = {
+  day?: string;
+  title?: string;
+  content?: string;
+  image?: string;
+};
+
+export type TourPriceRow = {
+  duration?: string;
+  price?: string;
+  pax?: string;
+};
+
+export type TourAcf = {
+  gallery?: string[];
+  duration?: string;
+  code?: string;
+  start_location?: string;
+  end_location?: string;
+  highlights?: string;
+  itinerary?: ItineraryDay[];
+  tour_price?: TourPriceRow[];
+  inclusions?: string;
+  exclusions?: string;
+  map_url?: string;
+  related_tours?: number[];
+};
