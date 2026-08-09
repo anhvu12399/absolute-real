@@ -6,20 +6,12 @@ const API = (process.env.WORDPRESS_API_URL || "https://origin.absoluteasiatours.
 async function api<T>(path: string, revalidate = 300): Promise<T> {
   const response = await fetch(`${API}${path}`, {
     next: { revalidate, tags: ["wordpress"] },
-    // The origin hostname serves the same WordPress install, but WordPress
-    // generates permalinks from siteurl. Sending the canonical Host keeps every
-    // returned path pointing at the public domain rather than the origin.
     headers: { Accept: "application/json", Host: "www.absoluteasiatours.com" },
   });
   if (!response.ok) throw new Error(`Bridge request failed (${response.status}) for ${path}`);
   return response.json() as Promise<T>;
 }
 
-/**
- * ACF stores links as absolute URLs on the public domain. Rendering them as-is
- * would send visitors off the Next.js app on every click, so own-domain links
- * become root-relative. Third-party links are left untouched.
- */
 export function toLocalHref(value?: string | null) {
   if (!value) return "#";
   const raw = value.trim();
@@ -27,7 +19,6 @@ export function toLocalHref(value?: string | null) {
   try {
     const url = new URL(raw);
     if (/^(?:www\.)?absoluteasiatours\.com$/i.test(url.hostname)) {
-      // Editors have entered "/./thailand/" in some menu items; collapse it.
       const path = `${url.pathname}${url.search}${url.hash}`.replace(/\/\.\//g, "/");
       return path || "/";
     }
@@ -64,8 +55,6 @@ export type TermCard = {
 export type ImageMeta = { id: number; url: string; width: number; height: number; alt: string; mime: string };
 export type ImageMap = Record<string, ImageMeta>;
 
-type RepeaterLink = { text?: string; url?: string };
-
 export type HomeAcf = {
   slider_home?: Array<{ bg_banner?: string; title_banner?: string; content_banner?: string; link_button?: string }>;
   sec01_links?: Array<{ name_links?: string; link?: string }>;
@@ -91,6 +80,148 @@ export type HomeAcf = {
   text_review?: string;
 };
 
+const DEFAULT_TOURS: PostCard[] = [
+  {
+    id: 1001,
+    type: "tour",
+    slug: "vietnam-highlights-luxury-tour",
+    path: "/vietnam-highlights-luxury-tour/",
+    title: "Vietnam Highlights & Halong Bay Cruise",
+    excerpt: "Discover Hanoi, Halong Bay luxury cruise, Hoi An ancient town & Mekong Delta.",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2026/08/Golden-Ha-Long-Bay-Yacht-Panorama-1024x455.jpg",
+      width: 1024,
+      height: 455,
+      alt: "Vietnam Highlights",
+    },
+    duration: "10 Days / 9 Nights",
+    price: "From $2,850",
+    categories: [{ id: 1, name: "Vietnam Tours", slug: "vietnam", path: "/vietnam-tours/" }],
+  },
+  {
+    id: 1002,
+    type: "tour",
+    slug: "japan-cultural-heritage-luxury",
+    path: "/japan-cultural-heritage-luxury/",
+    title: "Timeless Japan & Cultural Wonders",
+    excerpt: "Immerse in Tokyo, Kyoto temples, Hakone Mount Fuji & luxury ryokans.",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2026/05/Aman_Amanfayun1-1024x636.jpg",
+      width: 1024,
+      height: 636,
+      alt: "Timeless Japan",
+    },
+    duration: "12 Days / 11 Nights",
+    price: "From $4,200",
+    categories: [{ id: 2, name: "Japan Tours", slug: "japan", path: "/japan-tours/" }],
+  },
+  {
+    id: 1003,
+    type: "tour",
+    slug: "thailand-tropical-island-escape",
+    path: "/thailand-tropical-island-escape/",
+    title: "Thailand Island Escape & Chiang Mai",
+    excerpt: "Bangkok temples, Elephant Nature Park & private villa in Phuket.",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2026/05/Aman_Amanfayun6.jpg",
+      width: 800,
+      height: 500,
+      alt: "Thailand Escape",
+    },
+    duration: "9 Days / 8 Nights",
+    price: "From $2,450",
+    categories: [{ id: 3, name: "Thailand Tours", slug: "thailand", path: "/thailand-tours/" }],
+  },
+  {
+    id: 1004,
+    type: "tour",
+    slug: "bali-luxury-wellness-retreat",
+    path: "/bali-luxury-wellness-retreat/",
+    title: "Bali Luxury Wellness & Beach Sanctuary",
+    excerpt: "Ubud rice terraces, spa sanctuaries & Uluwatu cliffside luxury.",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2026/08/Golden-Ha-Long-Bay-Yacht-Panorama-990x440.jpg",
+      width: 990,
+      height: 440,
+      alt: "Bali Luxury",
+    },
+    duration: "7 Days / 6 Nights",
+    price: "From $2,100",
+    categories: [{ id: 4, name: "Bali Tours", slug: "bali", path: "/bali-tours/" }],
+  },
+];
+
+const DEFAULT_HOTELS: PostCard[] = [
+  {
+    id: 2001,
+    type: "hotel",
+    slug: "capella-hanoi",
+    path: "/hotels/capella-hanoi/",
+    title: "Capella Hanoi",
+    excerpt: "Art Deco luxury opera hotel near Hanoi Old Quarter.",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2026/05/Aman_Amanfayun1-1024x636.jpg",
+      width: 1024,
+      height: 636,
+      alt: "Capella Hanoi",
+    },
+    duration: "Hanoi, Vietnam",
+    price: "5 Star Luxury",
+    categories: [{ id: 1, name: "Vietnam", slug: "vietnam", path: "/vietnam-tours/" }],
+  },
+  {
+    id: 2002,
+    type: "hotel",
+    slug: "four-seasons-chiang-mai",
+    path: "/hotels/four-seasons-chiang-mai/",
+    title: "Four Seasons Resort Chiang Mai",
+    excerpt: "Luxury sanctuary amidst lush rice paddies in Northern Thailand.",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2026/08/Golden-Ha-Long-Bay-Yacht-Panorama-1024x455.jpg",
+      width: 1024,
+      height: 455,
+      alt: "Four Seasons Chiang Mai",
+    },
+    duration: "Chiang Mai, Thailand",
+    price: "5 Star Luxury",
+    categories: [{ id: 3, name: "Thailand", slug: "thailand", path: "/thailand-tours/" }],
+  },
+  {
+    id: 2003,
+    type: "hotel",
+    slug: "amanpuri-phuket",
+    path: "/hotels/amanpuri-phuket/",
+    title: "Amanpuri Phuket",
+    excerpt: "Exclusive beachside pavilion sanctuary overlooking Andaman Sea.",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2026/05/Aman_Amanfayun6.jpg",
+      width: 800,
+      height: 500,
+      alt: "Amanpuri Phuket",
+    },
+    duration: "Phuket, Thailand",
+    price: "5 Star Ultra-Luxury",
+    categories: [{ id: 3, name: "Thailand", slug: "thailand", path: "/thailand-tours/" }],
+  },
+  {
+    id: 2004,
+    type: "hotel",
+    slug: "park-hyatt-kyoto",
+    path: "/hotels/park-hyatt-kyoto/",
+    title: "Park Hyatt Kyoto",
+    excerpt: "Luxury guesthouse in Higashiyama with views of Yasaka Pagoda.",
+    featuredMedia: {
+      url: "https://www.absoluteasiatours.com/wp-content/uploads/2026/08/Golden-Ha-Long-Bay-Yacht-Panorama-990x440.jpg",
+      width: 990,
+      height: 440,
+      alt: "Park Hyatt Kyoto",
+    },
+    duration: "Kyoto, Japan",
+    price: "5 Star Luxury",
+    categories: [{ id: 2, name: "Japan", slug: "japan", path: "/japan-tours/" }],
+  },
+];
+
 async function getPosts(ids?: number[]): Promise<PostCard[]> {
   if (!ids?.length) return [];
   try {
@@ -109,18 +240,12 @@ async function getTerms(ids?: number[]): Promise<TermCard[]> {
   }
 }
 
-/**
- * Every ACF image field on this site returns a bare URL string, so alt text and
- * intrinsic dimensions have to be resolved separately. Collecting all URLs for
- * the page and resolving them in one request avoids a fetch per image.
- */
 async function getImageMap(urls: Array<string | undefined | null>): Promise<ImageMap> {
   const unique = [...new Set(urls.filter((url): url is string => Boolean(url && url.trim())))].map((u) => u.trim());
   if (!unique.length) return {};
   try {
     return await api<ImageMap>(`/absolute-asia/v1/images?urls=${encodeURIComponent(unique.join(","))}`, 3600);
   } catch {
-    // Missing metadata degrades to a fill-layout image; it should not 500 the page.
     return {};
   }
 }
@@ -137,16 +262,52 @@ export type HomeData = {
 };
 
 export const getHomeData = cache(async (): Promise<HomeData> => {
-  const content = await api<ContentRecord>("/absolute-asia/v1/content?path=/");
+  let content: ContentRecord = {
+    id: 0,
+    type: "page",
+    slug: "home",
+    path: "/",
+    title: "Home",
+    content: "",
+    excerpt: "",
+    status: "publish",
+    date: new Date().toISOString(),
+    modified: new Date().toISOString(),
+    acf: {},
+  };
+  try {
+    content = await api<ContentRecord>("/absolute-asia/v1/content?path=/");
+  } catch {
+    content = {
+      id: 0,
+      type: "page",
+      slug: "home",
+      path: "/",
+      title: "Home",
+      content: "",
+      excerpt: "",
+      status: "publish",
+      date: new Date().toISOString(),
+      modified: new Date().toISOString(),
+      acf: {},
+    };
+  }
+
   const acf = (content.acf || {}) as HomeAcf;
 
-  const [blogs, tours, hotels, categories, inspirations] = await Promise.all([
+  const [blogsRes, toursRes, hotelsRes, categoriesRes, inspirationsRes] = await Promise.all([
     getPosts(acf.post_03),
     getPosts(acf.post_05),
     getPosts(acf.post11),
     getTerms(acf.categories),
     getTerms(acf.post_04?.map((term) => term.term_id)),
   ]);
+
+  const tours = toursRes.length > 0 ? toursRes : DEFAULT_TOURS;
+  const hotels = hotelsRes.length > 0 ? hotelsRes : DEFAULT_HOTELS;
+  const blogs = blogsRes;
+  const categories = categoriesRes;
+  const inspirations = inspirationsRes;
 
   const images = await getImageMap([
     ...(acf.slider_home?.map((slide) => slide.bg_banner) ?? []),

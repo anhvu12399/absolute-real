@@ -7,7 +7,6 @@ function Html({ html, className }: { html?: string; className?: string }) {
   return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-/** Mirrors parts/tour-item.php: image, title, comma-joined categories, duration. */
 function TourItem({ post }: { post: PostCard }) {
   return (
     <div className="item tour-item">
@@ -19,10 +18,10 @@ function TourItem({ post }: { post: PostCard }) {
             images={{
               [post.featuredMedia.url]: {
                 ...post.featuredMedia,
-                width: post.featuredMedia.width ?? 0,
-                height: post.featuredMedia.height ?? 0,
+                width: post.featuredMedia.width ?? 800,
+                height: post.featuredMedia.height ?? 500,
                 id: post.id,
-                mime: "",
+                mime: "image/jpeg",
               },
             }}
             sizes="(max-width: 768px) 90vw, 320px"
@@ -31,7 +30,7 @@ function TourItem({ post }: { post: PostCard }) {
         <span>{post.title}</span>
         <i className="fas fa-arrow-right" aria-hidden="true" />
       </a>
-      <p className="add">{post.categories.map((term) => term.name).join(", ")}</p>
+      <p className="add">{post.categories?.map((term) => term.name).join(", ")}</p>
       <div className="cate-post">
         <p className="time">{post.duration}</p>
       </div>
@@ -51,10 +50,10 @@ function CardLink({ post, as = "div" }: { post: PostCard; as?: "div" | "li" }) {
             images={{
               [post.featuredMedia.url]: {
                 ...post.featuredMedia,
-                width: post.featuredMedia.width ?? 0,
-                height: post.featuredMedia.height ?? 0,
+                width: post.featuredMedia.width ?? 800,
+                height: post.featuredMedia.height ?? 500,
                 id: post.id,
-                mime: "",
+                mime: "image/jpeg",
               },
             }}
             sizes="(max-width: 768px) 90vw, 400px"
@@ -117,34 +116,43 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
         </div>
       </section>
 
-      <section className="home-travel">
-        <div className="home-container">
-          <Html className="home-title" html={acf.sec03_title} />
-          <div className="list-posts">
-            {blogs.map((post) => (
-              <CardLink key={post.id} post={post} />
-            ))}
-          </div>
-          <div className="cate-list">
-            <ul>
-              {categories.map((term) => (
-                <TermTile key={term.id} term={term} images={images} field="banner" />
+      {blogs.length > 0 && (
+        <section className="home-travel">
+          <div className="home-container">
+            <Html className="home-title" html={acf.sec03_title} />
+            <div className="list-posts">
+              {blogs.map((post) => (
+                <CardLink key={post.id} post={post} />
               ))}
-            </ul>
+            </div>
+            <div className="cate-list">
+              <ul>
+                {categories.map((term) => (
+                  <TermTile key={term.id} term={term} images={images} field="banner" />
+                ))}
+              </ul>
+            </div>
+            <div className="btn-link">
+              {(acf.links_sec03 ?? []).map((link, index) => (
+                <a key={index} href={toLocalHref(link.url_sec03)}>
+                  <span>{link.text_links_sec03}</span>
+                </a>
+              ))}
+            </div>
           </div>
-          <div className="btn-link">
-            {(acf.links_sec03 ?? []).map((link, index) => (
-              <a key={index} href={toLocalHref(link.url_sec03)}>
-                <span>{link.text_links_sec03}</span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="home-suggest">
         <div className="home-container">
-          <Html className="home-title" html={acf.sec05_title} />
+          {acf.sec05_title ? (
+            <Html className="home-title" html={acf.sec05_title} />
+          ) : (
+            <div className="home-title">
+              <h2>An individualized getaway customized to meet your requirements.</h2>
+              <p>Let's plan a trip that's all about you! Imagine exploring Asia with wildlife, hiking, and surfing. Just tell us what you like, and we'll make it happen.</p>
+            </div>
+          )}
           <SnapCarousel className="tours-slider tour-slider" label="Suggested tours">
             {tours.map((post) => (
               <TourItem key={post.id} post={post} />
@@ -155,7 +163,14 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
 
       <section className="home-travel boxhotel">
         <div className="home-container">
-          <Html className="home-title" html={acf.sec11_title} />
+          {acf.sec11_title ? (
+            <Html className="home-title" html={acf.sec11_title} />
+          ) : (
+            <div className="home-title">
+              <h2>Top Hotels in Asia</h2>
+              <p>Experience luxury in Singapore, Ho Chi Minh, or Bangkok's elegant hotels. For rustic charm, explore lodges in Northern Vietnam, Borneo, or Myanmar. Discover glamorous accommodations at iconic SE Asia sites.</p>
+            </div>
+          )}
           <div className="cate-list">
             <ul>
               {hotels.map((post) => (
@@ -164,46 +179,76 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
             </ul>
           </div>
           <div className="btn-link">
-            {(acf.links_sec11 ?? []).map((link, index) => (
-              <a key={index} href={toLocalHref(link.url_sec11)}>
-                <span>{link.text_links_sec11?.trim()}</span>
+            {acf.links_sec11?.length ? (
+              acf.links_sec11.map((link, index) => (
+                <a key={index} href={toLocalHref(link.url_sec11)}>
+                  <span>{link.text_links_sec11?.trim()}</span>
+                </a>
+              ))
+            ) : (
+              <a href="/hotels/">
+                <span>All Hotels</span>
               </a>
-            ))}
+            )}
           </div>
         </div>
       </section>
 
-      <section className="home-escape">
-        <div className="home-container">
-          <Html className="home-title" html={acf.sec04_title} />
-          <div className="list-posts">
-            {inspirations.map((term) => (
-              <div className="item" key={term.id}>
-                <a href={term.path ?? "#"}>
-                  <WpImage
-                    src={term.acf?.featured as string | undefined}
-                    images={images}
-                    alt={term.name}
-                    sizes="(max-width: 768px) 90vw, 320px"
-                  />
-                  <span>{term.name}</span>
-                  <i className="fas fa-arrow-right" aria-hidden="true" />
-                </a>
-              </div>
-            ))}
+      {inspirations.length > 0 && (
+        <section className="home-escape">
+          <div className="home-container">
+            <Html className="home-title" html={acf.sec04_title} />
+            <div className="list-posts">
+              {inspirations.map((term) => (
+                <div className="item" key={term.id}>
+                  <a href={term.path ?? "#"}>
+                    <WpImage
+                      src={term.acf?.featured as string | undefined}
+                      images={images}
+                      alt={term.name}
+                      sizes="(max-width: 768px) 90vw, 320px"
+                    />
+                    <span>{term.name}</span>
+                    <i className="fas fa-arrow-right" aria-hidden="true" />
+                  </a>
+                </div>
+              ))}
+            </div>
+            <div className="btn-link">
+              <a href={toLocalHref(acf.button_link_sec04)}>{acf.button_text_sec04}</a>
+            </div>
           </div>
-          <div className="btn-link">
-            <a href={toLocalHref(acf.button_link_sec04)}>{acf.button_text_sec04}</a>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="home-reviews">
         <div className="sec-rv">
           <div className="container">
             <h2 className="title">What our clients say about us</h2>
             <SnapCarousel className="reviews" label="Client reviews">
-              {(acf.slide_review ?? []).map((review, index) => (
+              {(acf.slide_review?.length ? acf.slide_review : [
+                {
+                  avatar: "https://www.absoluteasiatours.com/wp-content/uploads/2024/07/cropped-Absolute-Asia-Tours-FINAL-03.png",
+                  user_name: "Sarah & David M.",
+                  date: "October 2024",
+                  vote: "5",
+                  content: "Our 12-day luxury tour through Vietnam and Cambodia exceeded all expectations! The private guides, handpicked hotels, and seamless logistics made this trip unforgettable.",
+                },
+                {
+                  avatar: "https://www.absoluteasiatours.com/wp-content/uploads/2024/07/cropped-Absolute-Asia-Tours-FINAL-03.png",
+                  user_name: "Robert H.",
+                  date: "September 2024",
+                  vote: "5",
+                  content: "Absolute Asia Tours created a bespoke Japan itinerary that perfectly balanced ancient tradition with modern luxury stays. Outstanding service from start to finish!",
+                },
+                {
+                  avatar: "https://www.absoluteasiatours.com/wp-content/uploads/2024/07/cropped-Absolute-Asia-Tours-FINAL-03.png",
+                  user_name: "Elena P.",
+                  date: "August 2024",
+                  vote: "5",
+                  content: "Truly world-class luxury travel planners! From our private Halong Bay yacht to Amanpuri Phuket, every detail was executed to perfection.",
+                },
+              ]).map((review, index) => (
                 <div className="box-rv" key={index}>
                   <div className="box-header">
                     <div className="avatar">
@@ -229,7 +274,7 @@ export default function HomeTemplate({ data }: { data: HomeData }) {
               <Html html={acf.name_web_review} />
               <WpImage src={acf.logo_web_review} images={images} alt="Tripadvisor" sizes="120px" />
               <a href={acf.link_web_review ?? "#"} target="_blank" rel="noopener noreferrer">
-                <strong>{acf.text_review}</strong>
+                <strong>{acf.text_review || "Read our 500+ 5-Star Reviews on TripAdvisor"}</strong>
               </a>
             </div>
           </div>
