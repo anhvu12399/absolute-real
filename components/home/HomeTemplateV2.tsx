@@ -269,7 +269,7 @@ export default function HomeTemplateV2({
       </section>
 
       {/* ═══ STATEMENT + STATS ═══ */}
-      <section id="statement" className="section on-cream" style={{ paddingBottom: 0 }}>
+      <section id="statement" className="section on-cream" style={{ paddingTop: "clamp(2.2rem, 3.8vw, 3.2rem)", paddingBottom: 0 }}>
         {/* A div, not a p: the WordPress statement carries block tags, and the
             browser would close a <p> around them and break hydration. */}
         <div className="statement center reveal" dangerouslySetInnerHTML={{ __html: String(acf.statement_text || "For more than twenty years, we have been turning a single idea for a trip into an itinerary that could belong to no one else. A journey through Asia should never feel arranged — it should feel like it was always <em>composed, not booked.</em>") }}></div>
@@ -278,7 +278,7 @@ export default function HomeTemplateV2({
           <div className="stat-item"><div className="stat-num">{String(acf.stat_2_num || "6")}</div><div className="stat-label">{String(acf.stat_2_label || "Countries, One Itinerary")}</div></div>
           <div className="stat-item"><div className="stat-num">{String(acf.stat_3_num || "24")}</div><div className="stat-label">{String(acf.stat_3_label || "Hour Concierge")}</div></div>
         </div>
-        <div style={{ height: "clamp(3.5rem,7vw,6.5rem)" }}></div>
+        <div style={{ height: "clamp(1.5rem, 2.8vw, 2.4rem)" }}></div>
       </section>
 
       {/* ═══ TABBED JOURNEY CARDS ═══ */}

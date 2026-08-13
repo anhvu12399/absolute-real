@@ -63,12 +63,12 @@ h1 em,h2 em,h3 em{font-style:italic; font-weight:400; color:var(--rust);}
 .center .eyebrow{justify-content:center;}
 
 /* ---------- stat row ---------- */
-.stat-row{display:flex; justify-content:center; flex-wrap:wrap; gap:0; margin-top:1.7rem;}
-.stat-item{padding:0 2.6rem; text-align:center; border-left:1px solid var(--line-on-cream);}
+.stat-row{display:flex; justify-content:center; flex-wrap:wrap; gap:0; margin-top:1.3rem;}
+.stat-item{padding:0 2rem; text-align:center; border-left:1px solid var(--line-on-cream);}
 .stat-item:first-child{border-left:none;}
-.stat-num{font-family:'Playfair Display',serif; font-style:italic; font-weight:600; font-size:clamp(2.1rem,4vw,2.9rem); color:var(--rust); line-height:1;}
-.stat-label{margin-top:0.55rem; font-size:0.7rem; letter-spacing:0.13em; text-transform:uppercase; color:var(--text-dim-on-cream);}
-@media (max-width:640px){.stat-item{border-left:none; border-top:1px solid var(--line-on-cream); padding:1.4rem 1.6rem 0; margin-top:1.4rem;} .stat-item:first-child{border-top:none; margin-top:0; padding-top:0;}}
+.stat-num{font-family:'Playfair Display',serif; font-style:italic; font-weight:600; font-size:clamp(1.6rem,2.6vw,2.2rem); color:var(--rust); line-height:1;}
+.stat-label{margin-top:0.4rem; font-size:0.65rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim-on-cream);}
+@media (max-width:640px){.stat-item{border-left:none; border-top:1px solid var(--line-on-cream); padding:1rem 1.4rem 0; margin-top:1rem;} .stat-item:first-child{border-top:none; margin-top:0; padding-top:0;}}
 
 /* ---------- dropcap ---------- */
 .dropcap{float:left; font-family:'Playfair Display',serif; font-style:italic; font-weight:600; font-size:3.6em; line-height:0.78; padding:0.04em 0.1em 0 0; color:var(--rust);}
@@ -674,11 +674,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .ticker-btn svg{width:15px; height:15px;}
 
 /* ---------- statement ---------- */
-.statement{font-family:'Playfair Display',serif; font-size:clamp(1.06rem,1.6vw,1.36rem); line-height:1.38; font-weight:400;
-  max-width:40rem; margin:0 auto; padding:0 var(--pad); text-wrap:pretty;}
-.statement p{margin-bottom:0.6em;}
+.statement{font-family:'Playfair Display',serif; font-size:clamp(0.92rem,1.22vw,1.06rem); line-height:1.62; font-weight:400;
+  max-width:38rem; margin:0 auto; padding:0 var(--pad); text-wrap:pretty;}
+.statement p{margin-bottom:0.5em;}
 .statement p:last-child{margin-bottom:0;}
-.statement h1,.statement h2,.statement h3{font-size:1.16em; line-height:1.25; margin-bottom:0.5em; font-weight:500;}
+.statement h1,.statement h2,.statement h3{font-size:clamp(1.15rem,1.6vw,1.38rem); line-height:1.25; margin-bottom:0.5em; font-weight:500;}
 .statement strong{font-weight:600;}
 .statement em{font-style:italic; color:var(--rust);}
 
