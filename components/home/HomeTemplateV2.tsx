@@ -216,6 +216,11 @@ export default function HomeTemplateV2({
 
   return (
     <>
+      {/* Preload first hero image for instant LCP performance */}
+      {slides[0]?.image_url && (
+        <link rel="preload" as="image" href={optimized(slides[0].image_url, "hero")} fetchPriority="high" />
+      )}
+
       {/* ═══ KIỂU 2: PANORAMA HORIZON & DESTINATION STRIP HERO ═══ */}
       <section id="hero" className={`dest-strip-hero ph ${hero.image_url ? '' : 'ph-hero'}`} style={hero.image_url ? bg(hero.image_url, "hero") : {}}>
         <div className="dest-strip-cinema-overlay"></div>

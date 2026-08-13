@@ -27,14 +27,14 @@ const nextConfig: NextConfig = {
   turbopack: { root: process.cwd() },
   trailingSlash: true,
   images: {
-    deviceSizes: [320, 480, 640, 750, 828, 1080, 1200, 1600, 1920],
+    deviceSizes: [320, 480, 640, 750, 828, 1080, 1200, 1600, 1920, 2048],
     /* Backgrounds ask the optimizer for these widths by hand - see lib/images.ts. */
     imageSizes: [384, 640],
-    qualities: [75],
+    qualities: [75, 80, 85],
     /* WordPress uploads never change under the same URL, so they can be cached
        for a year rather than the 60-second default. */
     minimumCacheTTL: 31536000,
-    formats: ["image/webp"],
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       ...[...new Set(imageHosts)].map((hostname) => ({ protocol: "https" as const, hostname })),
       { protocol: "https", hostname: "backend.absoluteasiatours.com" },

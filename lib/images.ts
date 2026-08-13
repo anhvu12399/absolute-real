@@ -1,29 +1,18 @@
 /**
- * Image delivery.
+ * Image delivery & performance optimization.
  *
- * WordPress hands back the original upload — often a 2560px, 400KB JPEG — and
- * the templates paint it as a CSS background. A background cannot be a
- * `next/image`, so nothing resized it: a thumbnail card and a full-bleed hero
- * both downloaded the same file. On the homepage that came to roughly 54MB.
- *
- * Next's optimizer is reachable as a plain URL, so a background can use it too.
- * The same photograph then arrives as WebP at the width it is actually painted:
- * 177KB → 37KB for a card, → 88KB for a hero.
- *
- * `quality` must be listed in next.config's `images.qualities`.
+ * Next.js optimizer serves next-generation AVIF and WebP images with custom widths
+ * and crisp qualities tailored for high-DPI displays.
  */
 
-const QUALITY = 75;
+const QUALITY_STANDARD = 80;
+const QUALITY_HERO = 85;
 
 /**
  * Widths the optimizer will accept.
- *
- * These must match `images.imageSizes` + `images.deviceSizes` in next.config:
- * anything else is answered with a 400 and the image simply fails to load. A
- * request for an unlisted width is snapped up to the next allowed one rather
- * than breaking the page.
+ * Must match `images.imageSizes` + `images.deviceSizes` in next.config.
  */
-const ALLOWED = [320, 384, 480, 640, 750, 828, 1080, 1200, 1600, 1920];
+const ALLOWED = [320, 384, 480, 640, 750, 828, 1080, 1200, 1600, 1920, 2048];
 
 const snap = (want: number) => ALLOWED.find((w) => w >= want) ?? ALLOWED[ALLOWED.length - 1];
 
@@ -43,27 +32,24 @@ export type ImageWidth = keyof typeof IMAGE_WIDTHS;
 
 /**
  * An optimized URL for a remote WordPress image.
- *
- * Anything already local, a data URI, or an SVG is returned untouched — the
- * optimizer would either reject it or make it bigger.
+ * Returns AVIF/WebP with tailored compression.
  */
-export function optimized(src?: string | null, width: ImageWidth | number = "card"): string {
+export function optimized(src?: string | null, width: ImageWidth | number = "card", quality?: number): string {
   const url = (src || "").trim();
   if (!url) return "";
   if (url.startsWith("data:") || url.startsWith("/_next/")) return url;
   if (/\.svg(\?|$)/i.test(url)) return url;
 
   const w = snap(typeof width === "number" ? width : IMAGE_WIDTHS[width]);
-  return `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=${QUALITY}`;
+  const q = quality || (w >= 1200 ? QUALITY_HERO : QUALITY_STANDARD);
+  return `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=${q}`;
 }
 
 /**
- * A ready-made `style` object, or undefined when there is no photograph.
- *
- * Returning undefined rather than an empty background keeps the caller's
- * `is-empty` styling working: `style={bg(url, "card")}`.
+ * A ready-made `style` object with hardware-accelerated background image.
  */
-export function bg(src?: string | null, width: ImageWidth | number = "card") {
-  const url = optimized(src, width);
+export function bg(src?: string | null, width: ImageWidth | number = "card", quality?: number) {
+  const url = optimized(src, width, quality);
   return url ? { backgroundImage: `url(${url})` } : undefined;
 }
+

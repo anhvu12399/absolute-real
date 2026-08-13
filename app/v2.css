@@ -95,9 +95,18 @@ svg:not([class]):not([width]):not([viewBox]){width:16px; height:16px;}
 .link-arrow svg{width:12px; height:12px;}
 a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{outline:2px solid var(--rust); outline-offset:2px;}
 
-/* ---------- photographic placeholder panels ---------- */
-.ph{position:relative; overflow:hidden; background-size:cover; background-position:center;}
-.ph::after{content:""; position:absolute; inset:0; background:linear-gradient(115deg, rgba(255,255,255,0.10) 0%, transparent 30%);}
+/* ---------- photographic placeholder & image rendering ---------- */
+.ph{
+  position:relative;
+  overflow:hidden;
+  background-size:cover;
+  background-position:center;
+  background-color:#0c1424;
+  image-rendering:-webkit-optimize-contrast;
+  filter:contrast(1.02) saturate(1.04);
+  transition:transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+}
+.ph::after{content:""; position:absolute; inset:0; background:linear-gradient(115deg, rgba(255,255,255,0.08) 0%, transparent 35%); pointer-events:none;}
 .ph-vn{background-image:linear-gradient(165deg,#3E5C50 0%,#1E2A3D 60%,#0E141C 100%);}
 .ph-kh{background-image:linear-gradient(165deg,#AD8A54 0%,#5C4A30 50%,#1E2A3D 100%);}
 .ph-la{background-image:linear-gradient(165deg,#C79A55 0%,#6E2A2E 55%,#1E2A3D 100%);}
@@ -113,8 +122,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .ph-desert{background-image:radial-gradient(ellipse 60% 50% at 70% 20%,rgba(110,42,46,0.22),transparent 60%),linear-gradient(160deg,#3E2A22 0%,#211812 55%,#0C0A08 100%);}
 /* Starts lower than it used to: the title sits at the very bottom, so the
    upper half of the photograph does not need covering. */
-.overlay-bottom{position:absolute; inset:0; background:linear-gradient(180deg,transparent 46%,rgba(9,8,7,0.34) 72%,rgba(9,8,7,0.84) 100%);}
-.overlay-full{position:absolute; inset:0; background:rgba(9,8,7,0.4);}
+.overlay-bottom{position:absolute; inset:0; background:linear-gradient(180deg,transparent 40%,rgba(8,14,24,0.45) 68%,rgba(8,14,24,0.92) 100%);}
+.overlay-full{position:absolute; inset:0; background:rgba(8,14,24,0.45);}
+
+/* Performance: Offscreen content visibility */
+#why, #responsibly, #testimonials, #faqs, #faq, footer{
+  content-visibility:auto;
+  contain-intrinsic-size:1px 400px;
+}
 
 /* ---------- utility bar + nav ---------- */
 .utility-bar{background:#060a12; color:#f8f6f0; font-size:0.74rem; letter-spacing:0.04em; padding:0.55rem 0; border-bottom:1px solid rgba(229,193,88,0.12); transition:transform 0.35s ease, opacity 0.3s ease;}
@@ -809,9 +824,18 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .ways-row2{display:grid; grid-template-columns:repeat(2,1fr); gap:1.4rem; margin-top:1.4rem;}
 .ways-item{position:relative; aspect-ratio:4/3; display:flex; flex-direction:column; justify-content:space-between; padding:1.6rem;}
 /* These cards are links now - keep the anchor looking like the card it replaced. */
-a.hc-card, a.ways-item{text-decoration:none; color:inherit; transition:transform .35s ease, box-shadow .35s ease;}
-a.hc-card:hover, a.ways-item:hover{transform:translateY(-4px); box-shadow:0 18px 40px rgba(10,14,20,0.28);}
-a.hc-card:focus-visible, a.ways-item:focus-visible{outline:2px solid var(--brass); outline-offset:3px;}
+a.hc-card, a.ways-item{
+  text-decoration:none;
+  color:inherit;
+  border-radius:6px;
+  transition:transform .4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .4s ease, filter .3s ease;
+}
+a.hc-card:hover, a.ways-item:hover{
+  transform:translateY(-5px);
+  box-shadow:0 20px 45px rgba(8,14,24,0.45);
+  filter:contrast(1.04) saturate(1.06);
+}
+a.hc-card:focus-visible, a.ways-item:focus-visible{outline:2px solid #e5c158; outline-offset:3px;}
 .ways-item h3{color:var(--white); font-size:1.3rem; position:relative; z-index:2;}
 .ways-item p{color:rgba(255,255,255,0.85); font-size:0.85rem; position:relative; z-index:2;}
 @media (max-width:860px){.ways-grid,.ways-row2{grid-template-columns:1fr 1fr;}}
