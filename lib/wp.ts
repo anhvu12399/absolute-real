@@ -15,7 +15,7 @@ function resolveApiBase() {
   if (explicit) return explicit.replace(/\/$/, "");
   const wpUrl = process.env.NEXT_PUBLIC_WP_URL;
   if (wpUrl) return `${wpUrl.replace(/\/$/, "")}/wp-json`;
-  throw new Error("Set WORDPRESS_API_URL (or NEXT_PUBLIC_WP_URL) to your WordPress install");
+  return "https://www.absoluteasiatours.com/wp-json";
 }
 
 /**
