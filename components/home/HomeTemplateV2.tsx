@@ -140,15 +140,16 @@ export default function HomeTemplateV2({
     return () => window.clearInterval(timer);
   }, [slides.length]);
 
-  // Auto-scroll active destination tab into view on mobile when slide changes
+  // Auto-scroll active destination tab within container ONLY (never hijacks window scroll)
   useEffect(() => {
     if (!tabsContainerRef.current) return;
-    const activeBtn = tabsContainerRef.current.querySelector(".dest-strip-tab.is-active") as HTMLElement;
+    const container = tabsContainerRef.current;
+    const activeBtn = container.children[heroIndex] as HTMLElement;
     if (activeBtn) {
-      activeBtn.scrollIntoView({
+      const targetLeft = activeBtn.offsetLeft - (container.clientWidth / 2) + (activeBtn.clientWidth / 2);
+      container.scrollTo({
+        left: Math.max(0, targetLeft),
         behavior: "smooth",
-        block: "nearest",
-        inline: "center",
       });
     }
   }, [heroIndex]);
@@ -263,6 +264,17 @@ export default function HomeTemplateV2({
                 <span>{String(hero.link_text || "Explore This Journey")}</span>
                 <ArrowSvg />
               </Link>
+
+              {/* Running Progress Bar & Indicator for Desktop & Mobile */}
+              {slides.length > 1 && (
+                <div className="dest-hero-counter">
+                  <span className="dest-counter-curr">{String(heroIndex + 1).padStart(2, "0")}</span>
+                  <div className="dest-counter-bar">
+                    <div key={heroIndex} className="dest-counter-fill"></div>
+                  </div>
+                  <span className="dest-counter-total">{String(slides.length).padStart(2, "0")}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
