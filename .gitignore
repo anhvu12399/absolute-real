@@ -16,3 +16,6 @@ out/
 # Audit downloads, captured production HTML, and local deliverables
 work/
 outputs/
+*.pem
+*.zip
+.claude/

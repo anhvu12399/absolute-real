@@ -1,34 +1,27 @@
 import type { Metadata } from "next";
-import { NativeHeader } from "@/components/NativeHeader";
-import { NativeFooter } from "@/components/NativeFooter";
-import { getSiteData } from "@/lib/wp";
+import { Suspense } from "react";
+import { V2Header } from "@/components/v2/V2Header";
+import { V2Footer } from "@/components/v2/V2Footer";
+import { V2Icons } from "@/components/v2/V2Icons";
+import { RevealInit } from "@/components/v2/RevealWrapper";
+import { AdminPreviewBridge } from "@/components/v2/AdminPreviewBridge";
+import { getSiteDataSafe } from "@/lib/wp";
 
-import "./globals.css";
-import "./theme/main.css";
-import "./theme/plus_V.css";
-import "./theme/plus_T.css";
-import "./theme/plus.css";
-import "./theme/responsive_V.css";
-import "./theme/responsive_T.css";
-import "./theme/responsive.css";
-import "./native.css";
+import "./v2.css";
+import { BRAND_NAME, SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { organizationSchema, schemaScript, websiteSchema } from "@/lib/schema";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.absoluteasiatours.com";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "Private Asia Luxury Tours | Absolute Asia Tours", template: "%s | Absolute Asia Tours" },
-  description: "Private, tailor-made journeys across Asia, designed by local travel experts.",
+  title: { default: SITE_TITLE, template: `%s | ${BRAND_NAME}` },
+  description: SITE_DESCRIPTION,
   robots: process.env.VERCEL_ENV === "production" ? { index: true, follow: true } : { index: false, follow: false },
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  let siteData = null;
-  try {
-    siteData = await getSiteData();
-  } catch {
-    siteData = null;
-  }
+  const site = await getSiteDataSafe();
 
   return (
     <html lang="en">
@@ -36,26 +29,34 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Mulish:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Work+Sans:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        {/* Organization and WebSite, once site-wide. Page-level schema is
+            emitted by the route so each type describes itself. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: schemaScript(
+              organizationSchema({
+                logo: site?.logo,
+                phone: site?.phone,
+                description: site?.description || SITE_DESCRIPTION,
+              }),
+              websiteSchema(),
+            )!,
+          }}
         />
       </head>
-      <body className="home page-template-default header-4">
-        <a className="skip-link" href="#content">
-          Skip to content
-        </a>
-        <NativeHeader
-          logo={siteData?.logo}
-          menu={siteData?.menu || []}
-          phoneLabel={siteData?.phoneLabel || "Talk to an expert"}
-          phone={siteData?.phone || "+84 963 874 729"}
-        />
-        <div id="content">{children}</div>
-        <NativeFooter blocks={siteData?.footer || {}} />
+      <body>
+        <V2Icons />
+        <V2Header site={site} />
+        <main id="top">{children}</main>
+        <V2Footer site={site} />
+        {/* `.reveal` starts invisible; without this a server-rendered template
+            publishes a blank page. Mounted here so no route can miss it. */}
+        <RevealInit />
+        <Suspense><AdminPreviewBridge /></Suspense>
       </body>
     </html>
   );

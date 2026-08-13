@@ -1,17 +1,60 @@
 import type { NextConfig } from "next";
 
-const origin = process.env.WORDPRESS_ORIGIN || "https://origin.absoluteasiatours.com";
+/* The WordPress origin this site proxies wp-admin and uploads to. */
+const origin = process.env.WORDPRESS_ORIGIN || process.env.NEXT_PUBLIC_WP_URL || "";
+
+/* Hosts allowed to serve <Image> sources: the WordPress install plus any legacy
+   domain still referenced by imported content. Configured, not spelled out. */
+const imageHosts = [
+  process.env.NEXT_PUBLIC_SITE_URL,
+  process.env.NEXT_PUBLIC_WP_URL,
+  origin,
+  ...(process.env.NEXT_PUBLIC_LEGACY_HOSTS || "").split(","),
+]
+  .map((value) => (value || "").trim())
+  .filter(Boolean)
+  .map((value) => {
+    try {
+      return new URL(value.includes("://") ? value : `https://${value}`).hostname;
+    } catch {
+      return "";
+    }
+  })
+  .filter(Boolean)
+  .flatMap((host) => [host, host.startsWith("www.") ? host.slice(4) : `www.${host}`]);
 
 const nextConfig: NextConfig = {
   turbopack: { root: process.cwd() },
   trailingSlash: true,
   images: {
     deviceSizes: [320, 480, 640, 750, 828, 1080, 1200, 1600, 1920],
+    /* Backgrounds ask the optimizer for these widths by hand - see lib/images.ts. */
+    imageSizes: [384, 640],
+    qualities: [75],
+    /* WordPress uploads never change under the same URL, so they can be cached
+       for a year rather than the 60-second default. */
+    minimumCacheTTL: 31536000,
+    formats: ["image/webp"],
     remotePatterns: [
-      { protocol: "https", hostname: "www.absoluteasiatours.com" },
-      { protocol: "https", hostname: "absoluteasiatours.com" },
+      ...[...new Set(imageHosts)].map((hostname) => ({ protocol: "https" as const, hostname })),
       { protocol: "https", hostname: "amazingbiketours.com" },
     ],
+  },
+  async redirects() {
+    /* Legacy URLs that no longer have a record of their own.
+     *
+     * Everything else keeps its original path: the router resolves posts by the
+     * path WordPress reports, so /places-to-go/hoi-an/ and friends do not need
+     * an entry here - and must not have one, because a redirect to a path the
+     * router cannot serve turns an indexed page into a 404. */
+    return [
+      {
+        // Empty duplicate left by a repeated legacy import.
+        source: "/collection/rosewood-phuket-6/",
+        destination: "/collection/rosewood-phuket/",
+        permanent: true,
+      },
+    ];
   },
   async rewrites() {
     return {
