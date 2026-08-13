@@ -205,92 +205,67 @@ export default function HomeTemplateV2({
 
   return (
     <>
-      {/* ═══ CONCEPT D: THE FLOATING GLASS SHOWCASE HERO ═══ */}
-      <section id="hero" className={`glass-showcase-hero ph ${hero.image_url ? '' : 'ph-hero'}`} style={hero.image_url ? bg(hero.image_url, "hero") : {}}>
-        <div className="glass-showcase-cinema-overlay"></div>
-        <div className="glass-showcase-ambient-light"></div>
+      {/* ═══ KIỂU 2: PANORAMA HORIZON & DESTINATION STRIP HERO ═══ */}
+      <section id="hero" className={`dest-strip-hero ph ${hero.image_url ? '' : 'ph-hero'}`} style={hero.image_url ? bg(hero.image_url, "hero") : {}}>
+        <div className="dest-strip-cinema-overlay"></div>
 
-        <div className="container glass-showcase-inner">
-          <div className="glass-showcase-plate">
-            <div className="glass-plate-header">
-              <span className="glass-gold-tag">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg>
-                {String(hero.tagline || "Absolute Asia Private Expeditions")}
+        <div className="container dest-strip-content-wrap">
+          <div className="dest-strip-copy">
+            <div className="dest-strip-eyebrow">
+              <span className="dest-strip-eyebrow-line"></span>
+              <span className="dest-strip-eyebrow-text">
+                <em>{String(hero.tagline || "Private Bespoke")}</em> {String(hero.title || "Journeys")}
               </span>
-              <span className="glass-plate-num">EST. 1989 · LUXURY BESPOKE</span>
             </div>
 
             <h1
-              className="glass-plate-title"
+              className="dest-strip-headline"
               dangerouslySetInnerHTML={{ __html: String(hero.description || "Vietnam: The <em>Slow Gold</em> of the Mekong at Dawn") }}
             />
 
             {hero.subtitle && (
-              <p className="glass-plate-subtitle">{String(hero.subtitle)}</p>
+              <p className="dest-strip-subtitle">{String(hero.subtitle)}</p>
             )}
 
-            <div className="glass-plate-pills">
-              <span className="glass-pill">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-                {hero.meta || "12 Days / 11 Nights"}
-              </span>
-              <span className="glass-pill">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                100% Private &amp; Custom
-              </span>
-              <span className="glass-pill">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                Handpicked Sanctuaries
-              </span>
-            </div>
-
-            <div className="glass-plate-actions">
-              <Link href={toLocalHref(hero.link, "#plan")} className="btn btn-gold-glass">
-                <span>{String(hero.link_text || "Plan This Journey")}</span>
-                <ArrowSvg />
-              </Link>
-              <Link href="#statement" className="btn btn-outline-glass">
-                <span>Discover Our Standard</span>
+            <div className="dest-strip-actions">
+              <Link href={toLocalHref(hero.link, "#plan")} className="btn btn-line-white">
+                <span>{String(hero.link_text || "Explore This Journey")}</span>
                 <ArrowSvg />
               </Link>
             </div>
           </div>
+        </div>
 
-          {/* Roman Numeral Navigation Rail */}
-          {slides.length > 1 && (
-            <div className="glass-numeral-rail">
-              <span className="glass-rail-label">JOURNEYS</span>
-              {slides.map((_, idx) => {
-                const numerals = ["I", "II", "III", "IV", "V", "VI"];
-                const num = numerals[idx] || String(idx + 1);
-                const isActive = idx === heroIndex;
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    className={`glass-numeral-btn${isActive ? " is-active" : ""}`}
-                    onClick={() => setHeroIndex(idx)}
-                    aria-label={`Select Expedition ${num}`}
-                  >
-                    <span className="numeral-text">{num}</span>
-                    {isActive && <span className="numeral-glow-dot">✦</span>}
-                  </button>
-                );
-              })}
+        {/* Bottom Destination Tabs Strip */}
+        {slides.length > 1 && (
+          <div className="dest-strip-bar">
+            <div className="container dest-strip-bar-inner">
+              <div className="dest-strip-tabs">
+                {slides.map((s, idx) => {
+                  const isActive = idx === heroIndex;
+                  const rawTitle = String(s.description || s.title || `Journey ${idx + 1}`).replace(/<[^>]+>/g, "");
+                  const countryName = rawTitle.split(/[:|–—]/)[0].trim();
+                  const shortSub = rawTitle.split(/[:|–—]/)[1]?.trim() || s.tagline || "Private Expedition";
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      className={`dest-strip-tab${isActive ? " is-active" : ""}`}
+                      onClick={() => setHeroIndex(idx)}
+                    >
+                      <div className="dest-tab-top-line"></div>
+                      <div className="dest-tab-header">
+                        <span className="dest-tab-num">{String(idx + 1).padStart(2, "0")}</span>
+                        <span className="dest-tab-country">{countryName}</span>
+                      </div>
+                      <span className="dest-tab-sub">{clamp(shortSub, 32)}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          )}
-        </div>
-
-        {/* Floating bottom ticker */}
-        <div className="glass-bottom-strip">
-          <div className="container glass-bottom-inner">
-            <span className="glass-bottom-tag">Next Expedition:</span>
-            <Link href={String(acf.ticker_link || "#destinations")} className="glass-bottom-link">
-              {String(acf.ticker_text || "Bhutan: A Private Audience with the Himalaya")}
-              <ArrowSvg />
-            </Link>
           </div>
-        </div>
+        )}
       </section>
 
       {/* ═══ STATEMENT + STATS ═══ */}
