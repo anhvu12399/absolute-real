@@ -37,6 +37,9 @@ const nextConfig: NextConfig = {
     formats: ["image/webp"],
     remotePatterns: [
       ...[...new Set(imageHosts)].map((hostname) => ({ protocol: "https" as const, hostname })),
+      { protocol: "https", hostname: "backend.absoluteasiatours.com" },
+      { protocol: "https", hostname: "www.absoluteasiatours.com" },
+      { protocol: "https", hostname: "absoluteasiatours.com" },
       { protocol: "https", hostname: "amazingbiketours.com" },
     ],
   },
