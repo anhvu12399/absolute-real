@@ -130,6 +130,45 @@ function aat_seed_homepage_copy() {
         ]),
 
         'home_values' => $values,
+
+        'home_ways_to_explore' => wp_json_encode([
+            [
+                'title' => 'Cultural Immersion & Sacred Heritage',
+                'description' => 'Private access to ancient temples, monastic blessings, and centuries of living traditions.',
+                'link' => '/tours/',
+                'image_url' => '',
+            ],
+            [
+                'title' => 'Luxury Rail & River Expeditions',
+                'description' => 'Slow travel aboard handcrafted teak junks, Mekong riverboats, and iconic luxury heritage trains.',
+                'link' => '/cruises/',
+                'image_url' => '',
+            ],
+            [
+                'title' => 'Wellness Sanctuaries & Cliffside Villas',
+                'description' => 'Rejuvenating holistic retreats, thermal onsens, and secluded oceanfront pavilions.',
+                'link' => '/where-to-stay/',
+                'image_url' => '',
+            ],
+            [
+                'title' => 'Culinary & Street Gastronomy Journeys',
+                'description' => 'Private market walkthroughs with celebrated local chefs and Michelin-starred dining in historic quarters.',
+                'link' => '/inspiration/',
+                'image_url' => '',
+            ],
+            [
+                'title' => 'Himalayan Kingdoms & Cloud Forests',
+                'description' => 'Untouched valleys, cliff-hanging dzongs, and dramatic alpine passes in Bhutan and Nepal.',
+                'link' => '/bhutan/',
+                'image_url' => '',
+            ],
+            [
+                'title' => 'Archipelago & Tropical Marine Escapes',
+                'description' => 'Private yacht charters across Komodo, Raja Ampat, and secluded Southeast Asian islands.',
+                'link' => '/tours/',
+                'image_url' => '',
+            ],
+        ]),
     ];
 
     $written = [];
@@ -138,6 +177,12 @@ function aat_seed_homepage_copy() {
         $empty = $current === null || $current === '' || $current === false ||
             (is_array($current) && !$current) ||
             (is_string($current) && trim($current) === '');
+        
+        // Clean out legacy visa/when is blog posts from ways to explore
+        if ($field === 'home_ways_to_explore' && is_string($current) && (stripos($current, 'visa') !== false || stripos($current, 'when is') !== false || stripos($current, '""') !== false)) {
+            $empty = true;
+        }
+
         if (!$empty) continue;
 
         $stored = in_array($field, aat_repeater_fields(), true) && is_array($value)

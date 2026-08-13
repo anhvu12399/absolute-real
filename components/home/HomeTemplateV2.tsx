@@ -92,12 +92,23 @@ export default function HomeTemplateV2({
   const offers = cards(acf.home_tab_offers, tours.slice(3));
   const newItems = cards(acf.home_tab_new, tours.slice(0, 3));
 
-  /* Two authored cards in a carousel look like a loading failure. Real places
-     top the row up to six without replacing what an editor chose. */
-  const authoredWays = cards(acf.home_ways_to_explore, []);
-  const waysToExplore = authoredWays.length >= 4
-    ? authoredWays
-    : [...authoredWays, ...places.filter((p) => !authoredWays.some((c: any) => c.title === p.title)).map(toCard)].slice(0, 6);
+  /* Clean authored ways to explore: filter out visa guides / blog questions and guarantee description text */
+  const validAuthoredWays = cards(acf.home_ways_to_explore, []).filter(
+    (c: any) => c.title && !/visa|when is|transit|best time/i.test(c.title)
+  );
+
+  const fallbackWaysSources = (places.length ? places : tours).filter(
+    (p) => !/visa|when is|transit|best time/i.test(p.title)
+  );
+
+  const waysToExplore = (
+    validAuthoredWays.length >= 4
+      ? validAuthoredWays
+      : [...validAuthoredWays, ...fallbackWaysSources.filter((p) => !validAuthoredWays.some((c: any) => c.title === p.title)).map(toCard)]
+  ).slice(0, 6).map((item: any) => ({
+    ...item,
+    description: item.description || `Private tailor-made exploration of ${item.title.split(/[:|–—]/)[0].trim()} with expert local guides and handpicked boutique sanctuaries.`,
+  }));
   const stayWith = cards(acf.home_stay_with, hotels.slice(0, 4));
   const waysToTravel = cards(acf.home_ways_to_travel, tours.slice(0, 5));
 
