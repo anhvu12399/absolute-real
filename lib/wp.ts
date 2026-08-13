@@ -15,7 +15,7 @@ function resolveApiBase() {
   if (explicit) return explicit.replace(/\/$/, "");
   const wpUrl = process.env.NEXT_PUBLIC_WP_URL;
   if (wpUrl) return `${wpUrl.replace(/\/$/, "")}/wp-json`;
-  return "https://www.absoluteasiatours.com/wp-json";
+  return "https://backend.absoluteasiatours.com/wp-json";
 }
 
 /**
