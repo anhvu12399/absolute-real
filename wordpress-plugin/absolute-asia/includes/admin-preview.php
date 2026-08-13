@@ -165,36 +165,55 @@ function aat_admin_preview_panel() {
          */
         var FIELD_MAP = {
             /* ── Homepage ── */
-            'ticker_text':     { sel: '.hero-ticker-text a', type: 'text', section: 'hero' },
-            'statement_text':  { sel: '.statement', type: 'html', section: 'statement' },
-            'stat_1_num':      { sel: '.stat-item:nth-child(1) .stat-num', type: 'text', section: 'statement' },
-            'stat_1_label':    { sel: '.stat-item:nth-child(1) .stat-label', type: 'text', section: 'statement' },
-            'stat_2_num':      { sel: '.stat-item:nth-child(2) .stat-num', type: 'text', section: 'statement' },
-            'stat_2_label':    { sel: '.stat-item:nth-child(2) .stat-label', type: 'text', section: 'statement' },
-            'stat_3_num':      { sel: '.stat-item:nth-child(3) .stat-num', type: 'text', section: 'statement' },
-            'stat_3_label':    { sel: '.stat-item:nth-child(3) .stat-label', type: 'text', section: 'statement' },
-            'map_headline':    { sel: '.map-copy h2', type: 'html', section: 'map' },
-            'map_description': { sel: '.map-copy p:last-of-type', type: 'text', section: 'map' },
-            'quote_text':      { sel: '#quote q', type: 'text', section: 'quote' },
-            'quote_citation':  { sel: '#quote cite', type: 'text', section: 'quote' },
-            'why_title':       { sel: '#why h2, [id="why"] h2', type: 'text', section: 'why' },
+            'home_banner_slider': { sel: '#hero', section: 'hero' },
+            'ticker_text':        { sel: '.hero-ticker-text a', type: 'text', section: 'hero' },
+            'statement_text':     { sel: '.statement', type: 'html', section: 'statement' },
+            'stat_1_num':         { sel: '.stat-item:nth-child(1) .stat-num', type: 'text', section: 'statement' },
+            'stat_1_label':       { sel: '.stat-item:nth-child(1) .stat-label', type: 'text', section: 'statement' },
+            'stat_2_num':         { sel: '.stat-item:nth-child(2) .stat-num', type: 'text', section: 'statement' },
+            'stat_2_label':       { sel: '.stat-item:nth-child(2) .stat-label', type: 'text', section: 'statement' },
+            'stat_3_num':         { sel: '.stat-item:nth-child(3) .stat-num', type: 'text', section: 'statement' },
+            'stat_3_label':       { sel: '.stat-item:nth-child(3) .stat-label', type: 'text', section: 'statement' },
+            'tabs_headline':      { sel: '#journeys h2', type: 'html', section: 'journeys' },
+            'tab_1_label':        { sel: '[role="tab"]:nth-child(1)', type: 'text', section: 'journeys' },
+            'tab_2_label':        { sel: '[role="tab"]:nth-child(2)', type: 'text', section: 'journeys' },
+            'tab_3_label':        { sel: '[role="tab"]:nth-child(3)', type: 'text', section: 'journeys' },
+            'tab_4_label':        { sel: '[role="tab"]:nth-child(4)', type: 'text', section: 'journeys' },
+            'home_tab_destinations': { sel: '#journeys', section: 'journeys' },
+            'home_tab_journeys':     { sel: '#journeys', section: 'journeys' },
+            'home_tab_offers':       { sel: '#journeys', section: 'journeys' },
+            'home_tab_new':          { sel: '#journeys', section: 'journeys' },
+            'explore_eyebrow':    { sel: '#explore .eyebrow', type: 'html', section: 'explore' },
+            'explore_headline':   { sel: '#explore h2', type: 'html', section: 'explore' },
+            'home_ways_to_explore': { sel: '#explore', section: 'explore' },
+            'stay_eyebrow':       { sel: '#stay .eyebrow', type: 'html', section: 'stay' },
+            'stay_headline':      { sel: '#stay h2', type: 'html', section: 'stay' },
+            'home_stay_with':     { sel: '#stay', section: 'stay' },
+            'travel_eyebrow':     { sel: '#travel .eyebrow', type: 'html', section: 'travel' },
+            'travel_headline':    { sel: '#travel h2', type: 'html', section: 'travel' },
+            'home_ways_to_travel': { sel: '#travel', section: 'travel' },
+            'map_headline':       { sel: '.map-copy h2', type: 'html', section: 'map' },
+            'map_description':    { sel: '.map-copy p:last-of-type', type: 'text', section: 'map' },
+            'quote_text':         { sel: '#quote q', type: 'text', section: 'quote' },
+            'quote_citation':     { sel: '#quote cite', type: 'text', section: 'quote' },
             'responsibly_headline': { sel: '#responsibly h2', type: 'html', section: 'responsibly' },
             'responsibly_text':     { sel: '#responsibly p:not(.eyebrow)', type: 'text', section: 'responsibly' },
-
-            /* ── About / Why Us ── */
-            'story_eyebrow':       { sel: '#story .eyebrow', type: 'html', section: 'story' },
-            'story_headline':      { sel: '#story h2:first-of-type', type: 'text', section: 'story' },
-            'story_lede':          { sel: '#story .story-open p:not(.eyebrow)', type: 'text', section: 'story' },
-            'story_now_title':     { sel: '.story-now h3', type: 'text', section: 'story' },
-            'story_now_text':      { sel: '.story-now p', type: 'text', section: 'story' },
-            'story_founder_name':  { sel: '.founder-name', type: 'text', section: 'story' },
-            'story_founder_role':  { sel: '.founder-role', type: 'text', section: 'story' },
-            'story_founder_quote': { sel: '.founder-card q, .founder-card blockquote', type: 'text', section: 'story' },
-            'story_founder_photo': { sel: '.founder-photo', type: 'image', section: 'story' },
-            'pillars_title':       { sel: '#pillars h2', type: 'text', section: 'pillars' },
-            'team_title':          { sel: '#team h2', type: 'text', section: 'team' },
+            'responsibly_image':    { sel: '#responsibly .split-photo', type: 'image', section: 'responsibly' },
+            'home_values':        { sel: '#values', section: 'values' },
+            'story_bar_tagline':  { sel: '#values .story-tag', type: 'text', section: 'values' },
+            'story_bar_headline': { sel: '#values h2', type: 'html', section: 'values' },
+            'story_bar_link_text': { sel: '#values .btn', type: 'text', section: 'values' },
+            'plan_eyebrow':       { sel: '#plan .eyebrow', type: 'html', section: 'plan' },
+            'plan_headline':      { sel: '#plan h2', type: 'html', section: 'plan' },
+            'plan_desc':          { sel: '#plan .plan-copy p:last-child', type: 'text', section: 'plan' },
+            'plan_btn':           { sel: '#plan button[type="submit"]', type: 'text', section: 'plan' },
+            'why_title':          { sel: '#why h2', type: 'text', section: 'why' },
+            'why_reasons':        { sel: '#why', section: 'why' },
+            'testimonials':       { sel: '#reviews, #quote', section: 'reviews' },
+            'review_summary':     { sel: '.review-summary', type: 'html', section: 'reviews' },
 
             /* ── Tour ── */
+            'hero_image':         { sel: '#hero, .hotel-hero-plate', type: 'image', section: 'hero' },
             'hero_eyebrow':       { sel: '.hero-eyebrow, .crumb', type: 'text', section: 'hero' },
             'duration_days':      { sel: '[data-preview="duration_days"] .num', type: 'text', section: 'hero' },
             'duration_label':     { sel: '[data-preview="duration_label"] .num', type: 'text', section: 'hero' },
@@ -204,43 +223,98 @@ function aat_admin_preview_panel() {
             'tour_route':         { sel: '.tour-route, .breadcrumb-route', type: 'text', section: 'hero' },
             'tour_level':         { sel: '.tour-level, .activity-level', type: 'text', section: 'overview' },
             'tour_code':          { sel: '.tour-code', type: 'text', section: 'overview' },
-            'intro_title':        { sel: '#overview .eyebrow', type: 'html', section: 'overview' },
+            'intro_title':        { sel: '#overview .eyebrow, #overview h2', type: 'html', section: 'overview' },
             'intro_description':  { sel: '#overview .wordpress-content, .overview-lede p', type: 'text', section: 'overview' },
-            'highlights_title':   { sel: '#overview .headline', type: 'html', section: 'overview' },
+            'highlights_title':   { sel: '#overview .headline, #overview h3', type: 'html', section: 'overview' },
+            'highlights_list':    { sel: '#overview ul', section: 'overview' },
+            'itinerary':          { sel: '#itinerary', section: 'itinerary' },
+            'itinerary_eyebrow':  { sel: '#itinerary .eyebrow', type: 'html', section: 'itinerary' },
+            'itinerary_title':    { sel: '#itinerary h2', type: 'text', section: 'itinerary' },
+            'featured_stays':     { sel: '#stays', section: 'stays' },
+            'hotels_eyebrow':     { sel: '#stays .eyebrow', type: 'html', section: 'stays' },
+            'hotels_title':       { sel: '#stays h2', type: 'text', section: 'stays' },
+            'accommodation_options': { sel: '#stays', section: 'stays' },
+            'inclusions_list':    { sel: '#inclusions', section: 'inclusions' },
+            'exclusions_list':    { sel: '#inclusions', section: 'inclusions' },
+            'inclusions_eyebrow': { sel: '#inclusions .eyebrow', type: 'html', section: 'inclusions' },
+            'inclusions_title':   { sel: '#inclusions h2', type: 'text', section: 'inclusions' },
+            'special_offer_text': { sel: '.special-offer-banner', type: 'text', section: 'inclusions' },
+            'departure_dates':    { sel: '#dates, #inclusions', section: 'inclusions' },
+            'gallery':            { sel: '#gallery, #plates', section: 'gallery' },
+            'gallery_title':      { sel: '#gallery h2, #plates h2', type: 'text', section: 'gallery' },
+            'experiences':        { sel: '#experiences', section: 'experiences' },
+            'faqs':               { sel: '#faqs', section: 'faqs' },
 
-            /* ── Pages ── */
-            'eyebrow':          { sel: '.hero-copy .eyebrow, .hero-eyebrow, [class*="eyebrow"]', type: 'text', section: 'hero' },
-            'hero_tagline':     { sel: '.hero-copy h1, .hero-title', type: 'text', section: 'hero' },
-            'page_description': { sel: '.hero-copy p:not(.eyebrow), .hero-desc', type: 'text', section: 'hero' },
+            /* ── Hotel ── */
+            'hotel_location':     { sel: '.hotel-hero-loc', type: 'text', section: 'hero' },
+            'hotel_highlights':   { sel: '#facts .hotel-spec', section: 'facts' },
+            'location_map':       { sel: '.map-location-label', type: 'text', section: 'location' },
+            'latitude':           { sel: '#facts, .hotel-coords', type: 'text', section: 'facts' },
+            'longitude':          { sel: '#facts, .hotel-coords', type: 'text', section: 'facts' },
+            'city':               { sel: '#nearby', section: 'nearby' },
+            'nearby_places':      { sel: '#nearby', section: 'nearby' },
+            'related_tours':      { sel: '#journeys', section: 'journeys' },
+            'related_hotels':     { sel: '#nearby', section: 'nearby' },
+            'related_things':     { sel: '#nearby', section: 'nearby' },
+            'tours_title':        { sel: '#journeys h2', type: 'text', section: 'journeys' },
+            'hotels_title':       { sel: '#nearby h2', type: 'text', section: 'nearby' },
+            'in_brief_title':     { sel: '#facts h2', type: 'text', section: 'facts' },
+            'things_title':       { sel: '#nearby h2', type: 'text', section: 'nearby' },
+            'location_title':     { sel: '#location h2', type: 'text', section: 'location' },
 
-            /* ── Homepage Extras ── */
-            'tabs_headline': { sel: '#journeys h2', type: 'html', section: 'journeys' },
-            'explore_eyebrow': { sel: '#explore .eyebrow em', type: 'html', section: 'explore' },
-            'explore_headline': { sel: '#explore h2', type: 'html', section: 'explore' },
-            'stay_eyebrow': { sel: '#stay .eyebrow em', type: 'html', section: 'stay' },
-            'stay_headline': { sel: '#stay h2', type: 'html', section: 'stay' },
-            'travel_eyebrow': { sel: '#travel .eyebrow em', type: 'html', section: 'travel' },
-            'travel_headline': { sel: '#travel h2', type: 'html', section: 'travel' },
-            'story_bar_tagline': { sel: '#values .story-tag', type: 'text', section: 'values' },
-            'story_bar_headline': { sel: '#values h2', type: 'html', section: 'values' },
-            'story_bar_link_text': { sel: '#values .btn', type: 'text', section: 'values' },
-            'plan_eyebrow': { sel: '#plan .eyebrow em', type: 'html', section: 'plan' },
-            'plan_headline': { sel: '#plan h2', type: 'html', section: 'plan' },
-            'plan_desc': { sel: '#plan .plan-copy p:last-child', type: 'text', section: 'plan' },
-            'plan_btn': { sel: '#plan button[type="submit"]', type: 'text', section: 'plan' },
+            /* ── Articles (Guides / Things to Do / Blog) ── */
+            'read_minutes':       { sel: '.read-minutes', type: 'text', section: 'hero' },
+            'intro_html':         { sel: '#overview .wordpress-content, .article-intro', type: 'html', section: 'overview' },
+            'content_left':       { sel: '.secondary-column', type: 'html', section: 'content' },
+            'content_right_image': { sel: '.secondary-image', type: 'image', section: 'content' },
+            'sidebar_popular_title': { sel: '.sidebar-popular h3', type: 'text', section: 'sidebar' },
+            'sidebar_search_title':  { sel: '.sidebar-search h3', type: 'text', section: 'sidebar' },
+            'sidebar_social_title':  { sel: '.sidebar-social h3', type: 'text', section: 'sidebar' },
+            'further_title':      { sel: '#further h2', type: 'text', section: 'further' },
+            'related_guides':     { sel: '#further', section: 'further' },
+            'plan_title':         { sel: '#plan h2', type: 'text', section: 'plan' },
+            'plan_description':   { sel: '#plan p', type: 'html', section: 'plan' },
+            'plan_html':          { sel: '#plan .plan-block', type: 'html', section: 'plan' },
 
-            /* ── Destination ── */
-            'destination_overview': { sel: '#overview .serif-block, #overview .destination-intro', type: 'html', section: 'overview' },
+            /* ── Destination (Places to Go) ── */
+            'hero_tagline':       { sel: '.hero-copy h1, .hero-tagline', type: 'text', section: 'hero' },
+            'destination_overview': { sel: '#overview .serif-block, #overview', type: 'html', section: 'overview' },
+            'map_stops':          { sel: '#map', section: 'map' },
+            'related_title':      { sel: '#related h2', type: 'text', section: 'related' },
+            'related_description': { sel: '#related p', type: 'text', section: 'related' },
+            'featured_tours':     { sel: '#journeys', section: 'journeys' },
+            'related_places':     { sel: '#nearby', section: 'nearby' },
+            'testimonials_eyebrow': { sel: '#reviews .eyebrow', type: 'html', section: 'reviews' },
+            'testimonials_heading': { sel: '#reviews h2', type: 'text', section: 'reviews' },
+            'experiences_eyebrow': { sel: '#experiences .eyebrow', type: 'html', section: 'experiences' },
+            'experiences_heading': { sel: '#experiences h2', type: 'text', section: 'experiences' },
+
+            /* ── Pages (About Us / Story) ── */
+            'eyebrow':            { sel: '.hero-copy .eyebrow, [class*="eyebrow"]', type: 'text', section: 'hero' },
+            'page_description':   { sel: '.hero-copy p:not(.eyebrow)', type: 'text', section: 'hero' },
+            'story_eyebrow':      { sel: '#story .eyebrow', type: 'html', section: 'story' },
+            'story_headline':     { sel: '#story h2:first-of-type', type: 'text', section: 'story' },
+            'story_lede':         { sel: '#story .story-open p', type: 'text', section: 'story' },
+            'story_now_title':    { sel: '.story-now h3', type: 'text', section: 'story' },
+            'story_now_text':     { sel: '.story-now p', type: 'text', section: 'story' },
+            'story_founder_name': { sel: '.founder-name', type: 'text', section: 'story' },
+            'story_founder_role': { sel: '.founder-role', type: 'text', section: 'story' },
+            'story_founder_quote': { sel: '.founder-card q', type: 'text', section: 'story' },
+            'story_founder_photo': { sel: '.founder-photo', type: 'image', section: 'story' },
+            'pillars_title':      { sel: '#pillars h2', type: 'text', section: 'pillars' },
+            'team_title':         { sel: '#team h2', type: 'text', section: 'team' },
+
+            /* ── Shared Specialist ── */
+            'specialist_title':   { sel: '#specialist h2, .specialist-block h2', type: 'text', section: 'specialist' },
+            'specialist_text':    { sel: '#specialist p, .specialist-block p', type: 'text', section: 'specialist' },
+            'specialist_photo':   { sel: '#specialist img, .specialist-block img', type: 'image', section: 'specialist' },
+            'specialist_phone':   { sel: '#specialist .phone, .specialist-block .phone', type: 'text', section: 'specialist' },
         };
 
-        /* Also keep a section-only map for fields that can't do live DOM edit
-           (repeaters, images with complex rendering) — they just scroll. */
         var FIELD_SECTION = {
             'home_banner_slider': 'hero',
             'home_tab_destinations': 'journeys', 'home_tab_journeys': 'journeys',
             'home_tab_offers': 'journeys', 'home_tab_new': 'journeys',
-            'tab_1_label': 'journeys', 'tab_2_label': 'journeys',
-            'tab_3_label': 'journeys', 'tab_4_label': 'journeys',
             'home_ways_to_explore': 'explore', 'home_stay_with': 'explore',
             'home_ways_to_travel': 'explore',
             'home_values': 'values',
@@ -254,8 +328,8 @@ function aat_admin_preview_panel() {
             'faqs': 'faqs', 'experiences': 'experiences',
             'specialist_title': 'specialist', 'specialist_text': 'specialist',
             'specialist_photo': 'specialist', 'specialist_phone': 'specialist',
-            'hotel_highlights': 'overview', 'hotel_location': 'overview',
-            'nearby_places': 'location',
+            'hotel_highlights': 'facts', 'hotel_location': 'hero',
+            'nearby_places': 'nearby',
             'month_guide': 'when-to-go',
             'hero_image': 'hero',
             'pillars': 'pillars', 'team': 'team',
@@ -270,7 +344,6 @@ function aat_admin_preview_panel() {
         var isOpen = false;
         var debounceTimer = null;
 
-        /* Show target URL in status bar so we can debug blank iframes. */
         $status.text('Preview URL: ' + baseUrl);
 
         function openPanel() {
@@ -313,26 +386,29 @@ function aat_admin_preview_panel() {
                 $sectionLabel.text('→ #' + mapping.section + ' (' + fieldName + ')');
                 $status.text('✏️ Đang cập nhật: ' + fieldName).css('color', '#2271b1');
             } catch (e) {
-                /* Cross-origin — can't postMessage. */
                 $status.text('⚠ Không gửi được — kiểm tra URL frontend').css('color', '#d63638');
             }
         }
 
         /**
-         * Scroll the iframe to a section.
+         * Scroll the iframe to a section or specific selector.
          */
-        function scrollToSection(section) {
-            if (!section) return;
-            $sectionLabel.text('→ #' + section);
+        function scrollToTarget(section, selector, fieldName) {
+            if (!section && !selector) return;
+            $sectionLabel.text('→ #' + (section || 'element') + (fieldName ? ' (' + fieldName + ')' : ''));
 
             try {
                 $iframe[0].contentWindow.postMessage({
                     type: 'aat-scroll-to',
-                    section: section
+                    section: section,
+                    selector: selector,
+                    field: fieldName
                 }, '*');
             } catch (e) {
-                var url = baseUrl + '#' + section;
-                $iframe.attr('src', url);
+                if (section) {
+                    var url = baseUrl + '#' + section;
+                    $iframe.attr('src', url);
+                }
             }
         }
 
@@ -350,15 +426,14 @@ function aat_admin_preview_panel() {
 
             var value = $(this).val();
 
-            /* Debounce: wait 150ms after the user stops typing. */
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(function() {
                 sendLiveUpdate(fieldName, value);
             }, 150);
         });
 
-        /* ── Focus on field → scroll preview to section ── */
-        $(document).on('focus click', '.acf-field input, .acf-field textarea, .acf-field select, .acf-field .cfr-ui', function() {
+        /* ── Focus or click on ANY field/element → instantly scroll preview to target ── */
+        $(document).on('focus click', '.acf-field, .acf-field *, .custom-free-repeater, .custom-free-repeater *', function(e) {
             var $field = $(this).closest('.acf-field');
             var fieldName = $field.attr('data-name') || '';
 
@@ -370,10 +445,15 @@ function aat_admin_preview_panel() {
                 }
             }
 
-            var section = (FIELD_MAP[fieldName] || {}).section || FIELD_SECTION[fieldName];
-            if (section) {
+            if (!fieldName) return;
+
+            var mapping = FIELD_MAP[fieldName];
+            var section = mapping ? mapping.section : FIELD_SECTION[fieldName];
+            var selector = mapping ? mapping.sel : null;
+
+            if (section || selector) {
                 openPanel();
-                scrollToSection(section);
+                scrollToTarget(section, selector, fieldName);
             }
         });
 
@@ -388,18 +468,30 @@ function aat_admin_preview_panel() {
                 '🗺 Bản đồ & Giá trị cốt lõi': 'map',
                 '⭐ Tại sao chọn chúng tôi': 'why',
                 '💬 Đánh giá & Liên hệ': 'reviews',
-                '📜 Câu chuyện — Our Story': 'story',
-                'Team': 'team', 'Guarantees': 'pillars',
-                'Key Facts': 'hero', 'Overview': 'overview',
-                'Itinerary': 'itinerary', 'Stays & Options': 'stays',
+                '📜 Câu chuyện & Tiêu chuẩn': 'values',
+                '📝 Form kế hoạch': 'plan',
+                'Key Facts': 'hero',
+                'Overview': 'overview',
+                'Itinerary': 'itinerary',
+                'Stays & Options': 'stays',
                 'Inclusions & Dates': 'inclusions',
                 'Gallery, Experiences & FAQs': 'gallery',
                 'Speak to a Specialist': 'specialist',
-                'Country Page': 'overview', 'Directory Cards': 'listing',
+                'Hero & Overview': 'hero',
+                'Location & Map': 'facts',
+                'Gallery': 'plates',
+                'Related Content': 'journeys',
+                'Section Headings': 'overview',
+                'Hero & Content': 'hero',
+                'Sidebar': 'overview',
+                'Gallery & Related': 'gallery',
+                'Plan Your Trip': 'plan',
+                'Map': 'map',
+                'Related & Gallery': 'nearby',
             };
             if (TAB_SECTIONS[label]) {
                 openPanel();
-                scrollToSection(TAB_SECTIONS[label]);
+                scrollToTarget(TAB_SECTIONS[label], null, label);
             }
         });
     });

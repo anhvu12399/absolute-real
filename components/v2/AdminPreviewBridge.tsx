@@ -22,6 +22,7 @@ export function AdminPreviewBridge() {
       if (highlighted) {
         highlighted.style.outline = "";
         highlighted.style.outlineOffset = "";
+        highlighted.style.boxShadow = "";
         highlighted.style.transition = "";
         highlighted = null;
       }
@@ -30,15 +31,17 @@ export function AdminPreviewBridge() {
     function highlightElement(el: HTMLElement) {
       clearHighlight();
       highlighted = el;
-      el.style.transition = "outline-color 0.3s ease";
-      el.style.outline = "2px solid rgba(34, 113, 177, 0.7)";
-      el.style.outlineOffset = "3px";
+      el.style.transition = "all 0.3s ease";
+      el.style.outline = "3px solid #c9a84c";
+      el.style.outlineOffset = "4px";
+      el.style.boxShadow = "0 0 20px rgba(201, 168, 76, 0.5)";
       setTimeout(() => {
         if (highlighted === el) clearHighlight();
-      }, 4000);
+      }, 3000);
     }
 
     function findElement(selector: string): HTMLElement | null {
+      if (!selector) return null;
       const selectors = selector.split(",").map((s) => s.trim());
       for (const sel of selectors) {
         try {
@@ -83,10 +86,18 @@ export function AdminPreviewBridge() {
       return el;
     }
 
-    function scrollToSection(sectionId: string) {
-      const el = document.getElementById(sectionId);
+    function scrollToTarget(sectionId?: string, selector?: string) {
+      let el: HTMLElement | null = null;
+
+      if (selector) {
+        el = findElement(selector);
+      }
+      if (!el && sectionId) {
+        el = document.getElementById(sectionId);
+      }
+
       if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
         highlightElement(el);
       }
     }
@@ -107,7 +118,7 @@ export function AdminPreviewBridge() {
       }
 
       if (data.type === "aat-scroll-to") {
-        scrollToSection(data.section);
+        scrollToTarget(data.section, data.selector);
       }
     }
 
