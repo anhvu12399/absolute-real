@@ -117,11 +117,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .overlay-full{position:absolute; inset:0; background:rgba(9,8,7,0.4);}
 
 /* ---------- utility bar + nav ---------- */
-/* Ink rather than lacquer: maroon and the logo's gold are two warm colours
-   competing, and the gold has to be the one that wins. */
-.utility-bar{background:#151E2B; color:var(--cream); font-size:0.74rem; letter-spacing:0.04em; padding:0.55rem 0; transition:transform 0.35s ease, opacity 0.3s ease;}
-.utility-left strong{color:var(--gold); font-weight:600;}
-.utility-left svg{color:var(--gold);}
+.utility-bar{background:#060a12; color:#f8f6f0; font-size:0.74rem; letter-spacing:0.04em; padding:0.55rem 0; border-bottom:1px solid rgba(229,193,88,0.12); transition:transform 0.35s ease, opacity 0.3s ease;}
+.utility-left strong{color:#e5c158; font-weight:600;}
+.utility-left svg{color:#e5c158;}
 .utility-bar.is-hidden{transform:translateY(-100%); opacity:0; pointer-events:none;}
 .utility-inner{display:flex; justify-content:space-between; align-items:center; gap:1rem;}
 .utility-left{display:flex; align-items:center; gap:0.6rem;}
@@ -130,40 +128,50 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .utility-right span{opacity:0.7;}
 @media (max-width:760px){.utility-right{display:none;}}
 
-/* Dark, so the gold disc reads as gold leaf rather than mustard. Only the mark
-   comes from the logo file; the wordmark beside it is our own text, which is why
-   a dark bar works here - nothing baked into the image has to survive on it. */
-.site-nav{position:sticky; top:0; z-index:100; background:var(--ink); border-bottom:1px solid rgba(194,151,31,0.3); transition:transform 0.35s ease, box-shadow .3s ease;}
+.site-nav{position:sticky; top:0; z-index:100; background:linear-gradient(180deg, #0c1424 0%, #070b14 100%); border-bottom:1px solid rgba(229,193,88,0.22); box-shadow:0 10px 30px rgba(0,0,0,0.35); transition:transform 0.35s ease, box-shadow .3s ease;}
 .site-nav.is-hidden{transform:translateY(-100%); pointer-events:none;}
-.site-nav.is-scrolled{box-shadow:0 8px 24px rgba(30,42,61,0.08);}
+.site-nav.is-scrolled{box-shadow:0 12px 35px rgba(0,0,0,0.5);}
 .nav-inner{display:flex; align-items:center; justify-content:space-between; gap:1.5rem; padding:0.95rem 0;}
 .brand-mark{display:flex; align-items:center; gap:0.8rem; flex:none;}
-/* Stand-in for the logo: a gold disc in the brand's own colour. Replaced the
-   moment a logo is set in WordPress - see .brand-logo. */
-.seal{width:38px; height:38px; flex:none; background:var(--gold); color:var(--white); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:1.24rem; letter-spacing:0; border-radius:50%;}
+.seal{width:38px; height:38px; flex:none; background:linear-gradient(135deg, #e5c158, #c49a2e); color:#070b14; font-weight:700; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:1.24rem; letter-spacing:0; border-radius:50%; box-shadow:0 2px 10px rgba(229,193,88,0.35);}
 .brand-logo{height:44px; width:auto; flex:none; display:block;}
 @media (max-width:760px){.brand-logo{height:36px;}}
 .brand-text{display:flex; flex-direction:column; line-height:1.05;}
-.brand-text .name{font-family:'Playfair Display',serif; font-size:1.28rem; letter-spacing:0.01em; color:var(--cream);}
-.brand-text .tag{font-family:'Work Sans',sans-serif; font-size:0.52rem; letter-spacing:0.2em; text-transform:uppercase; font-weight:600; color:var(--gold); margin-top:3px;}
+.brand-text .name{font-family:'Playfair Display',serif; font-size:1.28rem; letter-spacing:0.01em; color:#f8f6f0;}
+.brand-text .tag{font-family:'Work Sans',sans-serif; font-size:0.52rem; letter-spacing:0.2em; text-transform:uppercase; font-weight:600; color:#e5c158; margin-top:3px;}
 .nav-links{display:flex; gap:2rem; list-style:none; margin:0; padding:0;}
-.nav-links a{font-size:0.76rem; letter-spacing:0.08em; text-transform:uppercase; font-weight:500; position:relative; padding-bottom:3px;}
-.nav-links a{color:rgba(239,233,220,0.88);}
-.nav-links a:hover{color:var(--gold);}
-.nav-links a::after{content:""; position:absolute; left:0; bottom:0; width:0; height:1.5px; background:var(--gold); transition:width .2s ease;}
+.nav-links a{font-size:0.76rem; letter-spacing:0.08em; text-transform:uppercase; font-weight:500; position:relative; padding-bottom:3px; color:#f8f6f0; transition:color 0.2s ease;}
+.nav-links a:hover{color:#e5c158;}
+.nav-links a::after{content:""; position:absolute; left:0; bottom:0; width:0; height:1.5px; background:#e5c158; transition:width .2s ease;}
 .nav-links a:hover::after{width:100%;}
 .nav-item-dropdown{position:relative;}
-.dropdown-menu{display:none; position:absolute; top:100%; left:0; min-width:210px; background:var(--ink); color:var(--cream); flex-direction:column; padding:0.8rem 0; box-shadow:0 14px 40px rgba(0,0,0,0.3); z-index:200; border-top:2px solid var(--gold); border-radius:0 0 4px 4px;}
+.dropdown-menu{display:none; position:absolute; top:100%; left:0; min-width:210px; background:linear-gradient(180deg, #0c1424 0%, #070b14 100%); color:#f8f6f0; flex-direction:column; padding:0.8rem 0; box-shadow:0 14px 40px rgba(0,0,0,0.5); z-index:200; border-top:2px solid #e5c158; border-radius:0 0 4px 4px;}
 .dropdown-menu.is-open{display:flex;}
 .menu-column{flex:1; display:flex; flex-direction:column; gap:0.4rem;}
-.menu-group-head{font-size:0.7rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--celadon-pale); font-weight:600; padding-bottom:0.4rem; border-bottom:1px solid rgba(239,233,220,0.15); margin-bottom:0.4rem;}
-.menu-head-link{font-size:0.88rem !important; font-weight:600 !important; color:var(--cream) !important;}
+.menu-group-head{font-size:0.7rem; letter-spacing:0.14em; text-transform:uppercase; color:#e5c158; font-weight:600; padding-bottom:0.4rem; border-bottom:1px solid rgba(229,193,88,0.2); margin-bottom:0.4rem;}
+.menu-head-link{font-size:0.88rem !important; font-weight:600 !important; color:#f8f6f0 !important;}
 .menu-sublinks{display:flex; flex-direction:column; gap:0.2rem;}
-.menu-sublinks a{padding:0.35rem 0 !important; font-size:0.82rem !important; color:rgba(239,233,220,0.85) !important;}
-.menu-sublinks a:hover{color:var(--gold) !important;}
-.dropdown-menu a{padding:0.55rem 1.3rem; color:var(--cream); font-size:0.84rem; text-transform:none; font-family:'Work Sans',sans-serif; letter-spacing:0.02em; white-space:nowrap;}
+.menu-sublinks a{padding:0.35rem 0 !important; font-size:0.82rem !important; color:#d8d2c4 !important;}
+.menu-sublinks a:hover{color:#e5c158 !important;}
+.dropdown-menu a{padding:0.55rem 1.3rem; color:#f8f6f0; font-size:0.84rem; text-transform:none; font-family:'Work Sans',sans-serif; letter-spacing:0.02em; white-space:nowrap;}
 .dropdown-menu a::after{display:none;}
-.dropdown-menu a:hover{background:rgba(255,255,255,0.08); color:var(--brass);}
+.dropdown-menu a:hover{background:rgba(229,193,88,0.12); color:#e5c158;}
+
+/* CTA button on nav */
+.site-nav .btn-fill-ink{
+  background:linear-gradient(135deg, #e5c158, #c49a2e) !important;
+  color:#070b14 !important;
+  font-weight:600 !important;
+  border:none !important;
+  border-radius:4px !important;
+  padding:0.72rem 1.4rem !important;
+  box-shadow:0 3px 12px rgba(229,193,88,0.3) !important;
+  transition:all 0.25s ease !important;
+}
+.site-nav .btn-fill-ink:hover{
+  background:linear-gradient(135deg, #f3d470, #d8a834) !important;
+  box-shadow:0 4px 16px rgba(229,193,88,0.45) !important;
+}
 
 /* ═══ FULL WIDTH LUXURY MEGA MENU ═══ */
 .nav-item-mega { position: static !important; }
@@ -176,11 +184,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   left: 50%;
   transform: translateX(-50%) translateY(-8px);
   width: 100vw;
-  background: #08121E;
-  color: var(--cream);
+  background: linear-gradient(180deg, #0c1424 0%, #060a12 100%);
+  color: #f8f6f0;
   padding: 3rem 0 3.5rem;
-  box-shadow: 0 35px 80px rgba(0,0,0,0.6);
-  border-top: 1px solid rgba(226,195,142,0.35);
+  box-shadow: 0 35px 80px rgba(0,0,0,0.7);
+  border-top: 2px solid #e5c158;
+  border-bottom: 1px solid rgba(229,193,88,0.15);
   z-index: 999;
   pointer-events: none;
   transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
@@ -202,11 +211,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   font-size: 0.92rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--cream);
+  color: #f8f6f0;
   margin-bottom: 1.4rem;
   font-weight: 500;
 }
-.mega-title-gold { color: #E2C38E; }
+.mega-title-gold { color: #e5c158; }
 .mega-subcols {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -218,7 +227,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   gap: 0.65rem;
 }
 .mega-menu-full a {
-  color: rgba(239, 233, 220, 0.85) !important;
+  color: #d8d2c4 !important;
   font-size: 0.88rem !important;
   font-weight: 400 !important;
   padding: 0 !important;
@@ -228,15 +237,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .mega-menu-full a:hover {
   background: transparent !important;
-  color: #E2C38E !important;
+  color: #e5c158 !important;
   transform: translateX(3px);
 }
 .mega-btn-wrap { margin-top: 2.2rem; }
 .mega-outline-btn {
   display: inline-block;
   padding: 0.65rem 1.4rem !important;
-  border: 1px solid rgba(226, 195, 142, 0.5) !important;
-  color: var(--cream) !important;
+  border: 1px solid rgba(229, 193, 88, 0.45) !important;
+  color: #f8f6f0 !important;
   font-size: 0.72rem !important;
   letter-spacing: 0.16em !important;
   text-transform: uppercase;
@@ -245,9 +254,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   transition: all 0.25s ease !important;
 }
 .mega-outline-btn:hover {
-  border-color: #E2C38E !important;
-  background: rgba(226, 195, 142, 0.12) !important;
-  color: #E2C38E !important;
+  border-color: #e5c158 !important;
+  background: rgba(229, 193, 88, 0.15) !important;
+  color: #e5c158 !important;
 }
 .mega-col-featured {
   border-left: 1px solid rgba(255, 255, 255, 0.12);
@@ -427,13 +436,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 .hero-eyebrow{
   display:flex; align-items:center; gap:0.6rem;
-  color:rgba(255,255,255,0.92); font-family:'Work Sans',sans-serif;
-  font-size:0.95rem; letter-spacing:0.04em; text-transform:none; font-weight:400;
-  margin-bottom:0.75rem;
-  text-shadow:0 1px 6px rgba(0,0,0,0.35);
+  color:#e5c158; font-family:'Work Sans',sans-serif;
+  font-size:0.92rem; letter-spacing:0.12em; text-transform:uppercase; font-weight:600;
+  margin-bottom:0.85rem;
+  text-shadow:0 1px 8px rgba(0,0,0,0.5);
 }
-.hero-eyebrow::before{content:""; display:inline-block; width:22px; height:1px; background:#c9a84c; flex:none;}
-.hero-eyebrow em{font-family:'Work Sans',sans-serif; font-style:normal; font-weight:400; font-size:1em; letter-spacing:0; color:#ffffff;}
+.hero-eyebrow::before{content:""; display:inline-block; width:24px; height:2px; background:#e5c158; flex:none;}
+.hero-eyebrow em{font-family:'Playfair Display', Georgia, serif; font-style:italic; font-weight:600; font-size:1.15em; letter-spacing:0.02em; text-transform:none; color:#e5c158;}
 
 .hero h1{
   color:#ffffff; font-family:'Playfair Display', Georgia, serif;
@@ -469,16 +478,33 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .hero-dots{display:flex; gap:10px; margin-top:1.6rem;}
 .hero-dot{width:34px; height:3px; border:0; padding:0; cursor:pointer; background:rgba(255,255,255,0.35); transition:background .25s ease;}
 .hero-dot:hover{background:rgba(255,255,255,0.6);}
-.hero-dot.is-active{background:var(--brass);}
-.hero-float{position:absolute; z-index:2; top:6.5rem; right:var(--pad); width:min(21vw,222px); background:var(--cream); padding:13px; box-shadow:0 18px 40px rgba(10,14,20,0.34);}
-.hero-float-inner{border:1px solid var(--line-on-cream); padding:5px;}
-.hero-float-photo{aspect-ratio:3/4;}
-/* Captions come from post titles and can run long, so the sign sits in the flow
-   and wraps instead of being absolutely pinned to the frame's corner. */
-.hero-float-sign{margin-top:10px; text-align:right;}
-.hero-float-sign .place{display:block; font-family:'Playfair Display',serif; font-style:italic; font-size:0.84rem; line-height:1.3; color:var(--ink); overflow-wrap:anywhere;}
-.hero-float-sign .plate{display:block; font-size:0.56rem; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-dim-on-cream); margin-top:4px;}
-@media (max-width:760px){.hero-float{display:none;}}
+.hero-dot.is-active{background:#e5c158;}
+
+/* ═══ Balanced Floating Inset Card ═══ */
+.hero-float{
+  position:absolute; z-index:2;
+  top:45%; transform:translateY(-50%);
+  right:max(var(--pad), calc((100vw - 1280px)/2 + 2rem));
+  width:clamp(190px, 16vw, 235px);
+  background:rgba(12, 20, 36, 0.72);
+  border:1px solid rgba(229, 193, 88, 0.35);
+  border-radius:8px;
+  padding:10px;
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  box-shadow:0 20px 45px rgba(0,0,0,0.5);
+  transition:transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hero-float:hover{
+  transform:translateY(-53%);
+  box-shadow:0 25px 55px rgba(0,0,0,0.65);
+  border-color:rgba(229, 193, 88, 0.55);
+}
+.hero-float-inner{border-radius:5px; overflow:hidden;}
+.hero-float-photo{aspect-ratio:4/4.2; border-radius:5px;}
+.hero-float-sign{margin-top:10px; text-align:right; padding:0 4px;}
+.hero-float-sign .place{display:block; font-family:'Playfair Display',serif; font-style:italic; font-size:0.88rem; line-height:1.3; color:#f8f6f0; overflow-wrap:anywhere;}
+.hero-float-sign .plate{display:block; font-size:0.58rem; letter-spacing:0.14em; text-transform:uppercase; color:#e5c158; font-weight:600; margin-top:3px;}
+@media (max-width:900px){.hero-float{display:none;}}
 .hero-ticker{position:relative; z-index:2; border-top:1px solid rgba(255,255,255,0.22); padding:1.1rem 0 0; margin-top:2.4rem;}
 .hero-ticker-inner{display:flex; align-items:center; justify-content:space-between; gap:1rem;}
 .hero-ticker-text{color:rgba(255,255,255,0.85); font-size:0.86rem;}
