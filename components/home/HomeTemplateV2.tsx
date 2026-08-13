@@ -132,11 +132,26 @@ export default function HomeTemplateV2({
       }));
 
   const [heroIndex, setHeroIndex] = useState(0);
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (slides.length < 2) return;
     const timer = window.setInterval(() => setHeroIndex((i) => (i + 1) % slides.length), 6000);
     return () => window.clearInterval(timer);
   }, [slides.length]);
+
+  // Auto-scroll active destination tab into view on mobile when slide changes
+  useEffect(() => {
+    if (!tabsContainerRef.current) return;
+    const activeBtn = tabsContainerRef.current.querySelector(".dest-strip-tab.is-active") as HTMLElement;
+    if (activeBtn) {
+      activeBtn.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+  }, [heroIndex]);
 
   const hero = slides[heroIndex] || slides[0] || {};
   /* The legacy slider has no second image, so the inset frame previews the next
@@ -256,7 +271,7 @@ export default function HomeTemplateV2({
         {slides.length > 1 && (
           <div className="dest-strip-bar">
             <div className="container dest-strip-bar-inner">
-              <div className="dest-strip-tabs">
+              <div className="dest-strip-tabs" ref={tabsContainerRef}>
                 {slides.map((s, idx) => {
                   const isActive = idx === heroIndex;
                   const rawTitle = String(s.description || s.title || `Journey ${idx + 1}`).replace(/<[^>]+>/g, "");

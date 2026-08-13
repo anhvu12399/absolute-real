@@ -679,10 +679,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
     overflow-x: auto;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    padding-inline: 0.5rem;
+  }
+  .dest-strip-tabs::-webkit-scrollbar {
+    display: none;
   }
   .dest-strip-tab {
-    min-width: 160px;
-    flex: none;
+    min-width: 170px;
+    flex: 0 0 auto;
+    scroll-snap-align: center;
     padding: 0.9rem 1.1rem 1rem;
   }
 }
