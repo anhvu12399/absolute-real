@@ -205,106 +205,90 @@ export default function HomeTemplateV2({
 
   return (
     <>
-      {/* ═══ CONCEPT 3: BELMOND SPLIT ARCHED CANVAS HERO ═══ */}
-      <section id="hero" className="belmond-hero">
-        <div className="belmond-hero-bg-canvas">
-          <div className="belmond-ambient-glow"></div>
-        </div>
+      {/* ═══ CONCEPT D: THE FLOATING GLASS SHOWCASE HERO ═══ */}
+      <section id="hero" className={`glass-showcase-hero ph ${hero.image_url ? '' : 'ph-hero'}`} style={hero.image_url ? bg(hero.image_url, "hero") : {}}>
+        <div className="glass-showcase-cinema-overlay"></div>
+        <div className="glass-showcase-ambient-light"></div>
 
-        <div className="container belmond-hero-inner">
-          {/* Left Column: Curated Bespoke Dispatch (42%) */}
-          <div className="belmond-dispatch-col">
-            <div className="belmond-dispatch-card">
-              <div className="belmond-kicker-row">
-                <span className="belmond-seal-mini">AA</span>
-                <span className="belmond-kicker-text">
-                  <em>Private Dispatch</em> · {String(hero.tagline || "Bespoke Journey")}
-                </span>
-              </div>
+        <div className="container glass-showcase-inner">
+          <div className="glass-showcase-plate">
+            <div className="glass-plate-header">
+              <span className="glass-gold-tag">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg>
+                {String(hero.tagline || "Absolute Asia Private Expeditions")}
+              </span>
+              <span className="glass-plate-num">EST. 1989 · LUXURY BESPOKE</span>
+            </div>
 
-              <h1
-                className="belmond-hero-title"
-                dangerouslySetInnerHTML={{ __html: String(hero.description || "Vietnam: The <em>Slow Gold</em> of the Mekong at Dawn") }}
-              />
+            <h1
+              className="glass-plate-title"
+              dangerouslySetInnerHTML={{ __html: String(hero.description || "Vietnam: The <em>Slow Gold</em> of the Mekong at Dawn") }}
+            />
 
-              {hero.subtitle && (
-                <p className="belmond-hero-subtitle">{String(hero.subtitle)}</p>
-              )}
+            {hero.subtitle && (
+              <p className="glass-plate-subtitle">{String(hero.subtitle)}</p>
+            )}
 
-              <div className="belmond-badges-row">
-                <span className="belmond-badge">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-                  {hero.meta || "12 Days Private Expedition"}
-                </span>
-                <span className="belmond-badge">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                  100% Tailored &amp; Private
-                </span>
-              </div>
+            <div className="glass-plate-pills">
+              <span className="glass-pill">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                {hero.meta || "12 Days / 11 Nights"}
+              </span>
+              <span className="glass-pill">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                100% Private &amp; Custom
+              </span>
+              <span className="glass-pill">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Handpicked Sanctuaries
+              </span>
+            </div>
 
-              <div className="belmond-actions-row">
-                <Link href={toLocalHref(hero.link, "#plan")} className="btn btn-gold-belmond">
-                  <span>{String(hero.link_text || "Plan This Journey")}</span>
-                  <ArrowSvg />
-                </Link>
-                <Link href="#statement" className="belmond-text-link">
-                  <span>Our Standard</span>
-                  <ArrowSvg />
-                </Link>
-              </div>
-
-              {/* Slider Controls & Counter */}
-              {slides.length > 1 && (
-                <div className="belmond-slider-controls">
-                  <div className="belmond-counter">
-                    <span className="belmond-count-current">{String(heroIndex + 1).padStart(2, "0")}</span>
-                    <span className="belmond-count-sep">/</span>
-                    <span className="belmond-count-total">{String(slides.length).padStart(2, "0")}</span>
-                  </div>
-                  <div className="belmond-progress-track">
-                    <div
-                      className="belmond-progress-fill"
-                      style={{ width: `${((heroIndex + 1) / slides.length) * 100}%` }}
-                    ></div>
-                  </div>
-                  <div className="belmond-nav-arrows">
-                    <button
-                      type="button"
-                      className="belmond-arrow-btn"
-                      onClick={() => setHeroIndex((heroIndex - 1 + slides.length) % slides.length)}
-                      aria-label="Previous Journey"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
-                    </button>
-                    <button
-                      type="button"
-                      className="belmond-arrow-btn"
-                      onClick={() => setHeroIndex((heroIndex + 1) % slides.length)}
-                      aria-label="Next Journey"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
-                  </div>
-                </div>
-              )}
+            <div className="glass-plate-actions">
+              <Link href={toLocalHref(hero.link, "#plan")} className="btn btn-gold-glass">
+                <span>{String(hero.link_text || "Plan This Journey")}</span>
+                <ArrowSvg />
+              </Link>
+              <Link href="#statement" className="btn btn-outline-glass">
+                <span>Discover Our Standard</span>
+                <ArrowSvg />
+              </Link>
             </div>
           </div>
 
-          {/* Right Column: Grand Arched Canvas (58%) */}
-          <div className="belmond-canvas-col">
-            <div className="belmond-arch-frame">
-              <div className="belmond-arch-inner-border"></div>
-              <div
-                className="belmond-arch-photo ph"
-                style={hero.image_url ? bg(hero.image_url, "hero") : {}}
-              >
-                <div className="belmond-arch-overlay"></div>
-                <div className="belmond-arch-badge">
-                  <span className="belmond-arch-pin">✦</span>
-                  <span className="belmond-arch-dest">{String(hero.title || "Private Asia Sanctuary")}</span>
-                </div>
-              </div>
+          {/* Roman Numeral Navigation Rail */}
+          {slides.length > 1 && (
+            <div className="glass-numeral-rail">
+              <span className="glass-rail-label">JOURNEYS</span>
+              {slides.map((_, idx) => {
+                const numerals = ["I", "II", "III", "IV", "V", "VI"];
+                const num = numerals[idx] || String(idx + 1);
+                const isActive = idx === heroIndex;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`glass-numeral-btn${isActive ? " is-active" : ""}`}
+                    onClick={() => setHeroIndex(idx)}
+                    aria-label={`Select Expedition ${num}`}
+                  >
+                    <span className="numeral-text">{num}</span>
+                    {isActive && <span className="numeral-glow-dot">✦</span>}
+                  </button>
+                );
+              })}
             </div>
+          )}
+        </div>
+
+        {/* Floating bottom ticker */}
+        <div className="glass-bottom-strip">
+          <div className="container glass-bottom-inner">
+            <span className="glass-bottom-tag">Next Expedition:</span>
+            <Link href={String(acf.ticker_link || "#destinations")} className="glass-bottom-link">
+              {String(acf.ticker_text || "Bhutan: A Private Audience with the Himalaya")}
+              <ArrowSvg />
+            </Link>
           </div>
         </div>
       </section>
