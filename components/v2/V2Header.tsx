@@ -163,7 +163,10 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
             <Link href="/#plan" className="btn btn-fill-ink" onClick={closeAll}>Plan Your Journey</Link>
             <button
               className="nav-toggle"
-              onClick={() => setMobileOpen(true)}
+              onClick={() => {
+                setOpenMenu(null);
+                setMobileOpen(true);
+              }}
               aria-label="Open menu"
               aria-expanded={mobileOpen}
             >
