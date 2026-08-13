@@ -33,14 +33,15 @@
 }
 
 /* ---------- reset ---------- */
-*{box-sizing:border-box;}
-html{scroll-behavior:smooth;}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth; overflow-x:hidden; max-width:100vw;}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;} *{animation-duration:.001ms !important; transition-duration:.001ms !important;}}
-body{margin:0; background:var(--cream); color:var(--ink); font-family:'Work Sans',sans-serif; font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased;}
+body{margin:0; background:var(--cream); color:var(--ink); font-family:'Work Sans',sans-serif; font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased; overflow-x:hidden; max-width:100vw;}
 img,svg{display:block; max-width:100%;}
 a{color:inherit; text-decoration:none;}
 button{font-family:inherit;}
 p{margin:0;}
+input, select, textarea{font-family:inherit; font-size:16px;}
 
 /* ---------- layout ---------- */
 .container{max-width:var(--maxw); margin:0 auto; padding-left:var(--pad); padding-right:var(--pad);}
@@ -1067,16 +1068,28 @@ footer{
   padding-bottom: 20px;
 }
 
-/* ─── Mobile: map becomes a full-screen overlay ─── */
+/* ─── Mobile & Tablet Itinerary Layout ─── */
 @media (max-width: 900px) {
   .itinerary-split {
     grid-template-columns: 1fr;
-    gap: 0;
+    gap: 1.5rem;
   }
 
-  /* Hide map col from normal flow on mobile — it becomes an overlay */
+  /* Display embedded map cleanly above itinerary days on mobile */
   .itinerary-map-col {
-    display: none;
+    display: block;
+    height: 300px;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .sticky-map-wrapper {
+    position: relative;
+    top: 0;
+    height: 300px;
+    min-height: 300px;
+    padding-bottom: 0;
   }
 
   /* Full-screen map overlay */

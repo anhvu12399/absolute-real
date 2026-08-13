@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { V2Header } from "@/components/v2/V2Header";
 import { V2Footer } from "@/components/v2/V2Footer";
@@ -14,6 +14,13 @@ import { organizationSchema, schemaScript, websiteSchema } from "@/lib/schema";
 
 const siteUrl = SITE_URL;
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#0c1424",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: SITE_TITLE, template: `%s | ${BRAND_NAME}` },
@@ -27,6 +34,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <head>
+        <link rel="dns-prefetch" href="https://backend.absoluteasiatours.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
