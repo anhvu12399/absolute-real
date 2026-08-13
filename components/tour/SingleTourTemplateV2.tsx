@@ -319,10 +319,12 @@ export default function SingleTourTemplateV2({
         <div className="container">
           <div className="cta-banner reveal">
             <div>
-              <h3>Interested in this itinerary but want to join a small group instead?</h3>
-              <p>Our small group departures follow a similar route at a lower per-person cost.</p>
+              <h3>{text(acf.group_cta_title) || "Interested in this itinerary but want to join a small group instead?"}</h3>
+              <p>{text(acf.group_cta_desc) || "Our small group departures follow a similar route at a lower per-person cost."}</p>
             </div>
-            <Link href="/vietnam-tours/" className="link-arrow">Learn More<ArrowSvg/></Link>
+            <Link href={text(acf.classic_tour_link) || country?.path || "/tours/"} className="link-arrow">
+              {text(acf.group_cta_btn) || "Learn More"}<ArrowSvg/>
+            </Link>
           </div>
         </div>
       </section>
@@ -413,7 +415,7 @@ export default function SingleTourTemplateV2({
 
           {inclusions.length > 0 && (
             <div className="center reveal" style={{ marginTop: "3rem" }}>
-              <Link href="#inclusions" className="btn btn-fill-ink">View Inclusions</Link>
+              <Link href="#inclusions" className="btn btn-fill-ink">{text(acf.inclusions_btn_text) || "View Inclusions"}</Link>
             </div>
           )}
         </div>
@@ -507,7 +509,7 @@ export default function SingleTourTemplateV2({
           )}
 
           <div className="center reveal" style={{ marginTop: "2.6rem" }}>
-            <Link href="/#plan" className="btn btn-fill-ink">Request This Itinerary</Link>
+            <Link href="/#plan" className="btn btn-fill-ink">{text(acf.inquiry_btn_text) || "Request This Itinerary"}</Link>
           </div>
         </div>
       </section>

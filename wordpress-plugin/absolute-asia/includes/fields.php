@@ -249,6 +249,11 @@ function aat_register_fields() {
             aat_text('field_aat_tour_lbl_excl', 'Exclusions Heading', 'exclusions_title'),
             aat_text('field_aat_tour_lbl_policy', 'Booking Policy Heading', 'booking_policy_title'),
             aat_text('field_aat_tour_lbl_other', 'Related Tours Heading', 'related_tours_title'),
+            aat_text('field_aat_tour_group_title', 'Small Group CTA Title', 'group_cta_title'),
+            aat_textarea('field_aat_tour_group_desc', 'Small Group CTA Description', 'group_cta_desc', 2),
+            aat_text('field_aat_tour_group_btn', 'Small Group CTA Button', 'group_cta_btn'),
+            aat_text('field_aat_tour_btn_incl', 'View Inclusions Button Text', 'inclusions_btn_text'),
+            aat_text('field_aat_tour_btn_inquiry', 'Request Tour Button Text', 'inquiry_btn_text'),
             aat_text('field_aat_tour_cta_label', 'Highlight CTA Label', 'cta_label'),
             aat_text('field_aat_tour_cta_link', 'Highlight CTA Link', 'cta_link'),
             [
