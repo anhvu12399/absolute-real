@@ -84,146 +84,167 @@ export default function RealMapComponent({
   useEffect(() => {
     if (typeof window === "undefined" || !mapContainerRef.current) return;
 
+    let isMounted = true;
     let L: any;
+
     import("leaflet").then((leafletModule) => {
+      if (!isMounted || !mapContainerRef.current) return;
       L = leafletModule.default || leafletModule;
 
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-
-      // Format stops to real lat/lng
-      const parsedStops: Stop[] = stopsList.map((item: any, i: number) => {
-        if (typeof item === "object" && item.lat && item.lng) {
-          return {
-            key: item.key || `stop-${i}`,
-            label: item.label || item.name || `Stop ${i + 1}`,
-            lat: item.lat,
-            lng: item.lng
-          };
+      try {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.remove();
+          mapInstanceRef.current = null;
         }
-        const label = typeof item === "string" ? item : item.label || item.name || `Stop ${i + 1}`;
-        const key = label.toLowerCase().replace(/[^a-z0-9]/g, "");
-        const coords = CITY_COORDS[key] || {
-          lat: 16.0 + (i % 3) * 4.0,
-          lng: 105.0 + (i % 5) * 5.0,
-        };
-        return { key, label, lat: coords.lat, lng: coords.lng };
-      });
 
-      if (parsedStops.length === 0) return;
+        // Clear leaflet ID on DOM node if left over
+        if ((mapContainerRef.current as any)._leaflet_id) {
+          delete (mapContainerRef.current as any)._leaflet_id;
+        }
 
-      const map = L.map(mapContainerRef.current, {
-        center: [16.0544, 105.8542],
-        zoom: 4,
-        scrollWheelZoom: false,
-        zoomControl: true,
-      });
-
-      mapInstanceRef.current = map;
-
-      // Voyager tile layer for real maps
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap contributors',
-        subdomains: "abcd",
-        maxZoom: 19,
-      }).addTo(map);
-
-      // Draw lines only if showLines is true and more than 1 stop
-      if (showLines && parsedStops.length > 1) {
-        for (let i = 0; i < parsedStops.length - 1; i++) {
-          const p1 = parsedStops[i];
-          const p2 = parsedStops[i + 1];
-
-          const dLat = p2.lat - p1.lat;
-          const dLng = p2.lng - p1.lng;
-
-          const curvature = 0.22;
-          const midLat = (p1.lat + p2.lat) / 2;
-          const midLng = (p1.lng + p2.lng) / 2;
-          const cLat = midLat - dLng * curvature;
-          const cLng = midLng + dLat * curvature;
-
-          const segmentPoints: [number, number][] = [];
-          const numSteps = 25;
-          for (let step = 0; step <= numSteps; step++) {
-            const t = step / numSteps;
-            const lat = (1 - t) * (1 - t) * p1.lat + 2 * (1 - t) * t * cLat + t * t * p2.lat;
-            const lng = (1 - t) * (1 - t) * p1.lng + 2 * (1 - t) * t * cLng + t * t * p2.lng;
-            segmentPoints.push([lat, lng]);
+        // Format stops to real lat/lng
+        const parsedStops: Stop[] = (stopsList || []).map((item: any, i: number) => {
+          if (typeof item === "object" && item.lat && item.lng) {
+            return {
+              key: item.key || `stop-${i}`,
+              label: item.label || item.name || `Stop ${i + 1}`,
+              lat: Number(item.lat),
+              lng: Number(item.lng)
+            };
           }
+          const label = typeof item === "string" ? item : item?.label || item?.name || `Stop ${i + 1}`;
+          const key = String(label).toLowerCase().replace(/[^a-z0-9]/g, "");
+          const coords = CITY_COORDS[key] || {
+            lat: 16.0 + (i % 3) * 4.0,
+            lng: 105.0 + (i % 5) * 5.0,
+          };
+          return { key, label, lat: coords.lat, lng: coords.lng };
+        });
 
-          L.polyline(segmentPoints, {
-            color: "#5c6863",
-            weight: 2.5,
-            opacity: 0.85,
-            dashArray: "5, 7",
-          }).addTo(map);
+        if (parsedStops.length === 0) return;
 
-          // Direction Arrow
-          const tArrow = 0.65;
-          const arrowLat = (1 - tArrow) * (1 - tArrow) * p1.lat + 2 * (1 - tArrow) * tArrow * cLat + tArrow * tArrow * p2.lat;
-          const arrowLng = (1 - tArrow) * (1 - tArrow) * p1.lng + 2 * (1 - tArrow) * tArrow * cLng + tArrow * tArrow * p2.lng;
+        const map = L.map(mapContainerRef.current, {
+          center: [16.0544, 105.8542],
+          zoom: 4,
+          scrollWheelZoom: false,
+          zoomControl: true,
+        });
 
-          const dt = 0.01;
-          const tNext = Math.min(1, tArrow + dt);
-          const nextLat = (1 - tNext) * (1 - tNext) * p1.lat + 2 * (1 - tNext) * tNext * cLat + tNext * tNext * p2.lat;
-          const nextLng = (1 - tNext) * (1 - tNext) * p1.lng + 2 * (1 - tNext) * tNext * cLng + tNext * tNext * p2.lng;
+        mapInstanceRef.current = map;
 
-          const angleDeg = Math.atan2(nextLng - arrowLng, nextLat - arrowLat) * (180 / Math.PI);
+        // Voyager tile layer for real maps
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+          attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap contributors',
+          subdomains: "abcd",
+          maxZoom: 19,
+        }).addTo(map);
 
-          const arrowIcon = L.divIcon({
-            className: "map-arrow-icon",
-            html: `<div style="transform: rotate(${angleDeg}deg); width:18px; height:18px; display:flex; align-items:center; justify-content:center;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#1b2b27"><path d="M12 2L2 22l10-4 10 4z"/></svg>
-            </div>`,
-            iconSize: [18, 18],
-            iconAnchor: [9, 9],
-          });
-          L.marker([arrowLat, arrowLng], { icon: arrowIcon, interactive: false }).addTo(map);
+        // Draw lines only if showLines is true and more than 1 stop
+        if (showLines && parsedStops.length > 1) {
+          for (let i = 0; i < parsedStops.length - 1; i++) {
+            const p1 = parsedStops[i];
+            const p2 = parsedStops[i + 1];
+
+            const dLat = p2.lat - p1.lat;
+            const dLng = p2.lng - p1.lng;
+
+            const curvature = 0.22;
+            const midLat = (p1.lat + p2.lat) / 2;
+            const midLng = (p1.lng + p2.lng) / 2;
+            const cLat = midLat - dLng * curvature;
+            const cLng = midLng + dLat * curvature;
+
+            const segmentPoints: [number, number][] = [];
+            const numSteps = 25;
+            for (let step = 0; step <= numSteps; step++) {
+              const t = step / numSteps;
+              const lat = (1 - t) * (1 - t) * p1.lat + 2 * (1 - t) * t * cLat + t * t * p2.lat;
+              const lng = (1 - t) * (1 - t) * p1.lng + 2 * (1 - t) * t * cLng + t * t * p2.lng;
+              segmentPoints.push([lat, lng]);
+            }
+
+            L.polyline(segmentPoints, {
+              color: "#5c6863",
+              weight: 2.5,
+              opacity: 0.85,
+              dashArray: "5, 7",
+            }).addTo(map);
+
+            // Direction Arrow
+            const tArrow = 0.65;
+            const arrowLat = (1 - tArrow) * (1 - tArrow) * p1.lat + 2 * (1 - tArrow) * tArrow * cLat + tArrow * tArrow * p2.lat;
+            const arrowLng = (1 - tArrow) * (1 - tArrow) * p1.lng + 2 * (1 - tArrow) * tArrow * cLng + tArrow * tArrow * p2.lng;
+
+            const dt = 0.01;
+            const tNext = Math.min(1, tArrow + dt);
+            const nextLat = (1 - tNext) * (1 - tNext) * p1.lat + 2 * (1 - tNext) * tNext * cLat + tNext * tNext * p2.lat;
+            const nextLng = (1 - tNext) * (1 - tNext) * p1.lng + 2 * (1 - tNext) * tNext * cLng + tNext * tNext * p2.lng;
+
+            const angleDeg = Math.atan2(nextLng - arrowLng, nextLat - arrowLat) * (180 / Math.PI);
+
+            const arrowIcon = L.divIcon({
+              className: "map-arrow-icon",
+              html: `<div style="transform: rotate(${angleDeg}deg); width:18px; height:18px; display:flex; align-items:center; justify-content:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#1b2b27"><path d="M12 2L2 22l10-4 10 4z"/></svg>
+              </div>`,
+              iconSize: [18, 18],
+              iconAnchor: [9, 9],
+            });
+            L.marker([arrowLat, arrowLng], { icon: arrowIcon, interactive: false }).addTo(map);
+          }
         }
-      }
 
-      // Add HTML markers for each stop
-      const bounds = L.latLngBounds();
+        // Add HTML markers for each stop
+        const bounds = L.latLngBounds();
 
-      parsedStops.forEach((stop) => {
-        bounds.extend([stop.lat, stop.lng]);
+        parsedStops.forEach((stop) => {
+          bounds.extend([stop.lat, stop.lng]);
 
-        const customIcon = L.divIcon({
-          className: "real-map-pin",
-          html: `
-            <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer; transform: translate(-50%, -50%); z-index: 10;">
-              <div style="width: 14px; height: 14px; border-radius: 50%; background: #1E2A3D; border: 2.5px solid #AD8A54; box-shadow: 0 0 8px rgba(30,42,61,0.6); margin-bottom: 4px; transition: transform 0.2s ease;"></div>
-              <span style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(4px); color: #1E2A3D; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.12); white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,0.15);">
-                ${stop.label}
-              </span>
-            </div>
-          `,
-          iconSize: [0, 0],
-          iconAnchor: [0, 0],
+          const customIcon = L.divIcon({
+            className: "real-map-pin",
+            html: `
+              <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer; transform: translate(-50%, -50%); z-index: 10;">
+                <div style="width: 14px; height: 14px; border-radius: 50%; background: #1E2A3D; border: 2.5px solid #AD8A54; box-shadow: 0 0 8px rgba(30,42,61,0.6); margin-bottom: 4px; transition: transform 0.2s ease;"></div>
+                <span style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(4px); color: #1E2A3D; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.12); white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,0.15);">
+                  ${stop.label}
+                </span>
+              </div>
+            `,
+            iconSize: [0, 0],
+            iconAnchor: [0, 0],
+          });
+
+          const marker = L.marker([stop.lat, stop.lng], { icon: customIcon }).addTo(map);
+          marker.on("click", () => {
+            map.flyTo([stop.lat, stop.lng], 7, { duration: 1.2 });
+            if (setActiveCity) setActiveCity(stop.key);
+          });
+
+          markersRef.current[stop.key] = marker;
         });
 
-        const marker = L.marker([stop.lat, stop.lng], { icon: customIcon }).addTo(map);
-        marker.on("click", () => {
-          map.flyTo([stop.lat, stop.lng], 7, { duration: 1.2 });
-          if (setActiveCity) setActiveCity(stop.key);
-        });
+        if (parsedStops.length > 0 && bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [50, 50], maxZoom: 10 });
+        }
 
-        markersRef.current[stop.key] = marker;
-      });
+        setTimeout(() => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.invalidateSize();
+          }
+        }, 300);
 
-      if (parsedStops.length > 0) {
-        map.fitBounds(bounds, { padding: [50, 50] });
+        setReady((n) => n + 1);
+      } catch (err) {
+        console.warn("[RealMapComponent] Failed to initialize map:", err);
       }
-
-      setReady((n) => n + 1);
     });
 
     return () => {
+      isMounted = false;
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        try {
+          mapInstanceRef.current.remove();
+        } catch {}
         mapInstanceRef.current = null;
       }
     };

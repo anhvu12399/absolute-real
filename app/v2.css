@@ -281,19 +281,22 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 /* ═══ MOBILE MENU ═══ */
 .mobile-overlay{
   position:fixed; inset:0; z-index:299;
-  background:rgba(9,8,7,0.55);
+  background:rgba(8,12,16,0.65);
   opacity:0; pointer-events:none;
   transition:opacity 0.35s ease;
-  backdrop-filter:blur(3px);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
 }
 .mobile-overlay.open{opacity:1; pointer-events:auto;}
 
 .mobile-menu{
   position:fixed; top:0; right:0; bottom:0; z-index:300;
-  width:min(360px,90vw);
-  background:var(--ink);
+  width:min(340px, 88vw);
+  background:linear-gradient(180deg, #0e131a 0%, #090d12 100%);
+  border-left:1px solid rgba(201,168,76,0.18);
+  box-shadow:-10px 0 40px rgba(0,0,0,0.5);
   transform:translateX(100%);
-  transition:transform 0.38s cubic-bezier(0.4,0,0.2,1);
+  transition:transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
   display:flex; flex-direction:column;
   overflow:hidden;
 }
@@ -302,90 +305,109 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 /* header bar inside drawer */
 .mobile-menu-head{
   display:flex; align-items:center; justify-content:space-between;
-  padding:1.1rem 1.4rem;
-  border-bottom:1px solid var(--line-on-ink);
+  padding:1.2rem 1.4rem;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.02);
   flex:none;
 }
-.mobile-menu-brand{display:flex; align-items:center; gap:0.6rem;}
+.mobile-menu-brand{display:flex; align-items:center; gap:0.75rem;}
 .mobile-menu-brand img{height:32px; width:auto; object-fit:contain;}
+.mobile-menu-brand .seal{
+  width:32px; height:32px; border-radius:50%;
+  background:linear-gradient(135deg, #d4af37, #aa8222);
+  color:#090d12; font-family:'Playfair Display',serif; font-weight:700;
+  font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 8px rgba(212,175,55,0.3);
+}
 .mobile-menu-brand-text{display:flex; flex-direction:column;}
-.mobile-menu-brand-name{font-family:'Playfair Display',serif; font-size:0.9rem; color:var(--cream); line-height:1.2;}
-.mobile-menu-brand-tag{font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--celadon-pale);}
+.mobile-menu-brand-name{font-family:'Playfair Display',serif; font-size:0.95rem; color:#ffffff; line-height:1.2; letter-spacing:0.02em;}
+.mobile-menu-brand-tag{font-size:0.58rem; letter-spacing:0.14em; text-transform:uppercase; color:#c9a84c; margin-top:2px;}
 
 .mobile-close{
-  background:none; border:none; color:var(--celadon-pale);
-  cursor:pointer; padding:6px;
-  transition:color 0.2s;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+  color:#e2dfd7; border-radius:50%;
+  cursor:pointer; width:34px; height:34px;
+  transition:all 0.2s;
   display:flex; align-items:center; justify-content:center;
 }
-.mobile-close:hover{color:var(--brass);}
-.mobile-close svg{width:20px; height:20px;}
+.mobile-close:hover{background:rgba(201,168,76,0.2); border-color:#c9a84c; color:#ffffff;}
+.mobile-close svg{width:16px; height:16px;}
 
 /* scrollable body */
 .mobile-menu-body{
   flex:1; overflow-y:auto; overscroll-behavior:contain;
-  padding:0.6rem 0 1.4rem;
+  padding:0.8rem 0 1.2rem;
 }
 
 /* top-level section row */
-.mm-section{}
+.mm-section{border-bottom:1px solid rgba(255,255,255,0.05);}
 .mm-section-toggle{
   display:flex; align-items:center; justify-content:space-between;
   width:100%; background:none; border:none; cursor:pointer;
-  padding:0.9rem 1.4rem;
-  font-family:'Work Sans',sans-serif; font-size:0.72rem;
-  letter-spacing:0.16em; text-transform:uppercase;
-  color:var(--celadon-pale); text-align:left;
-  transition:color 0.2s;
+  padding:1rem 1.4rem;
+  font-family:'Work Sans',sans-serif; font-size:0.76rem;
+  letter-spacing:0.14em; text-transform:uppercase; font-weight:500;
+  color:#d4cfc3; text-align:left;
+  transition:color 0.2s, background 0.2s;
 }
-.mm-section-toggle:hover{color:var(--brass);}
+.mm-section-toggle:hover{color:#c9a84c; background:rgba(255,255,255,0.02);}
 .mm-section-arrow{
   width:14px; height:14px; flex:none;
   transition:transform 0.28s ease;
-  color:var(--celadon-pale);
+  color:#c9a84c;
 }
 .mm-section-toggle[aria-expanded="true"] .mm-section-arrow{transform:rotate(180deg);}
 
 /* collapsible link list */
 .mm-links{
   display:none; flex-direction:column;
-  padding:0 0 0.4rem 1.4rem;
-  border-left:1px solid var(--brass-dim, rgba(201,168,76,0.2));
-  margin-left:1.4rem;
+  padding:0.4rem 1.4rem 0.8rem 1.8rem;
+  background:rgba(0,0,0,0.2);
+  border-left:2px solid #c9a84c;
+  margin:0 1.2rem 0.6rem 1.4rem;
+  border-radius:0 4px 4px 0;
 }
 .mm-links.is-open{display:flex;}
 .mm-links a{
-  font-family:'Playfair Display',serif; font-size:1.05rem;
-  color:var(--cream); padding:0.45rem 0;
-  border-bottom:1px solid var(--line-on-ink);
-  transition:color 0.2s, padding-left 0.2s;
+  font-family:'Playfair Display',serif; font-size:0.96rem;
+  color:#e8e4dc; padding:0.45rem 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  transition:all 0.2s;
   display:block;
 }
 .mm-links a:last-child{border-bottom:none;}
-.mm-links a:hover{color:var(--brass); padding-left:0.4rem;}
+.mm-links a:hover{color:#c9a84c; padding-left:0.35rem;}
 
 /* plain link row (no children – e.g. Tailor-Made) */
 .mm-plain-link{
-  display:block; padding:0.9rem 1.4rem;
-  font-family:'Work Sans',sans-serif; font-size:0.72rem;
-  letter-spacing:0.16em; text-transform:uppercase;
-  color:var(--celadon-pale);
-  transition:color 0.2s;
+  display:block; padding:1rem 1.4rem;
+  font-family:'Work Sans',sans-serif; font-size:0.76rem;
+  letter-spacing:0.14em; text-transform:uppercase; font-weight:500;
+  color:#d4cfc3;
+  transition:color 0.2s, background 0.2s;
   border:none; background:none; width:100%; text-align:left;
+  border-bottom:1px solid rgba(255,255,255,0.05);
 }
-.mm-plain-link:hover{color:var(--brass);}
+.mm-plain-link:hover{color:#c9a84c; background:rgba(255,255,255,0.02);}
 
 /* footer strip */
 .mobile-menu-foot{
   flex:none;
-  border-top:1px solid var(--line-on-ink);
-  padding:1.2rem 1.4rem;
-  display:flex; flex-direction:column; gap:0.8rem;
+  border-top:1px solid rgba(255,255,255,0.08);
+  background:rgba(0,0,0,0.25);
+  padding:1.1rem 1.4rem;
+  display:flex; flex-direction:column; gap:0.85rem;
 }
-.mobile-menu-phone{display:flex; align-items:center; gap:0.5rem; color:var(--celadon-pale); font-size:0.82rem;}
-.mobile-menu-phone svg{width:14px; height:14px; flex:none;}
-.mobile-menu-phone strong{color:var(--cream);}
-.mobile-menu-foot .btn{width:100%; justify-content:center; text-align:center;}
+.mobile-menu-phone{display:flex; align-items:center; gap:0.6rem; color:#b0aba0; font-size:0.8rem;}
+.mobile-menu-phone svg{width:14px; height:14px; flex:none; color:#c9a84c;}
+.mobile-menu-phone strong{color:#ffffff; font-weight:500;}
+.mobile-menu-foot .btn{
+  width:100%; justify-content:center; text-align:center;
+  background:linear-gradient(135deg, #c9a84c, #a8842e);
+  color:#090d12; font-weight:600; border:none;
+  padding:0.75rem 1rem; border-radius:4px;
+  box-shadow:0 3px 12px rgba(201,168,76,0.25);
+}
 
 /* ---------- breadcrumb ---------- */
 .crumb{display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:var(--text-dim-on-cream); flex-wrap:wrap;}
@@ -395,49 +417,55 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* ---------- hero ---------- */
 .hero{position:relative; min-height:88svh; display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden;}
-/* The scrim only goes where the words are.
- *
- * It used to wash the whole frame - 40% across the top and half the height
- * below - which cost the photograph its sky and its subject for contrast the
- * headline did not need up there. Now: nothing over the top two-fifths, a
- * soft-edged pool behind the copy, and a floor at the very bottom. The pool is
- * darker at its core than the old flat wash was, so the type is easier to read
- * than before while the picture is brighter. No hard edge anywhere - a visible
- * rectangle is what made the earlier panel look pasted on. */
-.hero::after{content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
-  background:linear-gradient(180deg, rgba(9,8,7,0) 0%, rgba(9,8,7,0) 78%, rgba(9,8,7,0.22) 92%, rgba(9,8,7,0.38) 100%);}
+/* Natural film overlay matching luxury bespoke editorial */
+.hero::after{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg, rgba(12,17,22,0.42) 0%, rgba(12,17,22,0.18) 35%, rgba(12,17,22,0.68) 100%);
+}
 .hero-horizon{position:absolute; left:0; right:0; bottom:0; height:46%; z-index:1; pointer-events:none;}
-/* Keep the container's horizontal padding - the shorthand used to drop it and
-   glue the headline to the viewport edge. */
 .hero-inner{position:relative; z-index:2; padding:0 var(--pad) 2.6rem;}
-.hero-eyebrow{display:flex; align-items:baseline; gap:0.5em; color:var(--celadon-pale); font-size:0.84rem; letter-spacing:0.16em; text-transform:uppercase; font-weight:600; margin-bottom:1.1rem;}
-.hero-eyebrow::before{content:""; display:inline-block; width:20px; height:1px; background:var(--brass); align-self:center; flex:none;}
-.hero-eyebrow em{font-family:'Playfair Display',serif; font-style:italic; font-weight:600; font-size:1.5em; letter-spacing:0; text-transform:none; color:var(--celadon-pale); line-height:1;}
-/* Imported tour titles can be very long; cap the headline at three lines so a
-   long one cannot swallow the whole banner. */
-/* Layered shadows do the work the panel used to do: a tight pair for edge
-   contrast, a wide soft one that acts as its own scrim. */
-.hero h1{color:var(--white); font-size:clamp(2.1rem,4.6vw,3.8rem); line-height:1.08; max-width:17ch; font-weight:500; letter-spacing:-0.02em;
-  text-shadow:0 1px 1px rgba(9,8,7,0.5), 0 2px 10px rgba(9,8,7,0.78), 0 8px 34px rgba(9,8,7,0.72), 0 16px 70px rgba(9,8,7,0.6);
-  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden;}
-.hero h1 em{color:var(--celadon-pale);}
-/* The smallest type on the page sits over the brightest part of some slides.
-   A halo on all four sides holds the letterforms without darkening the picture
-   any further - which is the trade the larger type does not have to make. */
-.hero-eyebrow{text-shadow:0 1px 1px rgba(9,8,7,0.6), 0 2px 8px rgba(9,8,7,0.85), 0 5px 22px rgba(9,8,7,0.7), 0 12px 44px rgba(9,8,7,0.5);}
-/* No panel: the copy carries its own shadows and the hero-wide scrim below
-   handles the rest, so there is no rectangle edge anywhere. */
-.hero-copy{position:relative; max-width:min(56ch,100%); padding:clamp(0.5rem,1.4vw,1rem) 0;}
-/* Sized past 18.7px at weight 600, which is where WCAG's large-text threshold
-   drops from 4.5:1 to 3:1 - a bar the scrim above can actually hold over a
-   bright photograph. The tight first shadow is what does the real work for
-   older eyes: it draws an edge on every letter, so the strokes stay separate
-   from whatever is behind them. */
-.hero-subtitle{color:#fff; font-size:clamp(1.12rem,1.55vw,1.38rem); line-height:1.62; max-width:44ch; margin-top:1.1rem; font-weight:600; letter-spacing:0.004em;
-  text-shadow:0 1px 1px rgba(9,8,7,0.55), 0 2px 8px rgba(9,8,7,0.8), 0 6px 26px rgba(9,8,7,0.7), 0 14px 56px rgba(9,8,7,0.55);}
-.hero-actions{margin-top:1.8rem;}
-.hero .btn-line-white{border-color:rgba(255,255,255,0.95); font-weight:600; text-shadow:0 1px 3px rgba(9,8,7,0.7); background:rgba(9,8,7,0.22);
-  backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);}
+
+.hero-eyebrow{
+  display:flex; align-items:center; gap:0.6rem;
+  color:rgba(255,255,255,0.92); font-family:'Work Sans',sans-serif;
+  font-size:0.95rem; letter-spacing:0.04em; text-transform:none; font-weight:400;
+  margin-bottom:0.75rem;
+  text-shadow:0 1px 6px rgba(0,0,0,0.35);
+}
+.hero-eyebrow::before{content:""; display:inline-block; width:22px; height:1px; background:#c9a84c; flex:none;}
+.hero-eyebrow em{font-family:'Work Sans',sans-serif; font-style:normal; font-weight:400; font-size:1em; letter-spacing:0; color:#ffffff;}
+
+.hero h1{
+  color:#ffffff; font-family:'Playfair Display', Georgia, serif;
+  font-size:clamp(2.3rem, 5.2vw, 4.4rem); line-height:1.14; max-width:22ch;
+  font-weight:400; letter-spacing:-0.01em;
+  text-shadow:0 2px 14px rgba(0,0,0,0.35);
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden;
+}
+.hero h1 em{font-style:italic; font-weight:400; color:#ffffff;}
+
+.hero-copy{position:relative; max-width:min(58ch,100%); padding:0.5rem 0;}
+
+.hero-subtitle{
+  color:rgba(255,255,255,0.92); font-family:'Work Sans',sans-serif;
+  font-size:clamp(0.98rem, 1.35vw, 1.18rem); line-height:1.65; max-width:48ch;
+  margin-top:0.9rem; font-weight:300; letter-spacing:0.01em;
+  text-shadow:0 1px 8px rgba(0,0,0,0.3);
+}
+
+.hero-actions{margin-top:1.6rem;}
+.hero .btn-line-white{
+  display:inline-flex; align-items:center; gap:0.6rem;
+  border:1px solid rgba(255,255,255,0.85); background:rgba(0,0,0,0.22);
+  color:#ffffff; padding:0.72rem 1.6rem; border-radius:4px;
+  font-family:'Work Sans',sans-serif; font-size:0.75rem; letter-spacing:0.14em;
+  text-transform:uppercase; font-weight:500;
+  backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  transition:all 0.25s ease; text-shadow:none;
+}
+.hero .btn-line-white:hover{
+  background:rgba(255,255,255,0.2); border-color:#ffffff; color:#ffffff;
+}
 .hero-dots{display:flex; gap:10px; margin-top:1.6rem;}
 .hero-dot{width:34px; height:3px; border:0; padding:0; cursor:pointer; background:rgba(255,255,255,0.35); transition:background .25s ease;}
 .hero-dot:hover{background:rgba(255,255,255,0.6);}

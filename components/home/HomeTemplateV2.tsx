@@ -20,7 +20,7 @@ const MAP_COUNTRIES = ["Bhutan", "Laos", "Vietnam", "Cambodia", "Thailand", "Ind
    ============================================================ */
 
 function ArrowSvg() {
-  return <svg><use href="#i-arrow"></use></svg>;
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7,7 17,7 17,17"/></svg>;
 }
 
 export default function HomeTemplateV2({

@@ -401,11 +401,13 @@ export default function SingleTourTemplateV2({
               </button>
             </div>
             <div className="mobile-map-overlay-body">
-              <RealMapComponent
-                stopsList={mapStops}
-                activeCity={activeMapCity}
-                setActiveCity={setActiveMapCity}
-              />
+              {showMobileMap && (
+                <RealMapComponent
+                  stopsList={mapStops}
+                  activeCity={activeMapCity}
+                  setActiveCity={setActiveMapCity}
+                />
+              )}
             </div>
           </div>
 

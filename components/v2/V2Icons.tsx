@@ -18,6 +18,10 @@ export function V2Icons() {
           <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="1.5"/>
           <polyline points="14,6 20,12 14,18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </symbol>
+        <symbol id="i-arrow-up-right" viewBox="0 0 24 24">
+          <line x1="7" y1="17" x2="17" y2="7" stroke="currentColor" strokeWidth="1.5"/>
+          <polyline points="7,7 17,7 17,17" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </symbol>
         <symbol id="i-chevron-down" viewBox="0 0 24 24">
           <polyline points="6,9 12,15 18,9" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </symbol>
