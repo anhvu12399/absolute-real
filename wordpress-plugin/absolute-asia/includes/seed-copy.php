@@ -247,8 +247,47 @@ function aat_seed_hub_pages() {
         }
     }
 
+    // Seed tour defaults
+    $tours = get_posts(['post_type' => 'tour', 'numberposts' => -1, 'post_status' => 'any']);
+    $tourDefaults = [
+        'group_cta_title'     => 'Interested in this itinerary but want to join a small group instead?',
+        'group_cta_desc'      => 'Our small group departures follow a similar route at a lower per-person cost.',
+        'group_cta_btn'       => 'Learn More',
+        'inclusions_btn_text' => 'View Inclusions',
+        'inquiry_btn_text'    => 'Request This Itinerary',
+        'intro_title'         => '<em>About This</em> Journey',
+        'highlights_title'    => '<em>Trip</em> Highlights',
+        'why_title'           => '<em>Why Choose</em> Absolute Asia',
+        'itinerary_eyebrow'   => '<em>Day</em> by Day',
+        'itinerary_title'     => 'Itinerary',
+        'hotels_eyebrow'      => "<em>Where</em> You'll Stay",
+        'hotels_title'        => 'Hand-Selected for an Unmatched Stay',
+        'inclusions_eyebrow'  => '<em>Inclusions</em> & Offers',
+        'inclusions_title'    => "What's Included",
+        'exclusions_title'    => "What's Not Included",
+        'dates_title'         => 'Departure Dates',
+        'gallery_eyebrow'     => '<em>Photo</em> Gallery',
+        'faq_eyebrow'         => '<em>Good</em> to Know',
+        'faq_title'           => 'Frequently Asked Questions',
+    ];
+    $tourCount = 0;
+    foreach ($tours as $t) {
+        $writtenTour = false;
+        foreach ($tourDefaults as $k => $v) {
+            $curr = get_field($k, $t->ID);
+            if ($curr === null || $curr === '' || $curr === false) {
+                aat_store_field($k, $v, $t->ID);
+                $writtenTour = true;
+            }
+        }
+        if ($writtenTour) $tourCount++;
+    }
+    if ($tourCount > 0) {
+        $details[] = "Tours updated: {$tourCount}";
+    }
+
     return [
-        'imported' => $total,
+        'imported' => $total + $tourCount,
         'pages'    => $details,
         'done'     => true,
     ];
