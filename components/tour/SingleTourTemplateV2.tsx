@@ -7,6 +7,7 @@ import type { ContentRecord, DepartureRow, FaqRow, GalleryRow, ItineraryRow } fr
 import type { ArchiveItem, SitePayload } from "@/lib/wp";
 import { BRAND_SHORT } from "@/lib/site";
 import { bg, optimized } from "@/lib/images";
+import { CITY_COORDS, resolveCityCoords } from "../destination/RealMapComponent";
 
 const RealMapComponent = dynamic(() => import("../destination/RealMapComponent"), { ssr: false });
 
@@ -124,23 +125,60 @@ export default function SingleTourTemplateV2({
     return groups;
   }, []);
 
-  /* The map takes real coordinates when the import supplied them, names otherwise. */
-  const mapStops = Array.from(
-    itineraryRows
-      .reduce((byRegion, row) => {
-        const label = (row.group_tag || "").trim();
-        if (!label || byRegion.has(label)) return byRegion;
-        const lat = Number(row.latitude);
-        const lng = Number(row.longitude);
-        byRegion.set(label, {
-          key: label.toLowerCase().replace(/[^a-z0-9]/g, ""),
+  /* Extract all actual destination stops from itinerary rows, day titles, or country terms */
+  const extractedStopsMap = new Map<string, { key: string; label: string; lat?: number; lng?: number }>();
+  
+  itineraryRows.forEach((row) => {
+    const lat = Number(row.latitude);
+    const lng = Number(row.longitude);
+    const hasCoords = Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0;
+
+    // 1. Check group tag if it's not generic "ITINERARY"
+    const groupTag = (row.group_tag || "").trim();
+    if (groupTag && !/^(itinerary|tour|day|overview)$/i.test(groupTag)) {
+      const resolved = resolveCityCoords(groupTag);
+      const key = resolved?.key || groupTag.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const label = resolved?.label || groupTag;
+      if (!extractedStopsMap.has(key)) {
+        extractedStopsMap.set(key, {
+          key,
           label,
-          ...(Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 ? { lat, lng } : {}),
+          ...(hasCoords ? { lat, lng } : resolved ? { lat: resolved.lat, lng: resolved.lng } : {}),
         });
-        return byRegion;
-      }, new Map<string, { key: string; label: string; lat?: number; lng?: number }>())
-      .values(),
-  );
+      }
+    }
+
+    // 2. Scan title & day description for city mentions (e.g. Seoul, Gyeongju, Busan, DMZ, Kyoto, Tokyo...)
+    const titleText = `${(row as any).day_title || ""} ${row.title || ""} ${row.description || ""}`;
+    for (const [cKey, cVal] of Object.entries(CITY_COORDS)) {
+      if (cKey.length >= 3) {
+        const regex = new RegExp(`\\b${cKey}\\b`, "i");
+        if (regex.test(titleText) && !extractedStopsMap.has(cKey)) {
+          extractedStopsMap.set(cKey, {
+            key: cKey,
+            label: cVal.name || cKey.toUpperCase(),
+            lat: cVal.lat,
+            lng: cVal.lng,
+          });
+        }
+      }
+    }
+  });
+
+  // 3. If still empty, fall back to country hub or tour destination
+  if (extractedStopsMap.size === 0) {
+    const fallbackTerm = tourData?.terms?.find((term) => term.taxonomy === "country" || term.taxonomy === "category");
+    const countryKey = (fallbackTerm?.slug || fallbackTerm?.name || "vietnam").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const resolved = resolveCityCoords(countryKey) || { lat: 16.0544, lng: 108.2022, label: fallbackTerm?.name || "Destination Hub", key: countryKey };
+    extractedStopsMap.set(resolved.key, {
+      key: resolved.key,
+      label: resolved.label,
+      lat: resolved.lat,
+      lng: resolved.lng,
+    });
+  }
+
+  const mapStops = Array.from(extractedStopsMap.values());
 
   /* An editor's picks win. Where there are none - most imported journeys carry
      no hotel list - the country's own stays fill the strip rather than leaving
