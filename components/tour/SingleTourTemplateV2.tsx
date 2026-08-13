@@ -47,6 +47,7 @@ export default function SingleTourTemplateV2({
   const [openDays, setOpenDays] = useState<Record<number, boolean>>({ 1: true });
   const [activeSubnav, setActiveSubnav] = useState("overview");
   const [activeMapCity, setActiveMapCity] = useState("hanoi");
+  const [showMobileMap, setShowMobileMap] = useState(false);
 
   useEffect(() => {
     const reveals = document.querySelectorAll(".reveal:not(.is-visible)");
@@ -336,6 +337,7 @@ export default function SingleTourTemplateV2({
           </div>
 
           <div className="itinerary-split reveal" style={{ marginTop: "2.4rem" }}>
+            {/* Desktop map column */}
             <div className="itinerary-map-col">
               <div className="sticky-map-wrapper" style={{ position: "sticky", top: "80px", height: "calc(100vh - 120px)", minHeight: "400px", paddingBottom: "20px" }}>
                 <RealMapComponent
@@ -372,6 +374,38 @@ export default function SingleTourTemplateV2({
                   })}
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Floating "View Map" button on Mobile */}
+          <button
+            className={`mobile-map-toggle-btn ${showMobileMap ? "hidden" : ""}`}
+            onClick={() => setShowMobileMap(true)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+              <circle cx="12" cy="9" r="2.5"/>
+            </svg>
+            View Map
+          </button>
+
+          {/* Mobile Map Full-screen Overlay */}
+          <div className={`mobile-map-overlay ${showMobileMap ? "open" : ""}`}>
+            <div className="mobile-map-overlay-head">
+              <span className="mobile-map-overlay-title">Tour Map & Route</span>
+              <button className="mobile-map-overlay-close" onClick={() => setShowMobileMap(false)} aria-label="Close Map">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="mobile-map-overlay-body">
+              <RealMapComponent
+                stopsList={mapStops}
+                activeCity={activeMapCity}
+                setActiveCity={setActiveMapCity}
+              />
             </div>
           </div>
 
