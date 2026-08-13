@@ -5,6 +5,7 @@ import { V2Footer } from "@/components/v2/V2Footer";
 import { V2Icons } from "@/components/v2/V2Icons";
 import { RevealInit } from "@/components/v2/RevealWrapper";
 import { AdminPreviewBridge } from "@/components/v2/AdminPreviewBridge";
+import { PageProgressBar } from "@/components/v2/PageProgressBar";
 import { getSiteDataSafe } from "@/lib/wp";
 
 import "./v2.css";
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             publishes a blank page. Mounted here so no route can miss it. */}
         <RevealInit />
         <Suspense><AdminPreviewBridge /></Suspense>
+        <Suspense><PageProgressBar /></Suspense>
       </body>
     </html>
   );
