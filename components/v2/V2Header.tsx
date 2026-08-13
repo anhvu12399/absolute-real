@@ -16,10 +16,11 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
 
   const sections = resolveSections(site);
   const phone = site?.phone || "+1 (212) 627-1950";
-  const phoneLabel = site?.phoneLabel || "Speak with an Asia designer";
+  const phoneLabel = site?.phoneLabel || "Call Us:";
 
   const toggleMenu = (name: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -30,12 +31,17 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
   const closeAll = () => {
     setOpenMenu(null);
     setMobileOpen(false);
+    setOpenMobileSection(null);
   };
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 8);
-      // Auto-close open menu when scrolling down
       setOpenMenu(null);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -72,9 +78,6 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
       <nav className={`site-nav${isScrolled ? " is-scrolled" : ""}`} id="siteNav">
         <div className="container nav-inner">
           <Link href="/" className="brand-mark" onClick={closeAll}>
-            {/* The mark comes from WordPress (Appearance → Customize → Site
-                Identity). Until one is set, the seal below stands in - it uses
-                the brand's own gold rather than pretending to be the logo. */}
             {site?.logo ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img className="brand-logo" src={optimized(site.logo, 240)} alt={site?.name || BRAND_NAME} />
@@ -90,9 +93,6 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
           <ul className="nav-links">
             {sections.map((section) => (
               <li className={`nav-item-dropdown${hasPanel(section) ? " nav-item-mega" : ""}`} key={section.key}>
-                {/* A top-level item with nothing under it - Tailor-Made - is a
-                    link, not a toggle. It used to open an empty panel and
-                    swallow the click. */}
                 {hasPanel(section) ? (
                   <a href={section.href} onClick={(e) => toggleMenu(section.key, e)} style={{ cursor: "pointer" }}>
                     {section.label} <span className="caret">▾</span>
@@ -161,38 +161,98 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
 
           <div className="nav-right">
             <Link href="/#plan" className="btn btn-fill-ink" onClick={closeAll}>Plan Your Journey</Link>
-            <button className="nav-toggle" onClick={() => setMobileOpen(true)} aria-label="Open menu" aria-expanded={mobileOpen}>
+            <button
+              className="nav-toggle"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={mobileOpen}
+            >
               <svg><use href="#i-menu"></use></svg>
             </button>
           </div>
         </div>
       </nav>
 
-      {/* ═══ MOBILE MENU ═══ */}
-      <div className={`mobile-menu${mobileOpen ? " open" : ""}`} id="mobileMenu">
-        <button className="mobile-close" onClick={() => setMobileOpen(false)} aria-label="Close menu">
-          <svg><use href="#i-close"></use></svg>
-        </button>
+      {/* ═══ MOBILE DRAWER ═══ */}
+      <div
+        className={`mobile-overlay${mobileOpen ? " open" : ""}`}
+        onClick={() => setMobileOpen(false)}
+        aria-hidden="true"
+      />
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem", maxHeight: "80vh", overflowY: "auto" }}>
-          <Link href="/" onClick={closeAll}>Homepage</Link>
-
-          {sections.map((section) => (
-            <div key={section.key}>
-              <span style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--celadon-pale)" }}>
-                {section.label}
-              </span>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", paddingLeft: "1rem", marginTop: "0.4rem" }}>
-                {section.columns.flat().map((link) => (
-                  <Link href={link.href} onClick={closeAll} key={link.href + link.label} style={{ fontSize: "1rem" }}>
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
+      <div
+        className={`mobile-menu${mobileOpen ? " open" : ""}`}
+        id="mobileMenu"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+      >
+        {/* Header row */}
+        <div className="mobile-menu-head">
+          <Link href="/" className="mobile-menu-brand" onClick={closeAll}>
+            {site?.logo ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={optimized(site.logo, 120)} alt={site?.name || BRAND_NAME} />
+            ) : (
+              <span className="seal" style={{ fontSize: "1.2rem", width: 32, height: 32 }}>A</span>
+            )}
+            <div className="mobile-menu-brand-text">
+              <span className="mobile-menu-brand-name">{site?.name || BRAND_NAME}</span>
+              <span className="mobile-menu-brand-tag">Private | Luxury | Journeys</span>
             </div>
-          ))}
+          </Link>
+          <button className="mobile-close" onClick={() => setMobileOpen(false)} aria-label="Close menu">
+            <svg><use href="#i-close"></use></svg>
+          </button>
+        </div>
 
-          <Link href="/#plan" className="btn btn-fill-ink" onClick={closeAll}>Plan My Trip</Link>
+        {/* Scrollable link list */}
+        <div className="mobile-menu-body">
+          {sections.map((section) => {
+            const allLinks = [...section.columns.flat(), ...(section.secondary || [])];
+            const isExpanded = openMobileSection === section.key;
+
+            if (!hasPanel(section)) {
+              return (
+                <Link key={section.key} href={section.href} className="mm-plain-link" onClick={closeAll}>
+                  {section.label}
+                </Link>
+              );
+            }
+
+            return (
+              <div className="mm-section" key={section.key}>
+                <button
+                  className="mm-section-toggle"
+                  aria-expanded={isExpanded}
+                  onClick={() => setOpenMobileSection(isExpanded ? null : section.key)}
+                >
+                  {section.label}
+                  <svg className="mm-section-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <polyline points="6,9 12,15 18,9"/>
+                  </svg>
+                </button>
+                <div className={`mm-links${isExpanded ? " is-open" : ""}`}>
+                  {allLinks.map((link) => (
+                    <Link key={link.href + link.label} href={link.href} onClick={closeAll}>
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer: phone + CTA */}
+        <div className="mobile-menu-foot">
+          <div className="mobile-menu-phone">
+            <svg><use href="#i-phone"></use></svg>
+            <span>{phoneLabel} <strong>{phone}</strong></span>
+          </div>
+          <Link href="/#plan" className="btn btn-fill-ink" onClick={closeAll}>
+            Plan Your Journey
+          </Link>
         </div>
       </div>
     </>
