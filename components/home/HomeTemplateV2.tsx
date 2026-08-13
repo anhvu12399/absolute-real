@@ -205,53 +205,105 @@ export default function HomeTemplateV2({
 
   return (
     <>
-      {/* ═══ HERO ═══ */}
-      <section id="hero" className={`hero ph ${hero.image_url ? '' : 'ph-hero'}`} style={hero.image_url ? bg(hero.image_url, "hero") : {}}>
-        <svg className="hero-horizon" viewBox="0 0 1400 500" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M0 340 C 180 300, 320 380, 480 330 C 640 280, 760 360, 940 310 C 1120 260, 1260 330, 1400 300 L1400 500 L0 500 Z" fill="none" stroke="var(--celadon-pale)" strokeWidth="1" opacity="0.16"/>
-          <path d="M0 400 C 220 370, 380 430, 560 390 C 760 345, 900 410, 1080 370 C 1220 340, 1320 390, 1400 370 L1400 500 L0 500 Z" fill="none" stroke="var(--brass)" strokeWidth="1" opacity="0.22"/>
-          <path d="M0 450 L1400 450" stroke="var(--line-on-ink)" strokeWidth="1"/>
-        </svg>
-        <div className="overlay-bottom"></div>
-        <div className="hero-float">
-          <div className="hero-float-inner">
-            <div className={`hero-float-photo ph ${insetImage ? '' : 'ph-vn'}`} style={insetImage ? bg(insetImage, "hero") : {}}></div>
-          </div>
-          <div className="hero-float-sign">
-            <span className="place">{clamp(insetCaption, 46)}</span>
-            <span className="plate">{String(insetPlate)}</span>
-          </div>
+      {/* ═══ CONCEPT 3: BELMOND SPLIT ARCHED CANVAS HERO ═══ */}
+      <section id="hero" className="belmond-hero">
+        <div className="belmond-hero-bg-canvas">
+          <div className="belmond-ambient-glow"></div>
         </div>
-        <div className="container hero-inner">
-          {/* Panel, not just a text-shadow: banner photos range from dark temples
-              to bright snow and only a backdrop keeps the copy readable on both. */}
-          <div className="hero-copy">
-          <p className="hero-eyebrow"><em>{String(hero.tagline || "Travel")}</em> {String(hero.title || "Inspiration")}</p>
-          <h1 dangerouslySetInnerHTML={{ __html: String(hero.description || "Vietnam: The <em>Slow Gold</em> of the Mekong at Dawn") }} />
-          {hero.subtitle && <p className="hero-subtitle">{String(hero.subtitle)}</p>}
-          <div className="hero-actions"><Link href={toLocalHref(hero.link, "#plan")} className="btn btn-line-white">{String(hero.link_text || "Learn More")}<ArrowSvg/></Link></div>
-          {slides.length > 1 && (
-            <div className="hero-dots" role="tablist" aria-label="Hero slides">
-              {slides.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  role="tab"
-                  aria-selected={idx === heroIndex}
-                  aria-label={`Slide ${idx + 1}`}
-                  className={`hero-dot${idx === heroIndex ? " is-active" : ""}`}
-                  onClick={() => setHeroIndex(idx)}
-                />
-              ))}
+
+        <div className="container belmond-hero-inner">
+          {/* Left Column: Curated Bespoke Dispatch (42%) */}
+          <div className="belmond-dispatch-col">
+            <div className="belmond-dispatch-card">
+              <div className="belmond-kicker-row">
+                <span className="belmond-seal-mini">AA</span>
+                <span className="belmond-kicker-text">
+                  <em>Private Dispatch</em> · {String(hero.tagline || "Bespoke Journey")}
+                </span>
+              </div>
+
+              <h1
+                className="belmond-hero-title"
+                dangerouslySetInnerHTML={{ __html: String(hero.description || "Vietnam: The <em>Slow Gold</em> of the Mekong at Dawn") }}
+              />
+
+              {hero.subtitle && (
+                <p className="belmond-hero-subtitle">{String(hero.subtitle)}</p>
+              )}
+
+              <div className="belmond-badges-row">
+                <span className="belmond-badge">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                  {hero.meta || "12 Days Private Expedition"}
+                </span>
+                <span className="belmond-badge">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  100% Tailored &amp; Private
+                </span>
+              </div>
+
+              <div className="belmond-actions-row">
+                <Link href={toLocalHref(hero.link, "#plan")} className="btn btn-gold-belmond">
+                  <span>{String(hero.link_text || "Plan This Journey")}</span>
+                  <ArrowSvg />
+                </Link>
+                <Link href="#statement" className="belmond-text-link">
+                  <span>Our Standard</span>
+                  <ArrowSvg />
+                </Link>
+              </div>
+
+              {/* Slider Controls & Counter */}
+              {slides.length > 1 && (
+                <div className="belmond-slider-controls">
+                  <div className="belmond-counter">
+                    <span className="belmond-count-current">{String(heroIndex + 1).padStart(2, "0")}</span>
+                    <span className="belmond-count-sep">/</span>
+                    <span className="belmond-count-total">{String(slides.length).padStart(2, "0")}</span>
+                  </div>
+                  <div className="belmond-progress-track">
+                    <div
+                      className="belmond-progress-fill"
+                      style={{ width: `${((heroIndex + 1) / slides.length) * 100}%` }}
+                    ></div>
+                  </div>
+                  <div className="belmond-nav-arrows">
+                    <button
+                      type="button"
+                      className="belmond-arrow-btn"
+                      onClick={() => setHeroIndex((heroIndex - 1 + slides.length) % slides.length)}
+                      aria-label="Previous Journey"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <button
+                      type="button"
+                      className="belmond-arrow-btn"
+                      onClick={() => setHeroIndex((heroIndex + 1) % slides.length)}
+                      aria-label="Next Journey"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
           </div>
-        </div>
-        <div className="container hero-ticker">
-          <div className="hero-ticker-inner">
-            <div className="hero-ticker-text">
-              <span>Next Up</span>
-              <Link href={String(acf.ticker_link || "#destinations")}>{String(acf.ticker_text || "Bhutan: A Private Audience with the Himalaya")} <ArrowSvg/></Link>
+
+          {/* Right Column: Grand Arched Canvas (58%) */}
+          <div className="belmond-canvas-col">
+            <div className="belmond-arch-frame">
+              <div className="belmond-arch-inner-border"></div>
+              <div
+                className="belmond-arch-photo ph"
+                style={hero.image_url ? bg(hero.image_url, "hero") : {}}
+              >
+                <div className="belmond-arch-overlay"></div>
+                <div className="belmond-arch-badge">
+                  <span className="belmond-arch-pin">✦</span>
+                  <span className="belmond-arch-dest">{String(hero.title || "Private Asia Sanctuary")}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
