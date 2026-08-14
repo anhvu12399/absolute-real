@@ -173,22 +173,18 @@ function aat_register_fields() {
             ['key' => 'field_aat_tour_days', 'label' => 'Duration (Days)', 'name' => 'duration_days', 'type' => 'number'],
             ['key' => 'field_aat_tour_destcount', 'label' => 'Destinations Count', 'name' => 'destinations_count', 'type' => 'number'],
             ['key' => 'field_aat_tour_guests', 'label' => 'Minimum Guests', 'name' => 'min_guests', 'type' => 'number', 'default_value' => 2],
-            aat_text('field_aat_tour_price', 'Starting Price', 'starting_price'),
             aat_text('field_aat_tour_duration_label', 'Duration Label (e.g. "12 Days / 11 Nights")', 'duration_label'),
-            aat_text('field_aat_tour_route', 'Route', 'tour_route'),
-            aat_text('field_aat_tour_level', 'Activity Level', 'tour_level'),
-            aat_text('field_aat_tour_code', 'Tour Code', 'tour_code'),
-            ['key' => 'field_aat_tour_featured', 'label' => 'Feature on homepage', 'name' => 'is_featured', 'type' => 'true_false', 'ui' => 1],
 
             aat_tab('tab_aat_tour_overview', 'Overview'),
             aat_text('field_aat_tour_intro_title', 'Intro Title', 'intro_title'),
-            aat_textarea('field_aat_tour_intro_desc', 'Intro Description', 'intro_description', 4),
             aat_textarea('field_aat_tour_highlights', 'Highlights (one per line)', 'highlights_list', 6),
+            aat_text('field_aat_tour_lbl_high', 'Highlights Heading', 'highlights_title', ['default_value' => '<em>Trip</em> Highlights']),
+            aat_text('field_aat_tour_lbl_highdesc', 'Highlights Note', 'highlights_note'),
 
             aat_tab('tab_aat_tour_itinerary', 'Itinerary'),
             aat_repeater_field('field_aat_tour_itinerary', 'Day by Day', 'itinerary', 'itinerary'),
 
-            aat_tab('tab_aat_tour_stays', 'Stays & Options'),
+            aat_tab('tab_aat_tour_stays', 'Stays & Accommodations'),
             [
                 'key' => 'field_aat_tour_stays',
                 'label' => 'Hand-Selected Stays',
@@ -198,7 +194,6 @@ function aat_register_fields() {
                 'multiple' => 1,
                 'return_format' => 'id',
             ],
-            aat_repeater_field('field_aat_tour_options', 'Accommodation Options', 'accommodation_options', 'options'),
 
             aat_tab('tab_aat_tour_inclusions', 'Inclusions & Dates'),
             aat_textarea('field_aat_tour_inclusions', 'Inclusions (one per line)', 'inclusions_list', 6),
@@ -211,13 +206,9 @@ function aat_register_fields() {
             aat_repeater_field('field_aat_tour_experiences', 'Experience Cards', 'experiences', 'experiences'),
             aat_repeater_field('field_aat_tour_faqs', 'FAQs', 'faqs', 'faqs'),
 
-            aat_tab('tab_aat_tour_labels', 'Section Headings'),
+            aat_tab('tab_aat_tour_labels', 'Section Headings & CTAs'),
             aat_text('field_aat_tour_eyebrow', 'Hero Eyebrow', 'hero_eyebrow'),
-            aat_text('field_aat_tour_eyebrow_link', 'Hero Eyebrow Link', 'hero_eyebrow_link'),
-            aat_text('field_aat_tour_gallery_title', 'Gallery Heading', 'gallery_title'),
             aat_text('field_aat_tour_classic', 'Classic Tour Link', 'classic_tour_link'),
-            
-            // Section Headings with default values
             aat_text('field_aat_tour_why_title', 'Why Us Heading', 'why_title', ['default_value' => '<em>Why Choose</em> Absolute Asia']),
             aat_text('field_aat_tour_itin_eye', 'Itinerary Eyebrow', 'itinerary_eyebrow', ['default_value' => '<em>Day</em> by Day']),
             aat_text('field_aat_tour_itin_head', 'Itinerary Heading', 'itinerary_title', ['default_value' => 'Itinerary']),
@@ -225,25 +216,17 @@ function aat_register_fields() {
             aat_text('field_aat_tour_stays_head', 'Stays Heading', 'hotels_title', ['default_value' => 'Hand-Selected for an Unmatched Stay']),
             aat_text('field_aat_tour_incl_eye', 'Inclusions Eyebrow', 'inclusions_eyebrow', ['default_value' => '<em>Inclusions</em> & Offers']),
             aat_text('field_aat_tour_incl_head', 'Inclusions Heading', 'inclusions_title', ['default_value' => "What's Included"]),
+            aat_text('field_aat_tour_lbl_excl', 'Exclusions Heading', 'exclusions_title', ['default_value' => "What's Not Included"]),
             aat_text('field_aat_tour_dates_head', 'Departure Dates Heading', 'dates_title', ['default_value' => 'Departure Dates']),
             aat_text('field_aat_tour_gal_eye', 'Gallery Eyebrow', 'gallery_eyebrow', ['default_value' => '<em>Photo</em> Gallery']),
+            aat_text('field_aat_tour_gallery_title', 'Gallery Heading', 'gallery_title'),
             aat_text('field_aat_tour_faq_eye', 'FAQ Eyebrow', 'faq_eyebrow', ['default_value' => '<em>Good</em> to Know']),
             aat_text('field_aat_tour_faq_head', 'FAQ Heading', 'faq_title', ['default_value' => 'Frequently Asked Questions']),
-
-            aat_text('field_aat_tour_lbl_high', 'Highlights Heading', 'highlights_title', ['default_value' => '<em>Trip</em> Highlights']),
-            aat_text('field_aat_tour_lbl_highdesc', 'Highlights Note', 'highlights_note'),
-            aat_text('field_aat_tour_lbl_opt', 'Accommodation Heading', 'options_title', ['default_value' => 'Accommodation Options']),
-            aat_textarea('field_aat_tour_lbl_optdesc', 'Accommodation Note', 'options_note', 2),
-            aat_text('field_aat_tour_lbl_excl', 'Exclusions Heading', 'exclusions_title', ['default_value' => "What's Not Included"]),
-            aat_text('field_aat_tour_lbl_policy', 'Booking Policy Heading', 'booking_policy_title', ['default_value' => 'Booking Policy']),
-            aat_text('field_aat_tour_lbl_other', 'Related Tours Heading', 'related_tours_title', ['default_value' => 'Related Journeys']),
             aat_text('field_aat_tour_group_title', 'Small Group CTA Title', 'group_cta_title', ['default_value' => 'Interested in this itinerary but want to join a small group instead?']),
             aat_textarea('field_aat_tour_group_desc', 'Small Group CTA Description', 'group_cta_desc', 2),
             aat_text('field_aat_tour_group_btn', 'Small Group CTA Button', 'group_cta_btn', ['default_value' => 'Learn More']),
             aat_text('field_aat_tour_btn_incl', 'View Inclusions Button Text', 'inclusions_btn_text', ['default_value' => 'View Inclusions']),
             aat_text('field_aat_tour_btn_inquiry', 'Request Tour Button Text', 'inquiry_btn_text', ['default_value' => 'Request This Itinerary']),
-            aat_text('field_aat_tour_cta_label', 'Highlight CTA Label', 'cta_label'),
-            aat_text('field_aat_tour_cta_link', 'Highlight CTA Link', 'cta_link'),
             [
                 'key' => 'field_aat_tour_related',
                 'label' => 'Other Tours',
@@ -277,8 +260,6 @@ function aat_register_fields() {
             aat_text('field_aat_place_lng', 'Longitude', 'longitude'),
 
             aat_tab('tab_aat_place_related', 'Related & Gallery'),
-            aat_text('field_aat_place_rel_title', 'Related Section Title', 'related_title'),
-            aat_textarea('field_aat_place_rel_desc', 'Related Section Description', 'related_description', 2),
             [
                 'key' => 'field_aat_place_tours',
                 'label' => 'Featured Tours',
@@ -426,13 +407,8 @@ function aat_register_fields() {
             aat_wysiwyg('field_aat_ed_left', 'Secondary Column', 'content_left'),
             aat_image('field_aat_ed_right_img', 'Secondary Image', 'content_right_image'),
 
-            aat_tab('tab_aat_ed_sidebar', 'Sidebar'),
-            aat_text('field_aat_ed_sb_popular', 'Popular Heading', 'sidebar_popular_title'),
-            aat_text('field_aat_ed_sb_search', 'Search Heading', 'sidebar_search_title'),
-            aat_text('field_aat_ed_sb_social', 'Social Heading', 'sidebar_social_title'),
-            aat_text('field_aat_ed_further', 'Further Reading Title', 'further_title'),
-            aat_text('field_aat_ed_view_more', 'View More Label', 'view_more_label'),
-            aat_text('field_aat_ed_view_more_link', 'View More Link', 'view_more_link'),
+            aat_tab('tab_aat_ed_sidebar', 'Sidebar & Further Reading'),
+            aat_text('field_aat_ed_further', 'Further Reading Title', 'further_title', ['default_value' => 'Further Reading']),
 
             aat_tab('tab_aat_ed_gallery', 'Gallery & Related'),
             aat_repeater_field('field_aat_ed_gallery', 'Gallery', 'gallery', 'gallery'),
