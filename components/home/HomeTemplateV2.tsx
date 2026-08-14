@@ -518,35 +518,6 @@ export default function HomeTemplateV2({
         </div>
       </section>
 
-      {/* ═══ 6 · WHY TRAVEL WITH US ═══
-          The numbered 01–06 list that briefly stood here said less in more
-          space: six clipped lines, no headings, nothing to look at. This is
-          the treatment that was here before — a full-bleed statement, then
-          four value blocks that each get a heading and a real sentence. */}
-      <section id="values" className="story-bar ph ph-desert">
-        <div className="overlay-full"></div>
-        <div className="container story-bar-inner reveal">
-          <div>
-            <p className="story-tag">{String(acf.story_bar_tagline || "Private Journeys, Composed for You")}</p>
-            <h2 dangerouslySetInnerHTML={{ __html: String(acf.story_bar_headline || `The <em>${BRAND_SHORT}</em> Standard`) }}></h2>
-          </div>
-          <Link href="/about-us/" className="btn btn-line-white">{String(acf.story_bar_link_text || "Read Our Story")}</Link>
-        </div>
-      </section>
-
-      {coreValues.length > 0 && (
-        <section className="value-grid ph ph-desert" id="why">
-          <div className="container value-grid-inner reveal">
-            {coreValues.map((val: any, idx: number) => (
-              <div className="value-item" key={idx}>
-                <h4>{String(val.title || "")}</h4>
-                <p>{String(val.description || "")}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* ═══ 7 · FEATURED PRIVATE JOURNEYS ═══
           Two routes out of every card: read it, or ask us to change it. The
           second is the one this business actually sells. */}
@@ -670,7 +641,7 @@ export default function HomeTemplateV2({
 
       {/* ═══ 9 · TRAVEL INSPIRATION ═══ */}
       {editorial.length > 0 && (
-        <section className="section on-white" id="inspiration">
+        <section className="section on-cream" id="inspiration">
           <div className="container">
             <div className="center reveal">
               <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{inspirationHeadline}</h2>
@@ -703,7 +674,7 @@ export default function HomeTemplateV2({
           appears only when WordPress holds real team photographs — a stock
           portrait of someone who does not work here is worse than none. */}
       {/* ═══ MAP ═══ */}
-      <section id="map" className="section on-cream">
+      <section id="map" className="section on-white">
         <div className="container map-grid">
           <div className="map-copy reveal">
             <p className="eyebrow"><em>One</em> Itinerary, Six Countries</p>
@@ -742,7 +713,7 @@ export default function HomeTemplateV2({
       </section>
 
       {(team.length > 0 || testimonials.length > 0) && (
-        <section className="section on-white" id="specialists">
+        <section className="section on-cream" id="specialists">
           <div className="container">
             <div className="center reveal">
               <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{specialistsHeadline}</h2>
@@ -832,6 +803,34 @@ export default function HomeTemplateV2({
             className={`split-photo ${responsiblyImage ? "" : "ph ph-la"}`}
             style={responsiblyImage ? bg(responsiblyImage, "hero") : undefined}
           />
+        </section>
+      )}
+
+      {/* ═══ STORY BAR + VALUES ═══
+          Sits where it always sat: the last word before the enquiry form, so
+          the four reasons to trust the company are the thing still in view
+          when the reader reaches the fields. */}
+      <section id="values" className="story-bar ph ph-desert">
+        <div className="overlay-full" />
+        <div className="container story-bar-inner reveal">
+          <div>
+            <p className="story-tag">{String(acf.story_bar_tagline || "Private Journeys, Composed for You")}</p>
+            <h2 dangerouslySetInnerHTML={{ __html: String(acf.story_bar_headline || `The <em>${BRAND_SHORT}</em> Standard`) }} />
+          </div>
+          <Link href="/about-us/" className="btn btn-line-white">{String(acf.story_bar_link_text || "Read Our Story")}</Link>
+        </div>
+      </section>
+
+      {coreValues.length > 0 && (
+        <section className="value-grid ph ph-desert" id="why">
+          <div className="container value-grid-inner reveal">
+            {coreValues.map((val: any, idx: number) => (
+              <div className="value-item" key={idx}>
+                <h4>{String(val.title || "")}</h4>
+                <p>{String(val.description || "")}</p>
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
