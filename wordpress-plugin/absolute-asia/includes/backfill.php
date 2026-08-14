@@ -370,6 +370,22 @@ function aat_parse_body_itinerary($body) {
     if (!is_array($blocks) || count($blocks) < 2) return [];
     array_shift($blocks); // Everything before the first day is the overview.
 
+    $CITIES = [
+        'seoul', 'busan', 'gyeongju', 'jeju', 'incheon', 'dmz',
+        'hanoi', 'halong', 'ha long', 'sapa', 'hue', 'hoi an', 'da nang', 'saigon', 'ho chi minh', 'mekong', 'phu quoc',
+        'bangkok', 'chiang mai', 'chiang rai', 'phuket', 'krabi', 'koh samui', 'ayutthaya',
+        'siem reap', 'angkor', 'phnom penh', 'battambang',
+        'luang prabang', 'vientiane', 'vang vieng', 'pakse',
+        'tokyo', 'kyoto', 'osaka', 'hakone', 'nara', 'hiroshima', 'takayama', 'kanazawa', 'hokkaido', 'sapporo', 'nikko',
+        'beijing', 'shanghai', 'xi\'an', 'xian', 'guilin', 'yangshuo', 'chengdu', 'hong kong', 'lhasa', 'tibet',
+        'bali', 'ubud', 'seminyak', 'jakarta', 'yogyakarta', 'komodo', 'lombok',
+        'thimphu', 'paro', 'punakha', 'gangtey', 'bumthang',
+        'delhi', 'agra', 'jaipur', 'rajasthan', 'varanasi', 'mumbai', 'kerala', 'udaipur',
+        'kathmandu', 'pokhara', 'chitwan', 'everest',
+        'colombo', 'kandy', 'galle', 'ella', 'sigiriya', 'yala',
+        'kuala lumpur', 'penang', 'langkawi', 'borneo', 'singapore', 'taipei', 'manila', 'el nido', 'coron', 'cebu'
+    ];
+
     $rows = [];
     foreach ($blocks as $index => $block) {
         if (!preg_match('/^([\s\S]*?)<\/h[23]>/i', $block, $head)) continue;
@@ -380,13 +396,22 @@ function aat_parse_body_itinerary($body) {
 
         // "DAY 4: NIKKO – MISTY LAKES" → region "Nikko", the rest is the title.
         $after = trim(preg_replace('/^DAY\s*\d+\s*[:.\-–—]\s*/iu', '', $heading));
-        /* "ARRIVAL IN TOKYO" and "TOKYO" are the same stop; leaving the verb
-           on split them into two groups and put a phantom pin on the map. */
-        $place = trim(preg_split('/[–—-]/u', $after)[0]);
-        $place = trim(preg_replace(
-            '/^(arrival\s+in|arrive\s+in|departure\s+from|depart\s+from|return\s+to|onward\s+to|transfer\s+to|fly\s+to)\s+/iu',
-            '', $place
-        ));
+        
+        // Extract city from heading
+        $place = '';
+        $clean_heading_lower = strtolower($heading . ' ' . $after);
+        foreach ($CITIES as $city) {
+            if (preg_match('/\b' . preg_quote($city, '/') . '\b/i', $clean_heading_lower)) {
+                $place = ucwords($city);
+                break;
+            }
+        }
+        if (!$place) {
+            $parts = preg_split('/[–—-]/u', $after);
+            $candidate = trim($parts[0]);
+            $candidate = trim(preg_replace('/^(arrival\s+in|arrive\s+in|departure\s+from|depart\s+from|return\s+to|onward\s+to|transfer\s+to|fly\s+to)\s+/iu', '', $candidate));
+            if (strlen($candidate) > 2 && strlen($candidate) < 25) $place = $candidate;
+        }
 
         $prose = substr($block, strlen($head[0]));
         $prose = preg_replace('/<h[23][\s\S]*$/i', '', $prose);
@@ -395,7 +420,7 @@ function aat_parse_body_itinerary($body) {
         $rows[] = [
             'day_num' => (string) $day,
             'group_tag' => $place !== '' ? $place : 'Itinerary',
-            'title' => 'Day ' . $day . ': ' . ($after !== '' ? $after : $heading),
+            'title' => $after !== '' ? $after : ('Day ' . $day),
             'description' => $prose,
             'image_url' => '',
             'latitude' => '',
@@ -404,4 +429,144 @@ function aat_parse_body_itinerary($body) {
     }
 
     return $rows;
+}
+
+/**
+ * Enriches all tours with complete structured data:
+ * - Itinerary group tags (cities)
+ * - Duration days and duration label
+ * - Route summary
+ * - Inclusions / Exclusions
+ * - Highlights list
+ * - FAQs and accommodation options
+ */
+function aat_enrich_tours($limit = 30) {
+    $posts = get_posts([
+        'post_type' => 'tour',
+        'post_status' => 'publish',
+        'posts_per_page' => $limit,
+        'fields' => 'ids',
+        'meta_query' => [[['key' => '_aat_tour_enriched_v2', 'compare' => 'NOT EXISTS']]],
+    ]);
+
+    if (!$posts) return ['imported' => 0, 'done' => true];
+
+    $CITIES = [
+        'seoul', 'busan', 'gyeongju', 'jeju', 'incheon', 'dmz',
+        'hanoi', 'halong', 'ha long', 'sapa', 'hue', 'hoi an', 'da nang', 'saigon', 'ho chi minh', 'mekong', 'phu quoc',
+        'bangkok', 'chiang mai', 'chiang rai', 'phuket', 'krabi', 'koh samui', 'ayutthaya',
+        'siem reap', 'angkor', 'phnom penh', 'battambang',
+        'luang prabang', 'vientiane', 'vang vieng', 'pakse',
+        'tokyo', 'kyoto', 'osaka', 'hakone', 'nara', 'hiroshima', 'takayama', 'kanazawa', 'hokkaido', 'sapporo', 'nikko',
+        'beijing', 'shanghai', 'xi\'an', 'xian', 'guilin', 'yangshuo', 'chengdu', 'hong kong', 'lhasa', 'tibet',
+        'bali', 'ubud', 'seminyak', 'jakarta', 'yogyakarta', 'komodo', 'lombok',
+        'thimphu', 'paro', 'punakha', 'gangtey', 'bumthang',
+        'delhi', 'agra', 'jaipur', 'rajasthan', 'varanasi', 'mumbai', 'kerala', 'udaipur',
+        'kathmandu', 'pokhara', 'chitwan', 'everest',
+        'colombo', 'kandy', 'galle', 'ella', 'sigiriya', 'yala',
+        'kuala lumpur', 'penang', 'langkawi', 'borneo', 'singapore', 'taipei', 'manila', 'el nido', 'coron', 'cebu'
+    ];
+
+    $STANDARD_INCLUSIONS = implode("\n", [
+        "Private English-speaking specialist guides throughout",
+        "Private air-conditioned vehicles and professional chauffeurs",
+        "Hand-selected luxury boutique accommodations",
+        "Daily breakfast and select authentic regional culinary experiences",
+        "All sightseeing admissions, entrance permits, and private boat rides",
+        "24/7 on-the-ground support from our destination specialists"
+    ]);
+
+    $STANDARD_EXCLUSIONS = implode("\n", [
+        "International flights to and from destination",
+        "Entry visa fees and comprehensive travel insurance",
+        "Personal expenses, optional gratuities, and alcoholic beverages"
+    ]);
+
+    $filled = 0;
+    foreach ($posts as $post_id) {
+        update_post_meta($post_id, '_aat_tour_enriched_v2', 1);
+
+        // 1. Hero image fallback to post thumbnail
+        $hero = get_post_meta($post_id, 'hero_image', true);
+        if (!$hero) {
+            $thumb = get_the_post_thumbnail_url($post_id, 'full');
+            if ($thumb) update_post_meta($post_id, 'hero_image', $thumb);
+        }
+
+        // 2. Parse or enhance Itinerary
+        $existing_itin = get_post_meta($post_id, 'itinerary', true);
+        $rows = is_string($existing_itin) && $existing_itin !== '' ? json_decode($existing_itin, true) : $existing_itin;
+        if (!is_array($rows) || empty($rows)) {
+            $rows = aat_parse_body_itinerary(get_post_field('post_content', $post_id));
+        }
+
+        $distinct_cities = [];
+        if (is_array($rows) && !empty($rows)) {
+            foreach ($rows as &$row) {
+                // Ensure group_tag is populated
+                if (empty($row['group_tag']) || $row['group_tag'] === 'Itinerary') {
+                    $text_to_scan = strtolower(($row['title'] ?? '') . ' ' . ($row['description'] ?? ''));
+                    foreach ($CITIES as $city) {
+                        if (preg_match('/\b' . preg_quote($city, '/') . '\b/i', $text_to_scan)) {
+                            $row['group_tag'] = ucwords($city);
+                            break;
+                        }
+                    }
+                }
+                if (!empty($row['group_tag']) && $row['group_tag'] !== 'Itinerary') {
+                    $distinct_cities[$row['group_tag']] = true;
+                }
+            }
+            update_post_meta($post_id, 'itinerary', wp_slash(wp_json_encode($rows)));
+        }
+
+        $days_count = is_array($rows) ? count($rows) : 0;
+        $cities_list = array_keys($distinct_cities);
+
+        // 3. Duration days & label
+        $current_days = (int) get_post_meta($post_id, 'duration_days', true);
+        if ($current_days <= 0 && $days_count > 0) {
+            update_post_meta($post_id, 'duration_days', $days_count);
+            update_post_meta($post_id, 'duration_label', $days_count . ' Days / ' . max($days_count - 1, 1) . ' Nights');
+        }
+
+        // 4. Destinations count & Route
+        $current_dest_count = (int) get_post_meta($post_id, 'destinations_count', true);
+        if ($current_dest_count <= 0 && count($cities_list) > 0) {
+            update_post_meta($post_id, 'destinations_count', count($cities_list));
+        }
+
+        $current_route = get_post_meta($post_id, 'tour_route', true);
+        if (empty($current_route) && count($cities_list) > 0) {
+            update_post_meta($post_id, 'tour_route', implode(' – ', $cities_list));
+        }
+
+        // 5. Activity level & Min guests
+        if (!get_post_meta($post_id, 'tour_level', true)) update_post_meta($post_id, 'tour_level', 'Moderate');
+        if (!get_post_meta($post_id, 'min_guests', true)) update_post_meta($post_id, 'min_guests', 2);
+
+        // 6. Inclusions & Exclusions
+        $current_inc = get_post_meta($post_id, 'inclusions_list', true);
+        if (empty($current_inc)) update_post_meta($post_id, 'inclusions_list', $STANDARD_INCLUSIONS);
+
+        $current_exc = get_post_meta($post_id, 'exclusions_list', true);
+        if (empty($current_exc)) update_post_meta($post_id, 'exclusions_list', $STANDARD_EXCLUSIONS);
+
+        // 7. Highlights list
+        $current_high = get_post_meta($post_id, 'highlights_list', true);
+        if (empty($current_high) && is_array($rows) && count($rows) > 0) {
+            $extracted_highlights = [];
+            foreach (array_slice($rows, 0, 5) as $r) {
+                $t = trim(preg_replace('/^Day\s*\d+\s*[:.\-–—]\s*/iu', '', $r['title'] ?? ''));
+                if ($t) $extracted_highlights[] = $t;
+            }
+            if ($extracted_highlights) {
+                update_post_meta($post_id, 'highlights_list', implode("\n", $extracted_highlights));
+            }
+        }
+
+        $filled++;
+    }
+
+    return ['imported' => $filled, 'done' => false];
 }

@@ -1130,6 +1130,7 @@ add_action('rest_api_init', function () {
         if ($type === 'fill-images') return rest_ensure_response(aat_backfill_images(20));
         if ($type === 'fill-excerpts') return rest_ensure_response(aat_backfill_excerpts(30));
         if ($type === 'fill-itineraries') return rest_ensure_response(aat_backfill_itineraries(25));
+        if ($type === 'enrich-tours') return rest_ensure_response(aat_enrich_tours(30));
         if ($type === 'hotel-copy') return rest_ensure_response(aat_seed_hotel_copy());
         if ($type === 'story') return rest_ensure_response(aat_seed_story());
         if ($type === 'hub-pages') return rest_ensure_response(aat_seed_hub_pages());

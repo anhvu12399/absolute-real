@@ -49,8 +49,6 @@ function aat_repeater_specs() {
             ['key' => 'title', 'label' => 'Day Title'],
             ['key' => 'description', 'label' => 'Day Description', 'type' => 'textarea'],
             ['key' => 'image_url', 'label' => 'Image', 'type' => 'image'],
-            ['key' => 'latitude', 'label' => 'Latitude'],
-            ['key' => 'longitude', 'label' => 'Longitude'],
         ],
         'dates' => [
             ['key' => 'date_range', 'label' => 'Date Range'],
