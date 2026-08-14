@@ -66,7 +66,7 @@ export type SitePayload = {
 };
 
 export async function getSiteData() {
-  return wpFetch<SitePayload>("/absolute-asia/v1/site", 60);
+  return wpFetch<SitePayload>("/absolute-asia/v1/site", 300);
 }
 
 /** Layout-safe variant: a backend hiccup must not blank the whole site chrome. */
@@ -80,7 +80,7 @@ export const getSiteDataSafe = cache(async (): Promise<SitePayload | null> => {
 
 export async function getContentBatch(ids: number[]) {
   if (!ids.length) return [];
-  const items = await wpFetch<BridgeItem[]>(`/absolute-asia/v1/content-batch?include=${ids.join(",")}`, 60);
+  const items = await wpFetch<BridgeItem[]>(`/absolute-asia/v1/content-batch?include=${ids.join(",")}`, 300);
   return items.map(normalize);
 }
 

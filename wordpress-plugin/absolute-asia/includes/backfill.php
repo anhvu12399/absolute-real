@@ -440,14 +440,20 @@ function aat_parse_body_itinerary($body) {
  * - Highlights list
  * - FAQs and accommodation options
  */
-function aat_enrich_tours($offset = 0, $limit = 20) {
-    $posts = get_posts([
+function aat_enrich_tours($offset = 0, $limit = 20, $specific_ids = []) {
+    $args = [
         'post_type' => 'tour',
         'post_status' => ['publish', 'draft'],
         'posts_per_page' => $limit,
         'offset' => $offset,
         'fields' => 'ids',
-    ]);
+    ];
+    if (!empty($specific_ids)) {
+        $args['post__in'] = $specific_ids;
+        $args['posts_per_page'] = -1;
+        $args['offset'] = 0;
+    }
+    $posts = get_posts($args);
 
     if (!$posts) return ['imported' => 0, 'done' => true, 'offset' => $offset];
 
@@ -599,6 +605,41 @@ function aat_enrich_tours($offset = 0, $limit = 20) {
             ])));
         }
 
+        // 9. Experiences
+        if (!get_post_meta($post_id, 'experiences', true)) {
+            update_post_meta($post_id, 'experiences', wp_slash(wp_json_encode([
+                ['title' => 'Private Cultural Encounter', 'description' => 'A unique opportunity to connect with local traditions and artisans.', 'image' => ''],
+                ['title' => 'Culinary Discovery', 'description' => 'Taste the authentic flavors of the region with an expert guide.', 'image' => '']
+            ])));
+        }
+
+        // 10. Featured Stays (featured_stays)
+        $existing_stays = get_post_meta($post_id, 'featured_stays', true);
+        if (empty($existing_stays) || $existing_stays === '[]' || (is_array($existing_stays) && empty($existing_stays))) {
+            $stay_ids = get_posts([
+                'post_type' => 'hotel',
+                'post_status' => 'publish',
+                'posts_per_page' => 3,
+                'fields' => 'ids',
+            ]);
+            if (!empty($stay_ids)) update_post_meta($post_id, 'featured_stays', $stay_ids);
+        }
+
+        // 11. Related Tours (related_tours)
+        $existing_tours = get_post_meta($post_id, 'related_tours', true);
+        if (empty($existing_tours) || $existing_tours === '[]' || (is_array($existing_tours) && empty($existing_tours))) {
+            $tour_ids = get_posts([
+                'post_type' => 'tour',
+                'post_status' => 'publish',
+                'posts_per_page' => 3,
+                'exclude' => [$post_id],
+                'fields' => 'ids',
+            ]);
+            if (!empty($tour_ids)) update_post_meta($post_id, 'related_tours', $tour_ids);
+        }
+
+
+
         $filled++;
     }
 
@@ -607,14 +648,20 @@ function aat_enrich_tours($offset = 0, $limit = 20) {
 }
 
 /** Enriches hotel records with location, highlights, and hero image. */
-function aat_enrich_hotels($offset = 0, $limit = 20) {
-    $posts = get_posts([
+function aat_enrich_hotels($offset = 0, $limit = 20, $specific_ids = []) {
+    $args = [
         'post_type' => 'hotel',
         'post_status' => ['publish', 'draft'],
         'posts_per_page' => $limit,
         'offset' => $offset,
         'fields' => 'ids',
-    ]);
+    ];
+    if (!empty($specific_ids)) {
+        $args['post__in'] = $specific_ids;
+        $args['posts_per_page'] = -1;
+        $args['offset'] = 0;
+    }
+    $posts = get_posts($args);
 
     if (!$posts) return ['imported' => 0, 'done' => true, 'offset' => $offset];
 
@@ -676,13 +723,41 @@ function aat_enrich_hotels($offset = 0, $limit = 20) {
             ]));
         }
 
-        // 4. Specialist Block
-        if (!get_post_meta($post_id, 'specialist_title', true)) update_post_meta($post_id, 'specialist_title', 'Speak to an Asia Travel Specialist');
-        if (!get_post_meta($post_id, 'specialist_text', true)) update_post_meta($post_id, 'specialist_text', 'Every journey with Absolute Asia is private, tailor-made, and planned around your exact pace, interests, and preferred style of travel. Connect with a specialist to begin designing your bespoke itinerary.');
-        if (!get_post_meta($post_id, 'specialist_button', true)) update_post_meta($post_id, 'specialist_button', 'Plan Your Trip');
-        if (!get_post_meta($post_id, 'specialist_link', true)) update_post_meta($post_id, 'specialist_link', '/#plan');
-        if (!get_post_meta($post_id, 'specialist_phone', true)) update_post_meta($post_id, 'specialist_phone', '+1 (800) 736-8187');
-        if (!get_post_meta($post_id, 'specialist_photo', true)) update_post_meta($post_id, 'specialist_photo', 'https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Village-Suite.jpg');
+
+
+        // 5. Map coords and labels
+        if (!get_post_meta($post_id, 'latitude', true)) update_post_meta($post_id, 'latitude', '15.8700');
+        if (!get_post_meta($post_id, 'longitude', true)) update_post_meta($post_id, 'longitude', '100.9925');
+        
+        $city_terms = get_the_terms($post_id, 'city');
+        if ($city_terms && !is_wp_error($city_terms)) {
+            $city_obj = get_posts(['post_type' => 'place_to_go', 'name' => $city_terms[0]->slug, 'posts_per_page' => 1]);
+            if ($city_obj) update_post_meta($post_id, 'city', $city_obj[0]->ID);
+        }
+
+        if (!get_post_meta($post_id, 'nearby_places', true)) {
+            update_post_meta($post_id, 'nearby_places', wp_slash(wp_json_encode([
+                ['title' => 'Local Market', 'distance' => '10 mins walk'],
+                ['title' => 'Historical Center', 'distance' => '5 mins drive']
+            ])));
+        }
+
+        // 6. Related content
+        $tax_query = $country ? [['taxonomy' => 'country', 'field' => 'name', 'terms' => $country]] : [];
+        if (!get_post_meta($post_id, 'related_tours', true)) {
+            $tours = get_posts(['post_type' => 'tour', 'posts_per_page' => 3, 'fields' => 'ids', 'tax_query' => $tax_query]);
+            if ($tours) update_post_meta($post_id, 'related_tours', $tours);
+        }
+        if (!get_post_meta($post_id, 'related_hotels', true)) {
+            $hotels = get_posts(['post_type' => 'hotel', 'posts_per_page' => 3, 'exclude' => [$post_id], 'fields' => 'ids', 'tax_query' => $tax_query]);
+            if ($hotels) update_post_meta($post_id, 'related_hotels', $hotels);
+        }
+        if (!get_post_meta($post_id, 'related_things', true)) {
+            $things = get_posts(['post_type' => ['thing_to_do', 'place_to_go'], 'posts_per_page' => 3, 'fields' => 'ids', 'tax_query' => $tax_query]);
+            if ($things) update_post_meta($post_id, 'related_things', $things);
+        }
+
+
 
         $filled++;
     }
@@ -692,14 +767,20 @@ function aat_enrich_hotels($offset = 0, $limit = 20) {
 }
 
 /** Enriches destination places with tagline, overview, and map info. */
-function aat_enrich_places($offset = 0, $limit = 20) {
-    $posts = get_posts([
+function aat_enrich_places($offset = 0, $limit = 20, $specific_ids = []) {
+    $args = [
         'post_type' => 'place_to_go',
         'post_status' => ['publish', 'draft'],
         'posts_per_page' => $limit,
         'offset' => $offset,
         'fields' => 'ids',
-    ]);
+    ];
+    if (!empty($specific_ids)) {
+        $args['post__in'] = $specific_ids;
+        $args['posts_per_page'] = -1;
+        $args['offset'] = 0;
+    }
+    $posts = get_posts($args);
 
     if (!$posts) return ['imported' => 0, 'done' => true, 'offset' => $offset];
 
@@ -728,14 +809,61 @@ function aat_enrich_places($offset = 0, $limit = 20) {
         // 4. Map info
         if (!get_post_meta($post_id, 'location_map', true)) update_post_meta($post_id, 'location_map', $title);
         if (!get_post_meta($post_id, 'map_headline', true)) update_post_meta($post_id, 'map_headline', 'Highlights of ' . $title);
+        if (!get_post_meta($post_id, 'map_description', true)) update_post_meta($post_id, 'map_description', 'Explore the most iconic sights and hidden gems.');
+        if (!get_post_meta($post_id, 'map_stops', true)) update_post_meta($post_id, 'map_stops', $title);
+        if (!get_post_meta($post_id, 'latitude', true)) update_post_meta($post_id, 'latitude', '15.8700');
+        if (!get_post_meta($post_id, 'longitude', true)) update_post_meta($post_id, 'longitude', '100.9925');
 
-        // 5. Specialist Block
-        if (!get_post_meta($post_id, 'specialist_title', true)) update_post_meta($post_id, 'specialist_title', 'Speak to an Asia Travel Specialist');
-        if (!get_post_meta($post_id, 'specialist_text', true)) update_post_meta($post_id, 'specialist_text', 'Every journey with Absolute Asia is private, tailor-made, and planned around your exact pace, interests, and preferred style of travel. Connect with a specialist to begin designing your bespoke itinerary.');
-        if (!get_post_meta($post_id, 'specialist_button', true)) update_post_meta($post_id, 'specialist_button', 'Plan Your Trip');
-        if (!get_post_meta($post_id, 'specialist_link', true)) update_post_meta($post_id, 'specialist_link', '/#plan');
-        if (!get_post_meta($post_id, 'specialist_phone', true)) update_post_meta($post_id, 'specialist_phone', '+1 (800) 736-8187');
-        if (!get_post_meta($post_id, 'specialist_photo', true)) update_post_meta($post_id, 'specialist_photo', 'https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Village-Suite.jpg');
+
+
+        // 6. Gallery
+        $existing_gallery = get_post_meta($post_id, 'gallery', true);
+        if (!$existing_gallery || $existing_gallery === '[]') {
+            $content = get_post_field('post_content', $post_id);
+            if (preg_match_all('/<img[^>]+src=(["\'])(https?:\/\/[^"\']+)\1/i', $content, $matches)) {
+                $gallery_rows = [];
+                foreach (array_unique($matches[2]) as $img_url) {
+                    $gallery_rows[] = ['image_url' => $img_url, 'caption' => ''];
+                }
+                if ($gallery_rows) {
+                    update_post_meta($post_id, 'gallery', wp_slash(wp_json_encode(array_slice($gallery_rows, 0, 8))));
+                }
+            }
+        }
+
+        // 7. Related Tours and Places
+        $terms = get_the_terms($post_id, 'country');
+        $tax_query = ($terms && !is_wp_error($terms)) ? [['taxonomy' => 'country', 'field' => 'term_id', 'terms' => $terms[0]->term_id]] : [];
+        
+        if (!get_post_meta($post_id, 'featured_tours', true)) {
+            $tours = get_posts(['post_type' => 'tour', 'posts_per_page' => 3, 'fields' => 'ids', 'tax_query' => $tax_query]);
+            if ($tours) update_post_meta($post_id, 'featured_tours', $tours);
+        }
+        if (!get_post_meta($post_id, 'related_places', true)) {
+            $places = get_posts(['post_type' => ['place_to_go', 'thing_to_do'], 'posts_per_page' => 4, 'exclude' => [$post_id], 'fields' => 'ids', 'tax_query' => $tax_query]);
+            if ($places) update_post_meta($post_id, 'related_places', $places);
+        }
+
+        // 8. Destination Guide Content
+        $guide_fields = [
+            'month_guide' => wp_slash(wp_json_encode([
+                ['month' => 'Jan - Apr', 'description' => 'Cool and dry weather, ideal for touring.'],
+                ['month' => 'May - Aug', 'description' => 'Warmer with occasional showers. Great for beaches.'],
+                ['month' => 'Sep - Dec', 'description' => 'Autumn foliage and pleasant temperatures.']
+            ])),
+            'best_time_image' => '',
+            'best_time_html' => '<h3>The Best Time to Visit ' . $title . '</h3><p>The optimal time for a journey depends largely on the regions you plan to cover.</p>',
+            'popular_places_html' => '<h3>Popular Places</h3><p>Discover the rich history and modern energy of the top destinations.</p>',
+            'experiences_html' => '<h3>Top Experiences</h3><p>Engage with local culture through our curated signature experiences.</p>',
+            'trip_ideas_html' => '<p>Browse our sample itineraries to start planning your bespoke journey.</p>'
+        ];
+        foreach ($guide_fields as $key => $val) {
+            if (!get_post_meta($post_id, $key, true)) {
+                update_post_meta($post_id, $key, $val);
+            }
+        }
+
+
 
         $filled++;
     }
@@ -745,14 +873,20 @@ function aat_enrich_places($offset = 0, $limit = 20) {
 }
 
 /** Enriches articles (guides, things to do, blogs) with hero image and read time. */
-function aat_enrich_articles($offset = 0, $limit = 20) {
-    $posts = get_posts([
+function aat_enrich_articles($offset = 0, $limit = 20, $specific_ids = []) {
+    $args = [
         'post_type' => ['travel_guide', 'thing_to_do', 'blog'],
         'post_status' => ['publish', 'draft'],
         'posts_per_page' => $limit,
         'offset' => $offset,
         'fields' => 'ids',
-    ]);
+    ];
+    if (!empty($specific_ids)) {
+        $args['post__in'] = $specific_ids;
+        $args['posts_per_page'] = -1;
+        $args['offset'] = 0;
+    }
+    $posts = get_posts($args);
 
     if (!$posts) return ['imported' => 0, 'done' => true, 'offset' => $offset];
 
@@ -781,13 +915,7 @@ function aat_enrich_articles($offset = 0, $limit = 20) {
             if ($excerpt) update_post_meta($post_id, 'intro_html', $excerpt);
         }
 
-        // 4. Specialist Block
-        if (!get_post_meta($post_id, 'specialist_title', true)) update_post_meta($post_id, 'specialist_title', 'Speak to an Asia Travel Specialist');
-        if (!get_post_meta($post_id, 'specialist_text', true)) update_post_meta($post_id, 'specialist_text', 'Every journey with Absolute Asia is private, tailor-made, and planned around your exact pace, interests, and preferred style of travel. Connect with a specialist to begin designing your bespoke itinerary.');
-        if (!get_post_meta($post_id, 'specialist_button', true)) update_post_meta($post_id, 'specialist_button', 'Plan Your Trip');
-        if (!get_post_meta($post_id, 'specialist_link', true)) update_post_meta($post_id, 'specialist_link', '/#plan');
-        if (!get_post_meta($post_id, 'specialist_phone', true)) update_post_meta($post_id, 'specialist_phone', '+1 (800) 736-8187');
-        if (!get_post_meta($post_id, 'specialist_photo', true)) update_post_meta($post_id, 'specialist_photo', 'https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Village-Suite.jpg');
+
 
         // 5. Further Reading Articles (related_guides)
         $existing_guides = get_post_meta($post_id, 'related_guides', true);
@@ -856,6 +984,35 @@ function aat_enrich_articles($offset = 0, $limit = 20) {
             }
         }
 
+        // 7. Gallery
+        $existing_gallery = get_post_meta($post_id, 'gallery', true);
+        if (!$existing_gallery || $existing_gallery === '[]') {
+            $content = get_post_field('post_content', $post_id);
+            if (preg_match_all('/<img[^>]+src=(["\'])(https?:\/\/[^"\']+)\1/i', $content, $matches)) {
+                $gallery_rows = [];
+                foreach (array_unique($matches[2]) as $img_url) {
+                    $gallery_rows[] = ['image_url' => $img_url, 'caption' => ''];
+                }
+                if ($gallery_rows) {
+                    update_post_meta($post_id, 'gallery', wp_slash(wp_json_encode(array_slice($gallery_rows, 0, 8))));
+                }
+            }
+        }
+
+        // 8. Secondary Content & Plan Section
+        $article_fields = [
+            'content_left' => '<p>Discover the untold stories of this region and gain a deeper understanding of its cultural heritage.</p>',
+            'content_right_image' => '',
+            'plan_description' => '<p>Let our specialists design a tailor-made itinerary that matches your unique travel style.</p>',
+            'plan_html' => '',
+            'plan_footer' => '<p>Get in touch today to begin your journey.</p>'
+        ];
+        foreach ($article_fields as $key => $val) {
+            if (!get_post_meta($post_id, $key, true)) {
+                update_post_meta($post_id, $key, $val);
+            }
+        }
+
         $filled++;
     }
 
@@ -872,17 +1029,13 @@ function aat_auto_fill_post_fields($post_id) {
     if (!$type) return;
 
     if ($type === 'tour') {
-        delete_post_meta($post_id, '_aat_tour_enriched_v2');
-        aat_enrich_tours(1);
+        aat_enrich_tours(0, 1, [$post_id]);
     } elseif ($type === 'hotel') {
-        delete_post_meta($post_id, '_aat_hotel_enriched');
-        aat_enrich_hotels(1);
+        aat_enrich_hotels(0, 1, [$post_id]);
     } elseif ($type === 'place_to_go') {
-        delete_post_meta($post_id, '_aat_place_enriched');
-        aat_enrich_places(1);
+        aat_enrich_places(0, 1, [$post_id]);
     } elseif (in_array($type, ['travel_guide', 'thing_to_do', 'blog'], true)) {
-        delete_post_meta($post_id, '_aat_article_enriched');
-        aat_enrich_articles(1);
+        aat_enrich_articles(0, 1, [$post_id]);
     }
 }
 

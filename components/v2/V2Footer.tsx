@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { MenuItem, SitePayload } from "@/lib/wp";
 import { toLocalHref } from "@/lib/links";
-import { BRAND_SHORT, SOCIAL_LINKS } from "@/lib/site";
+import { BRAND_NAME, BRAND_SHORT, SOCIAL_LINKS } from "@/lib/site";
+import { optimized } from "@/lib/images";
 
 /** Footer columns come from the WordPress "footer" menu; these ship until it exists. */
 const FALLBACK_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string }> }> = [
@@ -58,7 +59,18 @@ export function V2Footer({ site }: { site?: SitePayload | null }) {
     <footer>
       <div className="container footer-top">
         <div className="footer-brand">
-          <span className="footer-mark">AA</span>
+          <Link href="/" className="brand-mark footer-brand-mark" style={{ marginBottom: "1.2rem", display: "inline-flex", textDecoration: "none" }}>
+            {site?.logo ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img className="brand-logo" src={optimized(site.logo, 240)} alt={site?.name || BRAND_NAME} />
+            ) : (
+              <span className="seal">A</span>
+            )}
+            <span className="brand-text">
+              <span className="name">{site?.name || BRAND_NAME}</span>
+              <span className="tag">Private | Luxury | Journeys</span>
+            </span>
+          </Link>
           <h3>Find your next <em>journey</em></h3>
           <p>{name}&apos;s dispatch is filled with real itineraries and the odd travel tip, sent a few times a year.</p>
           <div className="footer-newsletter">
