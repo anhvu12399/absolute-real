@@ -789,6 +789,73 @@ function aat_enrich_articles($offset = 0, $limit = 20) {
         if (!get_post_meta($post_id, 'specialist_phone', true)) update_post_meta($post_id, 'specialist_phone', '+1 (800) 736-8187');
         if (!get_post_meta($post_id, 'specialist_photo', true)) update_post_meta($post_id, 'specialist_photo', 'https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Village-Suite.jpg');
 
+        // 5. Further Reading Articles (related_guides)
+        $existing_guides = get_post_meta($post_id, 'related_guides', true);
+        if (empty($existing_guides) || $existing_guides === '[]' || (is_array($existing_guides) && empty($existing_guides))) {
+            $country_terms = get_the_terms($post_id, 'country');
+            $tax_query = [];
+            if ($country_terms && !is_wp_error($country_terms)) {
+                $tax_query[] = [
+                    'taxonomy' => 'country',
+                    'field' => 'term_id',
+                    'terms' => $country_terms[0]->term_id,
+                ];
+            }
+            $guide_ids = get_posts([
+                'post_type' => ['travel_guide', 'thing_to_do', 'blog'],
+                'post_status' => 'publish',
+                'posts_per_page' => 4,
+                'exclude' => [$post_id],
+                'fields' => 'ids',
+                'tax_query' => $tax_query,
+            ]);
+            if (count($guide_ids) < 4) {
+                $more_ids = get_posts([
+                    'post_type' => ['travel_guide', 'thing_to_do', 'blog'],
+                    'post_status' => 'publish',
+                    'posts_per_page' => 4 - count($guide_ids),
+                    'exclude' => array_merge([$post_id], $guide_ids),
+                    'fields' => 'ids',
+                ]);
+                $guide_ids = array_merge($guide_ids, $more_ids);
+            }
+            if (!empty($guide_ids)) {
+                update_post_meta($post_id, 'related_guides', $guide_ids);
+            }
+        }
+
+        // 6. Related Tours (related_tours)
+        $existing_tours = get_post_meta($post_id, 'related_tours', true);
+        if (empty($existing_tours) || $existing_tours === '[]' || (is_array($existing_tours) && empty($existing_tours))) {
+            $country_terms = get_the_terms($post_id, 'country');
+            $tax_query = [];
+            if ($country_terms && !is_wp_error($country_terms)) {
+                $tax_query[] = [
+                    'taxonomy' => 'country',
+                    'field' => 'term_id',
+                    'terms' => $country_terms[0]->term_id,
+                ];
+            }
+            $tour_ids = get_posts([
+                'post_type' => 'tour',
+                'post_status' => 'publish',
+                'posts_per_page' => 3,
+                'fields' => 'ids',
+                'tax_query' => $tax_query,
+            ]);
+            if (empty($tour_ids)) {
+                $tour_ids = get_posts([
+                    'post_type' => 'tour',
+                    'post_status' => 'publish',
+                    'posts_per_page' => 3,
+                    'fields' => 'ids',
+                ]);
+            }
+            if (!empty($tour_ids)) {
+                update_post_meta($post_id, 'related_tours', $tour_ids);
+            }
+        }
+
         $filled++;
     }
 

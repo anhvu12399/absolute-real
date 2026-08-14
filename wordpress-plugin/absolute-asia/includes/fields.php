@@ -409,21 +409,21 @@ function aat_register_fields() {
 
             aat_tab('tab_aat_ed_sidebar', 'Sidebar & Further Reading'),
             aat_text('field_aat_ed_further', 'Further Reading Title', 'further_title', ['default_value' => 'Further Reading']),
-
-            aat_tab('tab_aat_ed_gallery', 'Gallery & Related'),
-            aat_repeater_field('field_aat_ed_gallery', 'Gallery', 'gallery', 'gallery'),
             [
                 'key' => 'field_aat_ed_guides',
-                'label' => 'Related Guides',
+                'label' => 'Further Reading Articles (Chọn bài đọc thêm)',
                 'name' => 'related_guides',
                 'type' => 'post_object',
                 'post_type' => ['travel_guide', 'thing_to_do', 'blog'],
                 'multiple' => 1,
                 'return_format' => 'id',
             ],
+
+            aat_tab('tab_aat_ed_gallery', 'Gallery & Related Tours'),
+            aat_repeater_field('field_aat_ed_gallery', 'Gallery', 'gallery', 'gallery'),
             [
                 'key' => 'field_aat_ed_tours',
-                'label' => 'Related Tours',
+                'label' => 'Related Tours / Journeys',
                 'name' => 'related_tours',
                 'type' => 'post_object',
                 'post_type' => ['tour'],
