@@ -329,11 +329,11 @@ export default function HomeTemplateV2({
 
   const tabsHeadline = str("tabs_headline", "Where will Asia take you?");
   const featuredHeadline = str("featured_headline", "Private journeys to begin with");
-  const cruisesHeadline = str("cruises_headline", "Cruises and stays worth the detour");
+  const cruisesHeadline = str("cruises_headline", str("stay_headline", "Cruises and stays worth the detour"));
   const inspirationHeadline = str("inspiration_headline", "Reading before you go");
   const specialistsHeadline = str("specialists_headline", "The people who plan it");
-  const enquiryHeadline = str("enquiry_headline", "Your Asia journey starts with a conversation");
-  const enquiryNote = str("enquiry_note");
+  const enquiryHeadline = str("enquiry_headline", str("plan_headline", "Your Asia journey starts with a conversation"));
+  const enquiryNote = str("enquiry_note", str("plan_desc", ""));
 
   const team = safeParse(acf.team);
 
