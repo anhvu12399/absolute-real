@@ -18,7 +18,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#0c1424",
+  /* Matches --chrome: the browser chrome on mobile should be the same
+     lacquer black as the menu it sits above. */
+  themeColor: "#171110",
 };
 
 export const metadata: Metadata = {

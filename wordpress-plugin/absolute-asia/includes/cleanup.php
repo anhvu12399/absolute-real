@@ -365,9 +365,14 @@ function aat_cleanup_records() {
     /* Runs after the country fixes: the stricter image rules need the country
        assignments to be right before they can judge a borrowed photograph. */
     $images = aat_repair_borrowed_images();
+    /* Every country term had an empty photograph, so the destination grids
+       had nothing to show. Runs last: it reads each country's own posts, and
+       the country assignments above have to be right first. */
+    $flags = function_exists('aat_backfill_country_images') ? aat_backfill_country_images() : [];
 
     return [
-        'imported' => count($countries) + count($terms) + count($duplicates) + count($images) + count($years),
+        'imported' => count($countries) + count($terms) + count($duplicates)
+            + count($images) + count($years) + count($flags),
         'done' => true,
         'details' => [
             'country' => $countries,
@@ -375,6 +380,7 @@ function aat_cleanup_records() {
             'duplicates' => $duplicates,
             'images' => $images,
             'years' => $years,
+            'countryPhotos' => $flags,
         ],
     ];
 }

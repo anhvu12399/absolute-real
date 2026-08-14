@@ -238,6 +238,26 @@ export default function HomeTemplateV2({
     widestPhoto([...tours, ...hotels])?.url ||
     "";
 
+  /* The quote band and the statement band were flat CSS gradients — two
+     full-bleed bands of coloured smear on a page that is otherwise all
+     photography. Both take a photograph from WordPress; until one is set they
+     borrow the sharpest plate the site owns, and each takes from a different
+     pool so the two bands never show the same picture. */
+  const bandPhoto = (authored: unknown, pools: ArchiveItem[][], taken: string[]) => {
+    const set = typeof authored === "string" ? authored.trim() : "";
+    if (set) return set;
+    for (const pool of pools) {
+      const found = pool
+        .filter((item) => item.featuredMedia?.url && !taken.includes(item.featuredMedia.url))
+        .sort((a, b) => (b.featuredMedia?.width || 0) - (a.featuredMedia?.width || 0))[0];
+      if (found?.featuredMedia?.url) return found.featuredMedia.url;
+    }
+    return "";
+  };
+
+  const quoteImage = bandPhoto(acf.quote_image, [places, tours], [responsiblyImage]);
+  const storyImage = bandPhoto(acf.story_bar_image, [tours, places, hotels], [responsiblyImage, quoteImage]);
+
   /* --- reveal init --- */
   useEffect(() => {
     const reveals = document.querySelectorAll(".reveal:not(.is-visible)");
@@ -291,12 +311,23 @@ export default function HomeTemplateV2({
     .sort((a, b) => (b.duration ? 1 : 0) - (a.duration ? 1 : 0))
     .slice(0, 6);
 
-  /* Cruises first — they are the distinctive half of this section — then the
-     stays, with no repeats. */
+  /* Hotels lead. Sorting cruises to the front filled every row with boats —
+     five entries all reading "Asia Cruises" — while the addresses the section
+     is named for never appeared. Hotels first, then cruises to round it out,
+     and the sharpest photograph leads because it takes the whole panel. */
+  const sharpest = (items: ArchiveItem[]) =>
+    items
+      .filter((item) => item.featuredMedia?.url)
+      .sort((a, b) => (b.featuredMedia?.width || 0) - (a.featuredMedia?.width || 0));
+
+  /* Four addresses and one vessel. Cruises used to fill every row — five
+     entries all reading "Asia Cruises", and not one of the hotels the section
+     is named for. Hotels lead and hold the lead plate; a single cruise keeps
+     the other half of the section's name honest. */
   const register = [
-    ...cruises,
-    ...hotels.filter((h) => !cruises.some((c) => c.id === h.id)),
-  ].slice(0, 6);
+    ...sharpest(hotels).slice(0, 4),
+    ...sharpest(cruises.filter((c) => !hotels.some((h) => h.id === c.id))).slice(0, 1),
+  ];
 
   const editorial = guides.slice(0, 3);
 
@@ -367,61 +398,83 @@ export default function HomeTemplateV2({
           anything — so "01 02 03 04" would assert an order that does not
           exist. Reading the place names down the spine is both the honest
           label and the navigation. */}
-      <section
-        id="hero"
-        className={`spine-hero ph ${hero.image_url ? "" : "ph-hero"}`}
-      >
-        {/* A separate layer so the photograph can drift without moving the
-            type sitting on top of it. */}
-        <div
-          key={heroIndex}
-          className="spine-plate"
-          style={hero.image_url ? bg(hero.image_url, "hero") : undefined}
-          aria-hidden="true"
-        />
-        <div className="spine-veil" aria-hidden="true" />
+      <section id="hero" className="spine-hero">
+        {/* The photograph and the type that must sit on it. */}
+        <div className={`spine-stage ph ${hero.image_url ? "" : "ph-hero"}`}>
+          {/* A separate layer so the photograph can drift without moving the
+              type sitting on top of it. */}
+          <div
+            key={heroIndex}
+            className="spine-plate"
+            style={hero.image_url ? bg(hero.image_url, "hero") : undefined}
+            aria-hidden="true"
+          />
+          <div className="spine-veil" aria-hidden="true" />
 
-        <div className="container spine-inner">
-          <div className="spine-copy" key={`copy-${heroIndex}`}>
-            {heroPlace && (
-              <p className="spine-place">
-                <span className="spine-rule" aria-hidden="true" />
-                {heroPlace}
-              </p>
-            )}
+          {slides.length > 1 && (
+            <nav className="spine-index" aria-label="Choose a destination">
+              {slides.map((slide, idx) => {
+                /* Place names, not full titles: "Bali" reads down a spine,
+                   "Bali, Culture & Island Escapes" does not. */
+                const label = placeOf(slide);
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`spine-index-item${idx === heroIndex ? " is-active" : ""}`}
+                    onClick={() => setHeroIndex(idx)}
+                    aria-current={idx === heroIndex ? "true" : undefined}
+                  >
+                    <span className="spine-index-tick" aria-hidden="true" />
+                    <span className="spine-index-label">{label || `Slide ${idx + 1}`}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          )}
 
-            <h1 className="spine-headline">{heroHeadline}</h1>
-
-            {hero.subtitle && <p className="spine-note">{clamp(hero.subtitle, 132)}</p>}
-
-            <Link href={toLocalHref(hero.link, "#plan")} className="spine-link">
-              {String(hero.link_text || "See this journey")}
-              <ArrowSvg />
-            </Link>
+          <div className="container spine-inner">
+            <div className="spine-copy" key={`copy-${heroIndex}`}>
+              {heroPlace && (
+                <p className="spine-place">
+                  <span className="spine-rule" aria-hidden="true" />
+                  {heroPlace}
+                </p>
+              )}
+              <h1 className="spine-headline">{heroHeadline}</h1>
+            </div>
           </div>
+
+          {/* The deckle edge — the torn edge of a sheet of hand-made paper.
+              It is cream painted over the photograph, so the boundary is a
+              real edge rather than a gradient, and the sentence below it sits
+              on solid paper instead of on a picture. */}
+          <svg
+            className="spine-deckle"
+            viewBox="0 0 1440 60"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            {/* Straight runs broken by short notches — a sheet torn against a
+                ruler. A smooth sine wave would read as a section divider, not
+                as paper. */}
+            <path
+              fill="var(--cream)"
+              d="M0 60V33l38-2c24-1 36 5 58 4l36-3c18-1 26-7 46-6l36 3 24-2c22-1 30 6 54 5l48-3c16-1 22-7 44-5l34 4 34-3c22-1 32 6 56 5l48-4c16-1 22-7 44-5l40 5 36-3c22-1 30 6 54 5l48-4c16-1 22-7 44-5l40 6 36-3c22-1 30 6 54 5l48-4c16-1 22-7 44-5l40 6 36-3c22-1 32 6 56 5L1440 32v28Z"
+            />
+          </svg>
         </div>
 
-        {slides.length > 1 && (
-          <nav className="spine-index" aria-label="Choose a destination">
-            {slides.map((slide, idx) => {
-              /* Place names, not full titles: "Bali" reads down a spine,
-                 "Bali, Culture & Island Escapes" does not. */
-              const label = placeOf(slide);
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  className={`spine-index-item${idx === heroIndex ? " is-active" : ""}`}
-                  onClick={() => setHeroIndex(idx)}
-                  aria-current={idx === heroIndex ? "true" : undefined}
-                >
-                  <span className="spine-index-tick" aria-hidden="true" />
-                  <span className="spine-index-label">{label || `Slide ${idx + 1}`}</span>
-                </button>
-              );
-            })}
-          </nav>
-        )}
+        {/* Below the tear: the sentence a reader actually has to read, in ink
+            on paper. No overlay is needed to make it legible, so the
+            photograph above keeps its own light. */}
+        <div className="container spine-foot">
+          {hero.subtitle && <p className="spine-note">{clamp(hero.subtitle, 132)}</p>}
+          <Link href={toLocalHref(hero.link, "#plan")} className="spine-link">
+            {String(hero.link_text || "See this journey")}
+            <ArrowSvg />
+          </Link>
+        </div>
       </section>
 
       {/* ═══ 3 · TRUST BAR ═══
@@ -773,7 +826,11 @@ export default function HomeTemplateV2({
 
       {/* ═══ QUOTE ═══ */}
       {String(acf.quote_text || "").trim() && (
-        <section id="quote" className="quote-wrap ph ph-quote">
+        <section
+          id="quote"
+          className={`quote-wrap ph ${quoteImage ? "" : "ph-quote"}`}
+          style={quoteImage ? bg(quoteImage, "hero") : undefined}
+        >
           <div className="overlay-full" />
           <div className="quote-inner reveal">
             <q>{String(acf.quote_text)}</q>
@@ -810,7 +867,11 @@ export default function HomeTemplateV2({
           Sits where it always sat: the last word before the enquiry form, so
           the four reasons to trust the company are the thing still in view
           when the reader reaches the fields. */}
-      <section id="values" className="story-bar ph ph-desert">
+      <section
+        id="values"
+        className={`story-bar ph ${storyImage ? "" : "ph-desert"}`}
+        style={storyImage ? bg(storyImage, "hero") : undefined}
+      >
         <div className="overlay-full" />
         <div className="container story-bar-inner reveal">
           <div>

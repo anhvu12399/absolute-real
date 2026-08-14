@@ -108,7 +108,88 @@ export default function SingleTourTemplateV2({
   const exclusions = lines(acf.exclusions_list);
 
   /* WordPress stores the itinerary flat, one row per day, tagged with its region. */
-  const itineraryRows = rows<ItineraryRow>(acf.itinerary);
+  const authoredItinerary = rows<ItineraryRow>(acf.itinerary);
+
+  /* 27 tours arrived from the legacy site with an empty itinerary field and
+     their days written into the body as `<h3>DAY 4: NIKKO – MISTY LAKES</h3>`
+     followed by prose. Those pages showed the days as undifferentiated
+     article text and — because the section is gated on having rows — no map
+     at all. Reading the headings back out gives them both. Nothing is
+     invented: every day, title and paragraph here is the text WordPress
+     already holds. `aat_backfill_itineraries()` writes the same rows into the
+     field so an editor can edit them; once it has run, this never fires. */
+  const derivedItinerary: ItineraryRow[] = (() => {
+    if (authoredItinerary.length) return [];
+    const body = typeof tourData?.content === "string" ? tourData.content : "";
+    if (!body) return [];
+
+    /* The body is stored double-encoded, so a stripped heading still reads
+       "SHRINES &#038; URBAN SERENITY". Loop until it stops changing. */
+    const decode = (value: string) => {
+      let out = value;
+      for (let pass = 0; pass < 3; pass++) {
+        const before = out;
+        out = out
+          .replace(/&#0?(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+          .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
+          .replace(/&amp;/g, "&")
+          .replace(/&nbsp;/g, " ")
+          .replace(/&quot;/g, '"')
+          .replace(/&#039;|&apos;/g, "'")
+          .replace(/&hellip;/g, "…")
+          .replace(/&ndash;/g, "–")
+          .replace(/&mdash;/g, "—")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">");
+        if (out === before) break;
+      }
+      return out;
+    };
+
+    const blocks = body.split(/<h[23][^>]*>(?=\s*DAY\s*\d)/i).slice(1);
+    return blocks
+      .map((block, index) => {
+        const head = block.match(/^([\s\S]*?)<\/h[23]>/i);
+        if (!head) return null;
+        const heading = decode(head[1].replace(/<[^>]+>/g, "")).trim();
+        const dayNum = Number((heading.match(/DAY\s*(\d+)/i) || [])[1] || index + 1);
+        /* "DAY 4: NIKKO – MISTY LAKES" → region "Nikko", title the rest. */
+        const after = heading.replace(/^DAY\s*\d+\s*[:.\-–—]\s*/i, "").trim();
+        /* "ARRIVAL IN TOKYO" and "TOKYO" are the same stop; leaving the verb
+           on split them into two groups and put a phantom pin on the map. */
+        const place = after
+          .split(/[–—-]/)[0]
+          .replace(/^(arrival\s+in|arrive\s+in|departure\s+from|depart\s+from|return\s+to|onward\s+to|transfer\s+to|fly\s+to)\s+/i, "")
+          .trim();
+        const prose = decode(
+          block
+            .slice(head[0].length)
+            .replace(/<h[23][\s\S]*$/i, "")
+            .replace(/<[^>]+>/g, " "),
+        )
+          .replace(/\s+/g, " ")
+          .trim();
+
+        return {
+          day_num: String(dayNum),
+          title: `Day ${dayNum}: ${after || heading}`,
+          description: prose,
+          group_tag: place || "Itinerary",
+        } as ItineraryRow;
+      })
+      .filter((row): row is ItineraryRow => Boolean(row));
+  })();
+
+  const itineraryRows = authoredItinerary.length ? authoredItinerary : derivedItinerary;
+
+  /* Whatever the day headings claimed is now the itinerary, so the overview
+     keeps only the paragraphs that came before the first one. */
+  const overviewBody = (() => {
+    const body = typeof tourData?.content === "string" ? tourData.content : "";
+    if (!body) return "";
+    if (!derivedItinerary.length) return body;
+    return body.split(/<h[23][^>]*>(?=\s*DAY\s*\d)/i)[0].trim();
+  })();
   const itineraryGroups = itineraryRows.reduce<
     Array<{ region: string; days: Array<{ id: number; title: string; desc: string; image?: string }> }>
   >((groups, row, index) => {
@@ -301,14 +382,17 @@ export default function SingleTourTemplateV2({
             <span className="current">{title}</span>
           </p>
 
-          <div className="overview-lede reveal">
-            <span className="tag">Overview</span>
-            {tourData?.content ? (
-              <div className="wordpress-content" dangerouslySetInnerHTML={{ __html: tourData.content }} />
-            ) : (
-              <p>A single thread from north to south: Halong Bay by private junk, Hue's imperial tombs, and Saigon after dark. Forward-looking cities give way to rice terraces and quiet fishing villages, with a private guide and driver throughout.</p>
-            )}
-          </div>
+          {/* The lede is what comes before the first day. When the days were
+              lifted out of the body into the itinerary below, leaving them
+              here too would print the whole tour twice. A tour with no body
+              text shows no lede — it does not borrow a description of
+              somewhere else. */}
+          {overviewBody && (
+            <div className="overview-lede reveal">
+              <span className="tag">Overview</span>
+              <div className="wordpress-content" dangerouslySetInnerHTML={{ __html: overviewBody }} />
+            </div>
+          )}
 
           {highlights.length > 0 && (
             <div className="reveal" style={{ marginTop: "2.4rem" }}>

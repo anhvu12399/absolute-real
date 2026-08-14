@@ -139,6 +139,9 @@ function aat_register_fields() {
             aat_textarea('field_aat_home_map_desc', 'Map Description', 'map_description', 4),
             aat_textarea('field_aat_home_quote', 'Quote Text', 'quote_text', 3),
             aat_text('field_aat_home_quote_cite', 'Quote Citation', 'quote_citation'),
+            /* Full-bleed band. Left empty it borrows the sharpest photograph
+               the site already owns, rather than showing a coloured gradient. */
+            aat_image('field_aat_home_quote_image', 'Quote Photo', 'quote_image'),
             aat_text('field_aat_home_resp_head', 'Travel Responsibly Headline', 'responsibly_headline'),
             aat_textarea('field_aat_home_resp_text', 'Travel Responsibly Text', 'responsibly_text', 4),
             /* The panel beside this copy was a flat gradient with nothing in it. */
@@ -149,6 +152,9 @@ function aat_register_fields() {
             aat_text('field_aat_home_story_tag', 'Story Tagline', 'story_bar_tagline'),
             aat_text('field_aat_home_story_head', 'Story Headline (HTML)', 'story_bar_headline'),
             aat_text('field_aat_home_story_btn', 'Button Text', 'story_bar_link_text'),
+            /* Same rule as the quote band: a photograph, or the sharpest one
+               the site owns that the other bands are not already using. */
+            aat_image('field_aat_home_story_image', 'Statement Photo', 'story_bar_image'),
 
             aat_tab('tab_aat_home_plan', '📝 Form kế hoạch'),
             aat_text('field_aat_home_plan_eye', 'Eyebrow', 'plan_eyebrow'),

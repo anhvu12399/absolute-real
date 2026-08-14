@@ -298,8 +298,10 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
       getArchiveSafe({ type: "hotel", perPage: 12 }),
       getTermsSafe("country"),
       /* Cruise content lives in the asia-cruises category rather than a post
-         type of its own - that is how the legacy site filed it. */
-      getArchiveSafe({ type: "tour,travel_guide,blog", taxonomy: "category", term: "asia-cruises", perPage: 6 }),
+         type of its own - that is how the legacy site filed it. Vessels only:
+         including `blog` put an article, "Best Private Asia Luxury Tours for
+         Americans", into a list of boats you can board. */
+      getArchiveSafe({ type: "tour", taxonomy: "category", term: "asia-cruises", perPage: 6 }),
       getArchiveSafe({ type: "travel_guide,blog", perPage: 6 }),
     ]);
     /* Showcase strips lead with illustrated entries; a blank plate up front
@@ -391,8 +393,10 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
       getArchiveSafe({ type: "place_to_go", perPage: 60 }),
       getTermsSafe("country"),
       /* Cruise content lives in the asia-cruises category rather than a post
-         type of its own - that is how the legacy site filed it. */
-      getArchiveSafe({ type: "tour,travel_guide,blog", taxonomy: "category", term: "asia-cruises", perPage: 6 }),
+         type of its own - that is how the legacy site filed it. Vessels only:
+         including `blog` put an article, "Best Private Asia Luxury Tours for
+         Americans", into a list of boats you can board. */
+      getArchiveSafe({ type: "tour", taxonomy: "category", term: "asia-cruises", perPage: 6 }),
       getArchiveSafe({ type: "travel_guide,blog", perPage: 6 }),
     ]);
     return (
