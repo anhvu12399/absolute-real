@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { BRAND_NAME, BRAND_SHORT } from "@/lib/site";
+import { BRAND_SHORT } from "@/lib/site";
 import { optimized } from "@/lib/images";
 
 const ALL_DESTINATIONS = [
@@ -25,56 +25,67 @@ const ALL_DESTINATIONS = [
 ];
 
 const TRAVEL_EXPERIENCES = [
-  { id: "culture", label: "🏛️ Ancient Temples & Culture" },
-  { id: "culinary", label: "🍜 Gourmet Dining & Street Food Trails" },
-  { id: "nature", label: "🌿 Pristine Nature & Wildlife" },
-  { id: "wellness", label: "🧘 Spa, Yoga & Holistic Wellness" },
-  { id: "beach", label: "🏖️ Private Beaches & Island Escapes" },
-  { id: "arts", label: "🎨 Local Arts, Crafts & Traditions" },
-  { id: "cruise", label: "⛵ Private Yacht & River Cruises" },
-  { id: "adventure", label: "🚶 Light Trekking & Adventure" },
+  { id: "culture", label: "Ancient Temples & Cultural Heritage" },
+  { id: "culinary", label: "Gourmet Dining & Culinary Trails" },
+  { id: "nature", label: "Pristine Nature & Wildlife Encounters" },
+  { id: "wellness", label: "Holistic Wellness, Spa & Yoga" },
+  { id: "beach", label: "Private Island & Coastal Escapes" },
+  { id: "arts", label: "Local Arts, Crafts & Living Traditions" },
+  { id: "cruise", label: "Private Yacht & Luxury River Cruises" },
+  { id: "adventure", label: "Light Trekking & Active Discovery" },
 ];
 
-const REVIEWS = [
+function safeParse(val: unknown) {
+  if (Array.isArray(val)) return val;
+  if (typeof val === "string") {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+  }
+  return [];
+}
+
+const FALLBACK_TRIPADVISOR_REVIEWS = [
   {
-    name: "Eleanor & David Thornton",
-    location: "New York, NY",
-    tour: "14-Day Grand Indochina (Vietnam & Cambodia)",
-    date: "Travelled March 2026",
-    stars: 5,
-    quote:
+    user_name: "Eleanor & David Thornton",
+    date: "March 2026",
+    vote: 5,
+    content:
       "Absolute Asia planned our 25th anniversary to Vietnam and Cambodia. Every private guide was deeply knowledgeable, the Aman and Belmond accommodations were sublime, and the private sunrise tour of Angkor Wat with zero crowds was the highlight of our lives.",
   },
   {
-    name: "Sir Julian & Lady Mercer",
-    location: "London, United Kingdom",
-    tour: "12-Day Hidden Kingdoms of Bhutan & Nepal",
-    date: "Travelled November 2025",
-    stars: 5,
-    quote:
+    user_name: "Sir Julian & Lady Mercer",
+    date: "November 2025",
+    vote: 5,
+    content:
       "The attention to detail is unmatched. Having a private luxury car, seamless airport escorts at every stop, and dining in private monastery gardens made this our most effortless and awe-inspiring journey to date.",
   },
   {
-    name: "Dr. Marcus Vance & Family",
-    location: "San Francisco, CA",
-    tour: "16-Day Japan & Thailand Heritage",
-    date: "Travelled January 2026",
-    stars: 5,
-    quote:
+    user_name: "Dr. Marcus Vance & Family",
+    date: "January 2026",
+    vote: 5,
+    content:
       "Traveling with two teenagers can be challenging, but our travel designer crafted an itinerary that kept everyone enchanted — from tea masters in Kyoto to private elephant sanctuaries in Chiang Mai. 10/10 service.",
   },
   {
-    name: "Claire & Thomas Dubois",
-    location: "Geneva, Switzerland",
-    tour: "10-Day Private Bali & Komodo Voyage",
-    date: "Travelled February 2026",
-    stars: 5,
-    quote:
+    user_name: "Claire & Thomas Dubois",
+    date: "February 2026",
+    vote: 5,
+    content:
       "From our private yacht charter in Komodo to cliffside dinners at Nihi Sumba, Absolute Asia delivered sheer perfection. Their 24/7 on-the-ground concierge resolved our last-minute helicopter transfer without a hitch.",
   },
 ];
 
-export default function PlanTripTemplateV2({ data, fallbackImage = "" }: { data?: any; fallbackImage?: string }) {
+export default function PlanTripTemplateV2({
+  data,
+  homeData,
+  fallbackImage = "",
+}: {
+  data?: any;
+  homeData?: any;
+  fallbackImage?: string;
+}) {
   const heroBg = data?.featuredMedia?.url || fallbackImage;
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -124,6 +135,15 @@ export default function PlanTripTemplateV2({ data, fallbackImage = "" }: { data?
     e.preventDefault();
     setSubmitted(true);
   };
+
+  /* Reviews data aligned with Homepage */
+  const acf = homeData?.acf || data?.acf || {};
+  const parsedReviews = safeParse(acf.testimonials);
+  const testimonials = parsedReviews.length > 0 ? parsedReviews : FALLBACK_TRIPADVISOR_REVIEWS;
+  const reviewSummary = typeof acf.review_summary === "string" ? acf.review_summary : "";
+  const reviewLogo = typeof acf.review_logo === "string" ? acf.review_logo : "";
+  const reviewLink = typeof acf.review_link === "string" ? acf.review_link : "";
+  const reviewText = typeof acf.review_text === "string" ? acf.review_text : "";
 
   return (
     <>
@@ -241,22 +261,6 @@ export default function PlanTripTemplateV2({ data, fallbackImage = "" }: { data?
                 boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
               }}
             >
-              <div
-                style={{
-                  width: "64px",
-                  height: "64px",
-                  margin: "0 auto 1.5rem",
-                  background: "rgba(72,98,79,0.12)",
-                  color: "var(--rust)",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1.8rem",
-                }}
-              >
-                ✓
-              </div>
               <p className="eyebrow" style={{ justifyContent: "center" }}>
                 <em>Inquiry</em> Received
               </p>
@@ -780,132 +784,143 @@ export default function PlanTripTemplateV2({ data, fallbackImage = "" }: { data?
                   flexWrap: "wrap",
                 }}
               >
-                <span>🔒 100% Privacy Protected</span>
-                <span>⚡ 24-Hour Response Guarantee</span>
-                <span>✨ Zero Commitment Required</span>
+                <span>Privacy Protected</span>
+                <span>·</span>
+                <span>24-Hour Specialist Response</span>
+                <span>·</span>
+                <span>100% Obligation-Free</span>
               </div>
             </form>
           )}
         </div>
       </section>
 
-      {/* ═══ REVIEWS & TRUST SECTION (WHAT TRAVELERS SAY) ═══ */}
-      <section className="section on-white" id="traveler-reviews" style={{ borderTop: "1px solid var(--line-on-cream)" }}>
-        <div className="container">
-          <div className="center reveal" style={{ maxWidth: "720px", margin: "0 auto 3rem" }}>
-            <p className="eyebrow" style={{ justifyContent: "center" }}>
-              <em>Traveler</em> Stories &amp; Acclaim
-            </p>
-            <h2 style={{ fontSize: "clamp(1.8rem,3vw,2.5rem)", marginTop: "0.5rem" }}>
-              Unrivaled Experiences, Remembered for a Lifetime
-            </h2>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.8rem",
-                marginTop: "1rem",
-                padding: "0.5rem 1.2rem",
-                background: "var(--cream)",
-                borderRadius: "30px",
-                border: "1px solid var(--line-on-cream)",
-              }}
-            >
-              <span style={{ color: "var(--gold)", fontSize: "1rem" }}>★★★★★</span>
-              <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--ink)" }}>
-                5.0 Rating · Over 1,200+ Discerning Travelers Guided
-              </span>
+      {/* ═══ REVIEWS & TRUST SECTION (ALIGNED WITH HOMEPAGE) ═══ */}
+      {testimonials.length > 0 && (
+        <section className="section on-white" id="reviews" style={{ borderTop: "1px solid var(--line-on-cream)" }}>
+          <div className="container">
+            <div className="center reveal">
+              <p className="eyebrow">
+                <em>What</em> Travelers Say
+              </p>
+              {reviewSummary && (
+                <div style={{ marginTop: "0.6rem" }} dangerouslySetInnerHTML={{ __html: reviewSummary }} />
+              )}
+              {reviewLink && (
+                <a
+                  href={reviewLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-arrow"
+                  style={{ marginTop: "0.4rem", display: "inline-flex" }}
+                >
+                  {reviewLogo && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={optimized(reviewLogo, "thumb")}
+                      alt={reviewText || "TripAdvisor"}
+                      style={{ height: "20px", marginRight: "8px" }}
+                    />
+                  )}
+                  {reviewText || "Read reviews on TripAdvisor"}
+                </a>
+              )}
             </div>
-          </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "1.8rem",
-            }}
-          >
-            {REVIEWS.map((review, idx) => (
-              <div className="review-card" key={idx} style={{ height: "100%" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <p className="review-stars" aria-label="5 out of 5 stars">
-                    {"★".repeat(review.stars)}
-                  </p>
-                  <span
-                    style={{
-                      fontSize: "0.68rem",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                      color: "var(--rust)",
-                      fontWeight: 600,
-                      background: "rgba(72,98,79,0.08)",
-                      padding: "0.2rem 0.5rem",
-                      borderRadius: "2px",
-                    }}
-                  >
-                    Verified Guest
-                  </span>
-                </div>
-                <p className="review-quote" style={{ WebkitLineClamp: 7, fontSize: "0.92rem", lineHeight: 1.7 }}>
-                  “{review.quote}”
-                </p>
-                <div className="review-by" style={{ marginTop: "auto" }}>
-                  <span className="review-avatar is-empty" aria-hidden="true">
-                    {review.name.charAt(0)}
-                  </span>
-                  <div>
-                    <strong>{review.name}</strong>
-                    <em>
-                      {review.location} · {review.tour}
-                    </em>
+            <div className="card-grid reveal" style={{ marginTop: "2.4rem" }}>
+              {testimonials.slice(0, 6).map((item: any, idx: number) => (
+                <div className="review-card" key={idx}>
+                  {item.vote && (
+                    <p className="review-stars" aria-label={`${item.vote} out of 5`}>
+                      {"★".repeat(Math.min(5, Number(item.vote) || 5))}
+                    </p>
+                  )}
+                  <p className="review-quote">“{String(item.content || "").replace(/<[^>]+>/g, "").slice(0, 260)}”</p>
+                  <div className="review-by">
+                    {item.avatar ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        className="review-avatar"
+                        src={optimized(String(item.avatar), "thumb")}
+                        alt=""
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="review-avatar is-empty" aria-hidden="true">
+                        {String(item.user_name || "?").trim().charAt(0)}
+                      </span>
+                    )}
+                    <span>
+                      <strong>{String(item.user_name || "")}</strong>
+                      {item.date && <em>{String(item.date)}</em>}
+                    </span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* 4 Pillars of Trust */}
-          <div
-            style={{
-              marginTop: "4rem",
-              paddingTop: "3rem",
-              borderTop: "1px solid var(--line-on-cream)",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: "2rem",
-            }}
-          >
-            <div style={{ textAlign: "center" }}>
-              <span style={{ fontSize: "1.8rem" }}>💎</span>
-              <h4 style={{ fontSize: "0.95rem", margin: "0.6rem 0 0.3rem", color: "var(--ink)" }}>100% Private &amp; Bespoke</h4>
-              <p style={{ fontSize: "0.82rem", color: "var(--text-dim-on-cream)", lineHeight: 1.6 }}>
-                Every day, route, and hotel curated exclusively for your travel party.
-              </p>
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <span style={{ fontSize: "1.8rem" }}>👑</span>
-              <h4 style={{ fontSize: "0.95rem", margin: "0.6rem 0 0.3rem", color: "var(--ink)" }}>Privileged VIP Access</h4>
-              <p style={{ fontSize: "0.82rem", color: "var(--text-dim-on-cream)", lineHeight: 1.6 }}>
-                Private monastery blessings, after-hours temple entries &amp; top local guides.
-              </p>
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <span style={{ fontSize: "1.8rem" }}>🛎️</span>
-              <h4 style={{ fontSize: "0.95rem", margin: "0.6rem 0 0.3rem", color: "var(--ink)" }}>24/7 On-the-Ground Concierge</h4>
-              <p style={{ fontSize: "0.82rem", color: "var(--text-dim-on-cream)", lineHeight: 1.6 }}>
-                Immediate local assistance from our regional offices throughout Asia.
-              </p>
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <span style={{ fontSize: "1.8rem" }}>🛡️</span>
-              <h4 style={{ fontSize: "0.95rem", margin: "0.6rem 0 0.3rem", color: "var(--ink)" }}>Virtuoso &amp; Top Hotel Perks</h4>
-              <p style={{ fontSize: "0.82rem", color: "var(--text-dim-on-cream)", lineHeight: 1.6 }}>
-                Complimentary room upgrades, daily breakfast, and resort credits for our guests.
-              </p>
+            {/* 4 Pillars of Excellence (Clean, Luxury & Minimalist without Emojis) */}
+            <div
+              style={{
+                marginTop: "4rem",
+                paddingTop: "3rem",
+                borderTop: "1px solid var(--line-on-cream)",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: "2.4rem",
+              }}
+            >
+              <div>
+                <span style={{ fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--rust)", fontWeight: 700 }}>
+                  01 / BESPOKE
+                </span>
+                <h4 style={{ fontSize: "1.05rem", margin: "0.5rem 0 0.4rem", color: "var(--ink)", fontFamily: "'Playfair Display', serif" }}>
+                  100% Private Journeys
+                </h4>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-dim-on-cream)", lineHeight: 1.6, margin: 0 }}>
+                  Every day, route, and hotel curated exclusively for your personal pace and party.
+                </p>
+              </div>
+
+              <div>
+                <span style={{ fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--rust)", fontWeight: 700 }}>
+                  02 / ACCESS
+                </span>
+                <h4 style={{ fontSize: "1.05rem", margin: "0.5rem 0 0.4rem", color: "var(--ink)", fontFamily: "'Playfair Display', serif" }}>
+                  Privileged VIP Entrées
+                </h4>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-dim-on-cream)", lineHeight: 1.6, margin: 0 }}>
+                  Private monastery blessings, after-hours temple access, and top regional specialists.
+                </p>
+              </div>
+
+              <div>
+                <span style={{ fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--rust)", fontWeight: 700 }}>
+                  03 / SERVICE
+                </span>
+                <h4 style={{ fontSize: "1.05rem", margin: "0.5rem 0 0.4rem", color: "var(--ink)", fontFamily: "'Playfair Display', serif" }}>
+                  24/7 Ground Concierge
+                </h4>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-dim-on-cream)", lineHeight: 1.6, margin: 0 }}>
+                  Immediate local assistance from our regional offices throughout Southeast &amp; East Asia.
+                </p>
+              </div>
+
+              <div>
+                <span style={{ fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--rust)", fontWeight: 700 }}>
+                  04 / LUXURY
+                </span>
+                <h4 style={{ fontSize: "1.05rem", margin: "0.5rem 0 0.4rem", color: "var(--ink)", fontFamily: "'Playfair Display', serif" }}>
+                  Preferred Hotel Perks
+                </h4>
+                <p style={{ fontSize: "0.85rem", color: "var(--text-dim-on-cream)", lineHeight: 1.6, margin: 0 }}>
+                  Complimentary room upgrades, daily breakfast, and resort credits for our travelers.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   );
 }

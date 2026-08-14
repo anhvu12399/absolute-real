@@ -353,11 +353,14 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
   if (cleanPath === "/plan-my-trip/" || cleanPath === "/tailor-made-tours/") {
     /* The page carries no image of its own, so the hero borrows a real journey
        photograph rather than sitting on flat ink. */
-    const [feature] = await getArchiveSafe({ type: "tour", perPage: 1 });
+    const [tours, homeContent] = await Promise.all([
+      getArchiveSafe({ type: "tour", perPage: 1 }),
+      getContentByPath("/"),
+    ]);
     return (
       <>
         <EditBar targets={editTargets({ content })} />
-        <PlanTripTemplateV2 data={content} fallbackImage={feature?.featuredMedia?.url || ""} />
+        <PlanTripTemplateV2 data={content} homeData={homeContent} fallbackImage={tours[0]?.featuredMedia?.url || ""} />
       </>
     );
   }
