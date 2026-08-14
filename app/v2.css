@@ -1096,11 +1096,9 @@ footer{
 @media (max-width:560px){.footer-top{grid-template-columns:1fr;}}
 @media (max-width:560px){.footer-top{grid-template-columns:1fr;}}
 
-/* ---------- reveal ---------- */
-.reveal{opacity:0; transform:translateY(16px); transition:opacity .7s ease, transform .7s ease;}
-.reveal.is-visible{opacity:1; transform:translateY(0);}
-@media (prefers-reduced-motion: reduce){.reveal{opacity:1; transform:none;}}
-@media (prefers-reduced-motion: reduce){.reveal{opacity:1; transform:none;}}
+/* ---------- reveal: instant visibility without scroll delay ---------- */
+.reveal{opacity:1 !important; transform:none !important; transition:none !important;}
+.reveal.is-visible{opacity:1 !important; transform:none !important;}
 
 /* ---------- wp-content override ---------- */
 .wp-content h1,.wp-content h2,.wp-content h3{font-family:'Playfair Display',serif;}
@@ -1730,11 +1728,7 @@ a.hc-card:hover{transform:translateY(-5px) scale(1.01);}
 .reveal.is-visible .eyebrow::before{width:34px;}
 
 /* Cards in a grid arrive one after another, not all at once. */
-.reveal.is-visible .card-grid > *{animation:aat-rise .7s cubic-bezier(.2,.7,.2,1) backwards;}
-.reveal.is-visible .card-grid > *:nth-child(2){animation-delay:.08s;}
-.reveal.is-visible .card-grid > *:nth-child(3){animation-delay:.16s;}
-.reveal.is-visible .card-grid > *:nth-child(n+4){animation-delay:.24s;}
-@keyframes aat-rise{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;}}
+.reveal.is-visible .card-grid > *{animation:none !important;}
 
 /* Focus rings in the brand's gold, so keyboard users get the same finish. */
 a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{

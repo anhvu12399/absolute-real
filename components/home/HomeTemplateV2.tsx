@@ -122,12 +122,21 @@ export default function HomeTemplateV2({
      towns — a visitor picks Vietnam before they pick Hoi An. The country
      taxonomy carries them; the photograph is borrowed from that country's own
      content, so nothing is invented. */
+  let destPhotoOffset = 0;
   const countryCards = countries.map((term) => {
-    const own = [...places, ...tours, ...hotels].filter((item) =>
-      item.categories?.some((c) => c.slug === term.slug),
+    const cleanTermSlug = term.slug.toLowerCase().replace(/-tours|-vacations/g, "");
+    const own = [...places, ...tours, ...hotels, ...cruises, ...guides].filter((item) =>
+      item.categories?.some((c) => c.slug === term.slug || c.slug === cleanTermSlug) ||
+      item.path?.toLowerCase().includes(`/${cleanTermSlug}/`) ||
+      item.title?.toLowerCase().includes(cleanTermSlug)
     );
+    const foundImage =
+      term.image ||
+      own.find((i) => i.featuredMedia?.url)?.featuredMedia?.url ||
+      photoPool[destPhotoOffset++ % Math.max(photoPool.length, 1)] ||
+      "";
     return {
-      image_url: term.image || own.find((i) => i.featuredMedia?.url)?.featuredMedia?.url || "",
+      image_url: foundImage,
       badge: "",
       title: term.name,
       meta: term.count ? `${term.count} journeys & places` : "",
@@ -138,7 +147,10 @@ export default function HomeTemplateV2({
     };
   });
 
-  const destinations = tabCards(acf.home_tab_destinations, IS_PLACE, countryCards);
+  const destinations = tabCards(acf.home_tab_destinations, IS_PLACE, countryCards).map((card: any) => ({
+    ...card,
+    image_url: card.image_url || photoPool[destPhotoOffset++ % Math.max(photoPool.length, 1)] || "",
+  }));
   const journeys = tabCards(acf.home_tab_journeys, IS_TOUR, tours.map(toCard));
   /* The homepage now runs three tabs, not five: where, what kind, what to
      read. The "special offers" and "new this season" sets, and the separate
