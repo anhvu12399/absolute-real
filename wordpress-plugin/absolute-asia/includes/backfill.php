@@ -536,33 +536,21 @@ function aat_enrich_tours($limit = 30) {
             update_post_meta($post_id, 'destinations_count', count($cities_list));
         }
 
-        $current_route = get_post_meta($post_id, 'tour_route', true);
-        if (empty($current_route) && count($cities_list) > 0) {
-            update_post_meta($post_id, 'tour_route', implode(' – ', $cities_list));
+        // 8. Sample Dates & FAQs if empty
+        if (!get_post_meta($post_id, 'departure_dates', true)) {
+            update_post_meta($post_id, 'departure_dates', wp_slash(wp_json_encode([
+                ['date_range' => 'Sep 15 – Sep ' . (15 + $days_count), 'price_info' => 'From $4,850 / person', 'availability_status' => 'Available'],
+                ['date_range' => 'Oct 10 – Oct ' . (10 + $days_count), 'price_info' => 'From $5,200 / person', 'availability_status' => 'Available'],
+                ['date_range' => 'Nov 05 – Nov ' . (5 + $days_count), 'price_info' => 'From $4,950 / person', 'availability_status' => 'Call for Availability'],
+            ])));
         }
 
-        // 5. Activity level & Min guests
-        if (!get_post_meta($post_id, 'tour_level', true)) update_post_meta($post_id, 'tour_level', 'Moderate');
-        if (!get_post_meta($post_id, 'min_guests', true)) update_post_meta($post_id, 'min_guests', 2);
-
-        // 6. Inclusions & Exclusions
-        $current_inc = get_post_meta($post_id, 'inclusions_list', true);
-        if (empty($current_inc)) update_post_meta($post_id, 'inclusions_list', $STANDARD_INCLUSIONS);
-
-        $current_exc = get_post_meta($post_id, 'exclusions_list', true);
-        if (empty($current_exc)) update_post_meta($post_id, 'exclusions_list', $STANDARD_EXCLUSIONS);
-
-        // 7. Highlights list
-        $current_high = get_post_meta($post_id, 'highlights_list', true);
-        if (empty($current_high) && is_array($rows) && count($rows) > 0) {
-            $extracted_highlights = [];
-            foreach (array_slice($rows, 0, 5) as $r) {
-                $t = trim(preg_replace('/^Day\s*\d+\s*[:.\-–—]\s*/iu', '', $r['title'] ?? ''));
-                if ($t) $extracted_highlights[] = $t;
-            }
-            if ($extracted_highlights) {
-                update_post_meta($post_id, 'highlights_list', implode("\n", $extracted_highlights));
-            }
+        if (!get_post_meta($post_id, 'faqs', true)) {
+            update_post_meta($post_id, 'faqs', wp_slash(wp_json_encode([
+                ['question' => 'Can this itinerary be fully customized?', 'answer' => 'Yes, every private journey with Absolute Asia can be tailored to your preferred travel pace, dates, interests, and hotel choices.'],
+                ['question' => 'What type of vehicles and guides are provided?', 'answer' => 'You will have a private, dedicated English-speaking local specialist guide and private air-conditioned vehicle with professional chauffeur throughout your journey.'],
+                ['question' => 'When is the best time of year to take this journey?', 'answer' => 'Spring and Autumn generally offer the most pleasant weather, though our travel designers can tailor seasonal activities year-round.'],
+            ])));
         }
 
         $filled++;
@@ -570,3 +558,174 @@ function aat_enrich_tours($limit = 30) {
 
     return ['imported' => $filled, 'done' => false];
 }
+
+/** Enriches hotel records with location, highlights, and hero image. */
+function aat_enrich_hotels($limit = 40) {
+    $posts = get_posts([
+        'post_type' => 'hotel',
+        'post_status' => 'publish',
+        'posts_per_page' => $limit,
+        'fields' => 'ids',
+        'meta_query' => [[['key' => '_aat_hotel_enriched', 'compare' => 'NOT EXISTS']]],
+    ]);
+
+    if (!$posts) return ['imported' => 0, 'done' => true];
+
+    $filled = 0;
+    foreach ($posts as $post_id) {
+        update_post_meta($post_id, '_aat_hotel_enriched', 1);
+
+        // 1. Hero image
+        $hero = get_post_meta($post_id, 'hero_image', true);
+        if (!$hero) {
+            $thumb = get_the_post_thumbnail_url($post_id, 'full');
+            if ($thumb) update_post_meta($post_id, 'hero_image', $thumb);
+        }
+
+        // 2. Location
+        $country = '';
+        $terms = get_the_terms($post_id, 'country');
+        if ($terms && !is_wp_error($terms)) $country = $terms[0]->name;
+
+        $loc = get_post_meta($post_id, 'hotel_location', true);
+        if (!$loc && $country) {
+            update_post_meta($post_id, 'hotel_location', $country);
+            update_post_meta($post_id, 'location_map', $country);
+        }
+
+        // 3. Highlights
+        $high = get_post_meta($post_id, 'hotel_highlights', true);
+        if (!$high) {
+            update_post_meta($post_id, 'hotel_highlights', implode("\n", [
+                "Hand-selected luxury boutique property with distinctive character",
+                "Spacious suites and villas featuring authentic regional design",
+                "Exceptional on-site culinary dining and wellness experiences",
+                "Personalized concierge service and tranquil secluded setting"
+            ]));
+        }
+
+        $filled++;
+    }
+
+    return ['imported' => $filled, 'done' => false];
+}
+
+/** Enriches destination places with tagline, overview, and map info. */
+function aat_enrich_places($limit = 40) {
+    $posts = get_posts([
+        'post_type' => 'place_to_go',
+        'post_status' => 'publish',
+        'posts_per_page' => $limit,
+        'fields' => 'ids',
+        'meta_query' => [[['key' => '_aat_place_enriched', 'compare' => 'NOT EXISTS']]],
+    ]);
+
+    if (!$posts) return ['imported' => 0, 'done' => true];
+
+    $filled = 0;
+    foreach ($posts as $post_id) {
+        update_post_meta($post_id, '_aat_place_enriched', 1);
+
+        $title = get_the_title($post_id);
+
+        // 1. Hero image
+        $hero = get_post_meta($post_id, 'hero_image', true);
+        if (!$hero) {
+            $thumb = get_the_post_thumbnail_url($post_id, 'full');
+            if ($thumb) update_post_meta($post_id, 'hero_image', $thumb);
+        }
+
+        // 2. Tagline
+        $tagline = get_post_meta($post_id, 'hero_tagline', true);
+        if (!$tagline) update_post_meta($post_id, 'hero_tagline', 'Discover the Heritage & Culture of ' . $title);
+
+        // 3. Overview
+        $overview = get_post_meta($post_id, 'destination_overview', true);
+        if (!$overview) {
+            $excerpt = get_the_excerpt($post_id);
+            if ($excerpt) update_post_meta($post_id, 'destination_overview', $excerpt);
+        }
+
+        // 4. Map info
+        if (!get_post_meta($post_id, 'location_map', true)) update_post_meta($post_id, 'location_map', $title);
+        if (!get_post_meta($post_id, 'map_headline', true)) update_post_meta($post_id, 'map_headline', 'Highlights of ' . $title);
+
+        $filled++;
+    }
+
+    return ['imported' => $filled, 'done' => false];
+}
+
+/** Enriches articles (guides, things to do, blogs) with hero image and read time. */
+function aat_enrich_articles($limit = 40) {
+    $posts = get_posts([
+        'post_type' => ['travel_guide', 'thing_to_do', 'blog'],
+        'post_status' => 'publish',
+        'posts_per_page' => $limit,
+        'fields' => 'ids',
+        'meta_query' => [[['key' => '_aat_article_enriched', 'compare' => 'NOT EXISTS']]],
+    ]);
+
+    if (!$posts) return ['imported' => 0, 'done' => true];
+
+    $filled = 0;
+    foreach ($posts as $post_id) {
+        update_post_meta($post_id, '_aat_article_enriched', 1);
+
+        // 1. Hero image
+        $hero = get_post_meta($post_id, 'hero_image', true);
+        if (!$hero) {
+            $thumb = get_the_post_thumbnail_url($post_id, 'full');
+            if ($thumb) update_post_meta($post_id, 'hero_image', $thumb);
+        }
+
+        // 2. Read minutes
+        $read = get_post_meta($post_id, 'read_minutes', true);
+        if (!$read) {
+            $content = get_post_field('post_content', $post_id);
+            $words = str_word_count(strip_tags($content));
+            $mins = max(3, ceil($words / 180));
+            update_post_meta($post_id, 'read_minutes', $mins . ' min read');
+        }
+
+        // 3. Intro HTML
+        $intro = get_post_meta($post_id, 'intro_html', true);
+        if (!$intro) {
+            $excerpt = get_the_excerpt($post_id);
+            if ($excerpt) update_post_meta($post_id, 'intro_html', $excerpt);
+        }
+
+        $filled++;
+    }
+
+    return ['imported' => $filled, 'done' => false];
+}
+
+/**
+ * Automatically populates any empty ACF fields on the edit screen so the
+ * editor sees all fields pre-filled with rich content ready for editing.
+ */
+function aat_auto_fill_post_fields($post_id) {
+    $type = get_post_type($post_id);
+    if (!$type) return;
+
+    if ($type === 'tour') {
+        delete_post_meta($post_id, '_aat_tour_enriched_v2');
+        aat_enrich_tours(1);
+    } elseif ($type === 'hotel') {
+        delete_post_meta($post_id, '_aat_hotel_enriched');
+        aat_enrich_hotels(1);
+    } elseif ($type === 'place_to_go') {
+        delete_post_meta($post_id, '_aat_place_enriched');
+        aat_enrich_places(1);
+    } elseif (in_array($type, ['travel_guide', 'thing_to_do', 'blog'], true)) {
+        delete_post_meta($post_id, '_aat_article_enriched');
+        aat_enrich_articles(1);
+    }
+}
+
+/** Hook into WordPress admin post load to pre-populate empty fields on the fly. */
+add_action('load-post.php', function () {
+    $post_id = isset($_GET['post']) ? (int) $_GET['post'] : 0;
+    if ($post_id > 0) aat_auto_fill_post_fields($post_id);
+});

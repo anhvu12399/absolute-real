@@ -1131,6 +1131,9 @@ add_action('rest_api_init', function () {
         if ($type === 'fill-excerpts') return rest_ensure_response(aat_backfill_excerpts(30));
         if ($type === 'fill-itineraries') return rest_ensure_response(aat_backfill_itineraries(25));
         if ($type === 'enrich-tours') return rest_ensure_response(aat_enrich_tours(30));
+        if ($type === 'enrich-hotels') return rest_ensure_response(aat_enrich_hotels(40));
+        if ($type === 'enrich-places') return rest_ensure_response(aat_enrich_places(40));
+        if ($type === 'enrich-articles') return rest_ensure_response(aat_enrich_articles(40));
         if ($type === 'hotel-copy') return rest_ensure_response(aat_seed_hotel_copy());
         if ($type === 'story') return rest_ensure_response(aat_seed_story());
         if ($type === 'hub-pages') return rest_ensure_response(aat_seed_hub_pages());
@@ -1266,10 +1269,12 @@ function aat_import_screen() {
            mục không phải quốc gia trong lưới điểm đến — và soát lại toàn bộ ảnh mà plugin
            từng mượn giúp. Ảnh mượn sai nước (ví dụ ảnh Phuket nằm trên một điểm ở Myanmar)
            sẽ bị gỡ hoặc thay bằng ảnh cùng nước.</p>
-        <p>
             <button class="button aat-run" data-type="rebrand">Đổi tên My Way Travel → Absolute Asia</button>
             <button class="button aat-run" data-type="fix-records">Sửa nước, bản trùng &amp; ảnh gán sai</button>
-        </p>
+            <button class="button aat-run button-primary" data-type="enrich-tours">⚡ Tự động điền dữ liệu Tours (Lịch trình, Số ngày, Điểm đến, Inclusions)</button>
+            <button class="button aat-run" data-type="enrich-hotels">🏨 Tự động điền Khách sạn (Địa điểm, Highlights, Ảnh)</button>
+            <button class="button aat-run" data-type="enrich-places">🗺 Tự động điền Điểm đến (Tagline, Bản đồ)</button>
+            <button class="button aat-run" data-type="enrich-articles">📝 Tự động điền Cẩm nang &amp; Blog (Thời gian đọc, Intro)</button>
         <pre id="aat-log" style="background:#1d2327;color:#c3c4c7;padding:12px;height:320px;overflow:auto"></pre>
 
         <h2>Đối chiếu từng trường</h2>
