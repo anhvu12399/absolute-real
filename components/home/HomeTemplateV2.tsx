@@ -333,17 +333,10 @@ export default function HomeTemplateV2({
 
   /* --- journeys carousel --- */
   const journeyTrackRef = useRef<HTMLDivElement>(null);
+  const tabRailRef = useRef<HTMLDivElement>(null);
 
   /* --- map pills --- */
   const [activeCountry, setActiveCountry] = useState<string | null>(null);
-
-  /* --- form chips --- */
-  const [chips, setChips] = useState<Record<string, boolean>>({});
-  const toggleChip = (name: string) => setChips((prev) => ({ ...prev, [name]: !prev[name] }));
-
-  /* --- form submit --- */
-  const [formSent, setFormSent] = useState(false);
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setFormSent(true); };
 
   /* Labels come from WordPress; the fallbacks are what shipped. */
   const label = (key: string, fallback: string) =>
@@ -470,7 +463,7 @@ export default function HomeTemplateV2({
             photograph above keeps its own light. */}
         <div className="container spine-foot">
           {hero.subtitle && <p className="spine-note">{clamp(hero.subtitle, 132)}</p>}
-          <Link href={toLocalHref(hero.link, "#plan")} className="spine-link">
+          <Link href={toLocalHref(hero.link, "/plan-my-trip/")} className="spine-link">
             {String(hero.link_text || "See this journey")}
             <ArrowSvg />
           </Link>
@@ -542,22 +535,49 @@ export default function HomeTemplateV2({
               data-panel={tab.key}
             >
               {/* A row the eye takes in at once, then a link to the whole set —
-                  rather than a grid that grows each time you press a button. */}
-              <div className="tab-rail">
-                {tab.rows.map((card: any, idx: number) => (
-                  <Link key={idx} href={toLocalHref(card.link, "#plan")} className="tab-card">
-                    <span
-                      className={`tab-card-photo ${card.image_url ? "" : "is-empty"}`}
-                      style={bg(card.image_url, "card")}
-                      aria-hidden="true"
-                    />
-                    <span className="tab-card-body">
-                      <strong>{String(card.title || "")}</strong>
-                      {card.meta && <em>{String(card.meta)}</em>}
-                      {card.description && <span>{clamp(card.description, 96)}</span>}
-                    </span>
-                  </Link>
-                ))}
+                  rather than a grid that grows each time you press a button.
+                  Cards run smaller here than in the carousels below: this row
+                  answers "where", the others answer "which one" — six or
+                  seven places should read as a row to scan, not six large
+                  photographs. The arrows give the same affordance the other
+                  horizontal rows already have. */}
+              <div className="tab-rail-wrap">
+                <div className="tab-rail" ref={tab.key === activeTab ? tabRailRef : undefined}>
+                  {tab.rows.map((card: any, idx: number) => (
+                    <Link key={idx} href={toLocalHref(card.link, "/plan-my-trip/")} className="tab-card">
+                      <span
+                        className={`tab-card-photo ${card.image_url ? "" : "is-empty"}`}
+                        style={bg(card.image_url, "card")}
+                        aria-hidden="true"
+                      />
+                      <span className="tab-card-body">
+                        <strong>{String(card.title || "")}</strong>
+                        {card.meta && <em>{String(card.meta)}</em>}
+                        {card.description && <span>{clamp(card.description, 96)}</span>}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+                {tab.rows.length > 3 && (
+                  <div className="tab-rail-arrows">
+                    <button
+                      type="button"
+                      className="hc-btn"
+                      aria-label="Scroll left"
+                      onClick={() => tabRailRef.current?.scrollBy({ left: -320, behavior: "smooth" })}
+                    >
+                      <svg style={{ transform: "rotate(180deg)" }}><use href="#i-arrow" /></svg>
+                    </button>
+                    <button
+                      type="button"
+                      className="hc-btn"
+                      aria-label="Scroll right"
+                      onClick={() => tabRailRef.current?.scrollBy({ left: 320, behavior: "smooth" })}
+                    >
+                      <svg><use href="#i-arrow" /></svg>
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="tab-foot">
@@ -765,60 +785,82 @@ export default function HomeTemplateV2({
         </div>
       </section>
 
-      {(team.length > 0 || testimonials.length > 0) && (
+      {/* ═══ 10 · SPECIALISTS ═══ */}
+      {team.length > 0 && (
         <section className="section on-cream" id="specialists">
           <div className="container">
             <div className="center reveal">
               <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{specialistsHeadline}</h2>
             </div>
+            <div className="team-grid reveal">
+              {team.slice(0, 4).map((member: any, idx: number) => (
+                <article className="team-card" key={idx}>
+                  {member.photo ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img className="team-photo" src={optimized(member.photo, "card")} alt={String(member.name || "")} loading="lazy" />
+                  ) : (
+                    <span className="team-photo is-empty" aria-hidden="true">
+                      {String(member.name || "?").trim().charAt(0)}
+                    </span>
+                  )}
+                  <h3>{String(member.name || "")}</h3>
+                  {member.role && <p className="team-role">{String(member.role)}</p>}
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
-            {team.length > 0 && (
-              <div className="team-grid reveal">
-                {team.slice(0, 4).map((member: any, idx: number) => (
-                  <article className="team-card" key={idx}>
-                    {member.photo ? (
+      {/* ═══ CLIENT REVIEWS ═══
+          Its own section, as it was before it got folded into "specialists"
+          and lost its heading, its rating summary and half its cards in the
+          merge — team and reviews answer different questions ("who plans
+          it" vs. "was it good") and read oddly sharing one headline. */}
+      {testimonials.length > 0 && (
+        <section className={`section ${team.length > 0 ? "on-white" : "on-cream"}`} id="reviews">
+          <div className="container">
+            <div className="center reveal">
+              <p className="eyebrow"><em>What</em> Travelers Say</p>
+              {reviewSummary && (
+                <div style={{ marginTop: "0.6rem" }} dangerouslySetInnerHTML={{ __html: reviewSummary }} />
+              )}
+              {reviewLink && (
+                <a href={reviewLink} target="_blank" rel="noopener noreferrer" className="link-arrow" style={{ marginTop: "0.4rem", display: "inline-flex" }}>
+                  {reviewLogo && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={optimized(reviewLogo, "thumb")} alt={reviewText || "Review site"} style={{ height: "20px", marginRight: "8px" }} />
+                  )}
+                  {reviewText || "Read reviews"}
+                </a>
+              )}
+            </div>
+            <div className="card-grid reveal" style={{ marginTop: "2.4rem" }}>
+              {testimonials.slice(0, 6).map((item: any, idx: number) => (
+                <div className="review-card" key={idx}>
+                  {item.vote && (
+                    <p className="review-stars" aria-label={`${item.vote} out of 5`}>
+                      {"★".repeat(Math.min(5, Number(item.vote) || 5))}
+                    </p>
+                  )}
+                  <p className="review-quote">“{clamp(item.content, 260)}”</p>
+                  <div className="review-by">
+                    {item.avatar ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img className="team-photo" src={optimized(member.photo, "card")} alt={String(member.name || "")} loading="lazy" />
+                      <img className="review-avatar" src={optimized(String(item.avatar), "thumb")} alt="" loading="lazy" />
                     ) : (
-                      <span className="team-photo is-empty" aria-hidden="true">
-                        {String(member.name || "?").trim().charAt(0)}
+                      <span className="review-avatar is-empty" aria-hidden="true">
+                        {String(item.user_name || "?").trim().charAt(0)}
                       </span>
                     )}
-                    <h3>{String(member.name || "")}</h3>
-                    {member.role && <p className="team-role">{String(member.role)}</p>}
-                  </article>
-                ))}
-              </div>
-            )}
-
-            {testimonials.length > 0 && (
-              <div className="card-grid reveal" style={{ marginTop: team.length ? "3rem" : "2.4rem" }}>
-                {testimonials.slice(0, 3).map((item: any, idx: number) => (
-                  <div className="review-card" key={idx}>
-                    {item.vote && (
-                      <p className="review-stars" aria-label={`${item.vote} out of 5`}>
-                        {"★".repeat(Math.min(5, Number(item.vote) || 5))}
-                      </p>
-                    )}
-                    <p className="review-quote">“{clamp(item.content, 240)}”</p>
-                    <div className="review-by">
-                      {item.avatar ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img className="review-avatar" src={optimized(String(item.avatar), "thumb")} alt="" loading="lazy" />
-                      ) : (
-                        <span className="review-avatar is-empty" aria-hidden="true">
-                          {String(item.user_name || "?").trim().charAt(0)}
-                        </span>
-                      )}
-                      <span>
-                        <strong>{String(item.user_name || "")}</strong>
-                        {item.date && <em>{String(item.date)}</em>}
-                      </span>
-                    </div>
+                    <span>
+                      <strong>{String(item.user_name || "")}</strong>
+                      {item.date && <em>{String(item.date)}</em>}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}
@@ -895,34 +937,25 @@ export default function HomeTemplateV2({
         </section>
       )}
 
-      <section className="section on-cream" id="plan">
-        <div className="container plan-grid">
-          <div className="plan-copy reveal">
-            <p className="eyebrow"><em dangerouslySetInnerHTML={{ __html: String(acf.plan_eyebrow || "<em>Start</em> Planning") }}></em></p>
-            <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }} dangerouslySetInnerHTML={{ __html: String(acf.plan_headline || "Tell us where, and we'll take it from <em>there</em>.") }}></h2>
-            <p>{String(acf.plan_desc || "Share a few details and a private travel designer will reach out within one business day — no obligation, no call center.")}</p>
-            {enquiryNote && <p className="plan-note">{enquiryNote}</p>}
-          </div>
-          <form className="form-card reveal" onSubmit={handleSubmit}>
-            <div className="form-row">
-              <div className="field"><label htmlFor="fname">Full name</label><input id="fname" type="text" placeholder="Jordan Whitfield" required /></div>
-              <div className="field"><label htmlFor="femail">Email</label><input id="femail" type="email" placeholder="jordan@email.com" required /></div>
-            </div>
-            <div className="field"><label>Destination(s) of interest</label>
-              <div className="chip-group">
-                {["Vietnam", "Cambodia", "Laos", "Thailand", "Bhutan", "Indonesia", "Not sure yet"].map((name) => (
-                  <button key={name} type="button" className="chip" aria-pressed={chips[name] ? "true" : "false"} onClick={() => toggleChip(name)}>{name}</button>
-                ))}
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="field"><label htmlFor="fdates">Approximate travel dates</label><input id="fdates" type="text" placeholder="March 2027, 2 weeks" /></div>
-              <div className="field"><label htmlFor="fparty">Party size</label><input id="fparty" type="number" min={1} placeholder="2" /></div>
-            </div>
-            <div className="field"><label htmlFor="fmsg">Tell us about the trip you&apos;re imagining</label><textarea id="fmsg" placeholder="A honeymoon that mixes Bangkok with a quiet beach in Thailand..."></textarea></div>
-            <button type="submit" className="btn btn-line-ink" style={{ marginTop: "1.6rem", width: "100%" }}>{String(acf.plan_btn || "Begin Planning My Journey")}</button>
-            {formSent && <div className="form-success show">Thank you — a private travel designer will be in touch within one business day.</div>}
-          </form>
+      {/* ═══ FINAL ENQUIRY CTA ═══
+          This used to be a second, shorter enquiry form living next to the
+          full one at /plan-my-trip/ — six fields short of it (no phone,
+          no budget, no duration), so a visitor who filled it out gave less
+          than the page was designed to collect. One form, reached from
+          everywhere, is better than two that disagree. */}
+      <section className="section on-ink" id="plan">
+        <div className="container plan-cta reveal">
+          <p className="eyebrow"><em dangerouslySetInnerHTML={{ __html: String(acf.plan_eyebrow || "<em>Start</em> Planning") }}></em></p>
+          <h2 style={{ fontSize: "clamp(1.9rem,3.6vw,2.8rem)" }}>{enquiryHeadline}</h2>
+          <p>
+            {enquiryNote ||
+              String(acf.plan_desc) ||
+              "Share a few details and a private travel designer will reach out within one business day — no obligation, no call center."}
+          </p>
+          <Link href="/plan-my-trip/" className="btn btn-fill-cream">
+            {String(acf.plan_btn || "Begin Planning My Journey")}
+            <ArrowSvg />
+          </Link>
         </div>
       </section>
     </>
