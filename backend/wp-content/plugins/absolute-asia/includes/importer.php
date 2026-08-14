@@ -17,6 +17,15 @@ if (!defined('ABSPATH')) exit;
 
 define('AAT_SOURCE_DEFAULT', 'https://www.absoluteasiatours.com');
 
+/* AJAX handler: save the frontend URL for the live preview panel. */
+add_action('wp_ajax_aat_save_frontend_url', function () {
+    check_ajax_referer('aat_save_frontend_url');
+    if (!current_user_can('manage_options')) wp_send_json_error('Forbidden');
+    $url = esc_url_raw(wp_unslash($_POST['url'] ?? ''));
+    update_option('aat_frontend_url', $url);
+    wp_send_json_success(['url' => $url]);
+});
+
 /** old REST base => new taxonomy */
 function aat_import_taxonomy_map() {
     return [
@@ -1122,7 +1131,7 @@ add_action('rest_api_init', function () {
         if ($type === 'fill-excerpts') return rest_ensure_response(aat_backfill_excerpts(30));
         if ($type === 'hotel-copy') return rest_ensure_response(aat_seed_hotel_copy());
         if ($type === 'story') return rest_ensure_response(aat_seed_story());
-        if ($type === 'story') return rest_ensure_response(aat_seed_story());
+        if ($type === 'hub-pages') return rest_ensure_response(aat_seed_hub_pages());
         if ($type === 'rebrand') return rest_ensure_response(aat_rebrand_run(40));
         if ($type === 'fix-records') return rest_ensure_response(aat_cleanup_records());
         if ($type === 'fill-reset') return rest_ensure_response(aat_backfill_reset() + ['imported' => 0, 'done' => true]);
@@ -1201,7 +1210,7 @@ function aat_import_screen() {
             <button class="button aat-run" data-type="seed-copy">Soạn nội dung trang chủ</button>
             <button class="button aat-run" data-type="hotel-copy">Viết mô tả khách sạn</button>
             <button class="button aat-run" data-type="story">Soạn trang Our Story</button>
-            <button class="button aat-run" data-type="story">Soạn trang Our Story</button>
+            <button class="button aat-run" data-type="hub-pages">Bơm dữ liệu trang hub</button>
             <button class="button" data-type="fill-reset" id="aat-fill-reset">Xét lại từ đầu</button>
         </p>
 
@@ -1210,6 +1219,36 @@ function aat_import_screen() {
         <?php aat_compat_field(); ?>
 
         <?php aat_logo_field(); ?>
+
+        <h2>🌐 Frontend URL (cho Live Preview)</h2>
+        <p>URL của trang Next.js frontend — dùng cho nút <strong>👁 Live Preview</strong> khi sửa bài.
+           Nếu để trống, preview sẽ trỏ về WordPress (không đúng cho headless site).</p>
+        <p>
+            <input type="url" id="aat-frontend-url"
+                   value="<?php echo esc_attr(get_option('aat_frontend_url', '')); ?>"
+                   placeholder="https://your-frontend.vercel.app"
+                   style="width:400px;font-size:14px;padding:6px 10px" />
+            <button class="button button-primary" id="aat-save-frontend-url">Lưu</button>
+            <span id="aat-frontend-url-status" style="margin-left:8px;color:#00ba37;font-size:12px"></span>
+        </p>
+        <script>
+        jQuery(function($) {
+            $('#aat-save-frontend-url').on('click', function(e) {
+                e.preventDefault();
+                var url = $('#aat-frontend-url').val().replace(/\/+$/, '');
+                $.post(ajaxurl, {
+                    action: 'aat_save_frontend_url',
+                    url: url,
+                    _wpnonce: '<?php echo wp_create_nonce("aat_save_frontend_url"); ?>'
+                }, function(res) {
+                    if (res.success) {
+                        $('#aat-frontend-url-status').text('✅ Đã lưu!').show();
+                        setTimeout(function() { $('#aat-frontend-url-status').fadeOut(); }, 3000);
+                    }
+                });
+            });
+        });
+        </script>
 
         <h2>Dọn dữ liệu cũ</h2>
         <p><strong>Link sang <code>mywaytravel.com</code> đã tự động đổi về link nội bộ</strong>
@@ -1311,7 +1350,7 @@ function aat_import_screen() {
                 /* `rebrand` is deliberately absent: renaming the sister agency
                    is a business decision, and it touches wording customers
                    wrote. It stays a separate button. */
-                ['menu', 'relink', 'fix-records', 'fill-images', 'fill-excerpts', 'seed-copy', 'hotel-copy', 'story']
+                ['menu', 'relink', 'fix-records', 'fill-images', 'fill-excerpts', 'seed-copy', 'hotel-copy', 'story', 'hub-pages']
             )); ?>;
 
             var $btn = $(this).prop('disabled', true).text('Đang chạy…');

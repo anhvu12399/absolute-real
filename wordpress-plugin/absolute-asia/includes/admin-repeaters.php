@@ -92,6 +92,9 @@ function aat_repeater_specs() {
             ['key' => 'latitude', 'label' => 'Latitude'],
             ['key' => 'longitude', 'label' => 'Longitude'],
         ],
+        'trust' => [
+            ['key' => 'text', 'label' => 'Điểm tin cậy'],
+        ],
         'reasons' => [
             ['key' => 'icon', 'label' => 'Icon (guide/chat/gem/key/car/clock)'],
             ['key' => 'text', 'label' => 'Text', 'type' => 'textarea'],

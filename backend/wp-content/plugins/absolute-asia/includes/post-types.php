@@ -46,6 +46,7 @@ function aat_register_post_types() {
             'labels' => [
                 'name' => $plural,
                 'singular_name' => $singular,
+                'add_new' => 'Add New',
                 'add_new_item' => "Add New $singular",
                 'edit_item' => "Edit $singular",
                 'search_items' => "Search $plural",
@@ -54,7 +55,7 @@ function aat_register_post_types() {
             'has_archive' => $has_archive,
             'rewrite' => ['slug' => $slug, 'with_front' => false],
             'supports' => ['title', 'editor', 'thumbnail', 'excerpt', 'revisions', 'custom-fields'],
-            'taxonomies' => $taxonomies,
+            'taxonomies' => [], /* Clean sidebar — no sub-items */
             'show_in_rest' => true,
             'menu_icon' => $icon,
         ]);
@@ -99,6 +100,9 @@ function aat_register_post_types() {
         'hierarchical' => true,
         'public' => true,
         'show_in_rest' => true,
+        'show_in_menu' => false,
+        'show_in_quick_edit' => true,
+        'meta_box_cb' => 'post_categories_meta_box',
         'rewrite' => ['slug' => 'inspiration', 'with_front' => false],
     ]);
 
@@ -107,6 +111,9 @@ function aat_register_post_types() {
         'hierarchical' => true,
         'public' => true,
         'show_in_rest' => true,
+        'show_in_menu' => false,
+        'show_in_quick_edit' => true,
+        'meta_box_cb' => 'post_categories_meta_box',
         'rewrite' => ['slug' => 'country', 'with_front' => false],
     ]);
 
@@ -117,6 +124,9 @@ function aat_register_post_types() {
         'hierarchical' => true,
         'public' => true,
         'show_in_rest' => true,
+        'show_in_menu' => false,
+        'show_in_quick_edit' => true,
+        'meta_box_cb' => 'post_categories_meta_box',
         'rewrite' => ['slug' => 'hotel_service', 'with_front' => false],
     ]);
 
@@ -125,6 +135,9 @@ function aat_register_post_types() {
         'hierarchical' => true,
         'public' => true,
         'show_in_rest' => true,
+        'show_in_menu' => false,
+        'show_in_quick_edit' => true,
+        'meta_box_cb' => 'post_categories_meta_box',
         'rewrite' => ['slug' => 'city', 'with_front' => false],
     ]);
 
@@ -133,6 +146,9 @@ function aat_register_post_types() {
         'hierarchical' => true,
         'public' => true,
         'show_in_rest' => true,
+        'show_in_menu' => false,
+        'show_in_quick_edit' => true,
+        'meta_box_cb' => 'post_categories_meta_box',
         'rewrite' => ['slug' => 'blog-type', 'with_front' => false],
     ]);
 }

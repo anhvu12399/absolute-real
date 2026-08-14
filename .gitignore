@@ -19,3 +19,7 @@ outputs/
 *.pem
 *.zip
 .claude/
+
+# Chọn site đang chạy — mỗi máy một khác
+.env.local
+.env.local.*

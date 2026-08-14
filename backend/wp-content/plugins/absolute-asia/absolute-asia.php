@@ -47,6 +47,7 @@ require_once AAT_PATH . 'includes/seed-hotels.php';
 require_once AAT_PATH . 'includes/seed-story.php';
 require_once AAT_PATH . 'includes/audit.php';
 require_once AAT_PATH . 'includes/revalidate.php';
+require_once AAT_PATH . 'includes/admin-preview.php';
 
 register_activation_hook(__FILE__, function () {
     aat_register_post_types();

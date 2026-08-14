@@ -320,22 +320,61 @@ function aat_fix_duplicates() {
     return $handled;
 }
 
+/**
+ * Bring seeded copy into line with the configured founding year.
+ *
+ * The founding year lives in one place - the Founded setting. Copy seeded
+ * before that setting existed carries a year inside a sentence, so the
+ * homepage published "Since 2005" beside an About page that says 1989.
+ * Rewrites only the year, only where it disagrees, and only in fields the
+ * seeder wrote; a sentence an editor typed by hand is left alone unless it
+ * names a year that is simply wrong.
+ */
+function aat_fix_founding_year() {
+    $year = (int) get_option('aat_founded_year', 0);
+    if (!$year) return [];
+
+    $home = function_exists('aat_front_page_post') ? aat_front_page_post() : null;
+    if (!$home) return [];
+
+    $fixed = [];
+    foreach (['story_bar_tagline', 'statement_text', 'intro_text', 'quote_text'] as $field) {
+        $text = get_post_meta($home->ID, $field, true);
+        if (!is_string($text) || $text === '') continue;
+
+        $updated = preg_replace_callback(
+            '/\b(since|est\.?|founded in)\s+(19|20)\d{2}\b/i',
+            function ($m) use ($year) { return $m[1] . ' ' . $year; },
+            $text
+        );
+
+        if ($updated !== null && $updated !== $text) {
+            update_post_meta($home->ID, $field, wp_slash($updated));
+            $fixed[] = $field . ' → ' . $year;
+        }
+    }
+
+    return $fixed;
+}
+
 function aat_cleanup_records() {
     $countries = aat_fix_single_country();
     $terms = aat_fix_country_terms();
     $duplicates = aat_fix_duplicates();
+    $years = aat_fix_founding_year();
     /* Runs after the country fixes: the stricter image rules need the country
        assignments to be right before they can judge a borrowed photograph. */
     $images = aat_repair_borrowed_images();
 
     return [
-        'imported' => count($countries) + count($terms) + count($duplicates) + count($images),
+        'imported' => count($countries) + count($terms) + count($duplicates) + count($images) + count($years),
         'done' => true,
         'details' => [
             'country' => $countries,
             'terms' => $terms,
             'duplicates' => $duplicates,
             'images' => $images,
+            'years' => $years,
         ],
     ];
 }

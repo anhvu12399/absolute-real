@@ -292,10 +292,15 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
   /* ── Homepage ──
      Cards authored in WordPress win; live archives fill any tab left empty. */
   if (cleanPath === "/") {
-    const [tours, places, hotels] = await Promise.all([
+    const [tours, places, hotels, countryTerms, cruises, guides] = await Promise.all([
       getArchiveSafe({ type: "tour", perPage: 12 }),
       getArchiveSafe({ type: "place_to_go", perPage: 12 }),
       getArchiveSafe({ type: "hotel", perPage: 12 }),
+      getTermsSafe("country"),
+      /* Cruise content lives in the asia-cruises category rather than a post
+         type of its own - that is how the legacy site filed it. */
+      getArchiveSafe({ type: "tour,travel_guide,blog", taxonomy: "category", term: "asia-cruises", perPage: 6 }),
+      getArchiveSafe({ type: "travel_guide,blog", perPage: 6 }),
     ]);
     /* Showcase strips lead with illustrated entries; a blank plate up front
        reads as broken rather than sparse. */
@@ -319,6 +324,9 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
           tours={illustratedFirst(tours)}
           places={illustratedFirst(places)}
           hotels={illustratedFirst(hotels)}
+          countries={realCountries(countryTerms)}
+          cruises={illustratedFirst(cruises)}
+          guides={illustratedFirst(guides)}
         />
       </>
     );
@@ -382,6 +390,10 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
     const [items, countries] = await Promise.all([
       getArchiveSafe({ type: "place_to_go", perPage: 60 }),
       getTermsSafe("country"),
+      /* Cruise content lives in the asia-cruises category rather than a post
+         type of its own - that is how the legacy site filed it. */
+      getArchiveSafe({ type: "tour,travel_guide,blog", taxonomy: "category", term: "asia-cruises", perPage: 6 }),
+      getArchiveSafe({ type: "travel_guide,blog", perPage: 6 }),
     ]);
     return (
       <>

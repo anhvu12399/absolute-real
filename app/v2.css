@@ -36,6 +36,7 @@
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;} *{animation-duration:.001ms !important; transition-duration:.001ms !important;}}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;} *{animation-duration:.001ms !important; transition-duration:.001ms !important;}}
 body{margin:0; background:var(--cream); color:var(--ink); font-family:'Work Sans',sans-serif; font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased; overflow-x:clip;}
 img,svg{display:block; max-width:100%;}
 a{color:inherit; text-decoration:none;}
@@ -70,6 +71,7 @@ h1 em,h2 em,h3 em{font-style:italic; font-weight:400; color:var(--rust);}
 .stat-item:first-child{border-left:none;}
 .stat-num{font-family:'Playfair Display',serif; font-style:italic; font-weight:600; font-size:clamp(1.6rem,2.6vw,2.2rem); color:var(--rust); line-height:1;}
 .stat-label{margin-top:0.4rem; font-size:0.65rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim-on-cream);}
+@media (max-width:640px){.stat-item{border-left:none; border-top:1px solid var(--line-on-cream); padding:1rem 1.4rem 0; margin-top:1rem;} .stat-item:first-child{border-top:none; margin-top:0; padding-top:0;}}
 @media (max-width:640px){.stat-item{border-left:none; border-top:1px solid var(--line-on-cream); padding:1rem 1.4rem 0; margin-top:1rem;} .stat-item:first-child{border-top:none; margin-top:0; padding-top:0;}}
 
 /* ---------- dropcap ---------- */
@@ -143,6 +145,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .utility-right{display:flex; align-items:center; gap:1.2rem; opacity:0.92;}
 .utility-right span{opacity:0.7;}
 @media (max-width:760px){.utility-right{display:none;}}
+@media (max-width:760px){.utility-right{display:none;}}
 
 .site-nav{position:sticky; top:0; z-index:999; background:linear-gradient(180deg, #0c1424 0%, #070b14 100%); border-bottom:1px solid rgba(229,193,88,0.22); box-shadow:0 10px 30px rgba(0,0,0,0.35); transition:box-shadow .3s ease;}
 .site-nav.is-scrolled{box-shadow:0 14px 40px rgba(0,0,0,0.55); border-bottom-color:rgba(229,193,88,0.35);}
@@ -150,6 +153,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .brand-mark{display:flex; align-items:center; gap:0.8rem; flex:none;}
 .seal{width:38px; height:38px; flex:none; background:linear-gradient(135deg, #e5c158, #c49a2e); color:#070b14; font-weight:700; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:1.24rem; letter-spacing:0; border-radius:50%; box-shadow:0 2px 10px rgba(229,193,88,0.35);}
 .brand-logo{height:44px; width:auto; flex:none; display:block;}
+@media (max-width:760px){.brand-logo{height:36px;}}
 @media (max-width:760px){.brand-logo{height:36px;}}
 .brand-text{display:flex; flex-direction:column; line-height:1.05;}
 .brand-text .name{font-family:'Playfair Display',serif; font-size:1.28rem; letter-spacing:0.01em; color:#f8f6f0;}
@@ -309,6 +313,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .nav-toggle{display:flex;}
   .brand-text .tag{display:none;}
 }
+@media (max-width:520px){.nav-right .btn{display:none;}}
 @media (max-width:520px){.nav-right .btn{display:none;}}
 
 /* ═══ MOBILE MENU ═══ */
@@ -767,6 +772,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .hero-text{background:var(--cream); padding:clamp(1.75rem,4vw,3.5rem); display:flex; flex-direction:column; justify-content:center; gap:1.6rem;}
 .hero-text p{color:var(--text-dim-on-cream); font-size:1.02rem;}
 @media (max-width:900px){.hero-split,.hero-split-luxury{grid-template-columns:1fr;} .hero-photo{min-height:56vh;}}
+@media (max-width:900px){.hero-split,.hero-split-luxury{grid-template-columns:1fr;} .hero-photo{min-height:56vh;}}
 
 /* ---------- subnav ---------- */
 .subnav{border-top:1px solid var(--line-on-cream); border-bottom:1px solid var(--line-on-cream); background:var(--white);}
@@ -797,6 +803,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .offer-meta{font-size:0.8rem; color:var(--rust); font-weight:600; margin-bottom:0.5rem;}
 .offer-card p.desc{color:var(--text-dim-on-cream); font-size:0.92rem; margin-bottom:1rem;}
 @media (max-width:900px){.card-grid{grid-template-columns:1fr 1fr; gap:1.6rem;}}
+@media (max-width:900px){.card-grid{grid-template-columns:1fr 1fr; gap:1.6rem;}}
+@media (max-width:600px){.card-grid{grid-template-columns:1fr;}}
 @media (max-width:600px){.card-grid{grid-template-columns:1fr;}}
 
 /* ---------- journey rows (destination) ---------- */
@@ -813,6 +821,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .journey-foot{margin-top:1.4rem; padding-top:1.2rem; border-top:1px solid var(--line-on-cream); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;}
 .journey-price{font-size:0.9rem;}
 .journey-price strong{font-size:1.05rem;}
+@media (max-width:800px){.journey-row{grid-template-columns:1fr;}}
 @media (max-width:800px){.journey-row{grid-template-columns:1fr;}}
 
 /* ---------- horizontal carousel ---------- */
@@ -872,12 +881,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .stay-index-copy em{font-style:normal; font-size:0.8rem; color:var(--text-dim-on-cream); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .stay-index a svg{width:18px; height:18px; color:var(--brass); flex:none;}
 @media (max-width:860px){.stay-editorial{grid-template-columns:1fr;}}
+@media (max-width:860px){.stay-editorial{grid-template-columns:1fr;}}
 
 .stay-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-on-cream); border:1px solid var(--line-on-cream); margin-top:2.6rem;}
 .stay-card{position:relative; aspect-ratio:3/4; display:flex; flex-direction:column; justify-content:space-between; padding:2rem;}
 .stay-card h3{color:var(--white); font-size:1.7rem; position:relative; z-index:2;}
 .stay-card p{color:rgba(255,255,255,0.86); font-size:0.9rem; position:relative; z-index:2; margin-bottom:1.1rem;}
 .stay-card .btn{position:relative; z-index:2; align-self:flex-start;}
+@media (max-width:860px){.stay-grid{grid-template-columns:1fr;}}
 @media (max-width:860px){.stay-grid{grid-template-columns:1fr;}}
 
 /* ---------- ways to explore ---------- */
@@ -900,6 +911,8 @@ a.hc-card:focus-visible, a.ways-item:focus-visible{outline:2px solid #e5c158; ou
 .ways-item h3{color:var(--white); font-size:1.3rem; position:relative; z-index:2;}
 .ways-item p{color:rgba(255,255,255,0.85); font-size:0.85rem; position:relative; z-index:2;}
 @media (max-width:860px){.ways-grid,.ways-row2{grid-template-columns:1fr 1fr;}}
+@media (max-width:860px){.ways-grid,.ways-row2{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.ways-grid,.ways-row2{grid-template-columns:1fr;}}
 @media (max-width:560px){.ways-grid,.ways-row2{grid-template-columns:1fr;}}
 
 /* ---------- quote ---------- */
@@ -912,7 +925,9 @@ a.hc-card:focus-visible, a.ways-item:focus-visible{outline:2px solid #e5c158; ou
 .split{display:grid; grid-template-columns:1fr 1fr;}
 .split-copy{padding:clamp(2.5rem,5vw,4.5rem) var(--pad); display:flex; flex-direction:column; justify-content:center;}
 .split-copy p{color:var(--text-dim-on-cream); margin:1.2rem 0 1.6rem; max-width:44ch;}
-.split-photo{min-height:340px;}
+/* Carries its own cover rules: the photograph arrives as an inline
+   background-image, and only the placeholder variant wore `.ph`. */
+.split-photo{min-height:340px; background-size:cover; background-position:center; background-repeat:no-repeat;}
 @media (max-width:860px){.split{grid-template-columns:1fr;}}
 
 /* ---------- story bar + values ---------- */
@@ -926,6 +941,8 @@ a.hc-card:focus-visible, a.ways-item:focus-visible{outline:2px solid #e5c158; ou
 .value-item h4{color:var(--celadon-pale); font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:600; margin-bottom:0.9rem;}
 .value-item p{color:rgba(243,238,227,0.82); font-size:0.9rem;}
 @media (max-width:900px){.value-grid-inner{grid-template-columns:1fr 1fr; row-gap:2rem;}}
+@media (max-width:900px){.value-grid-inner{grid-template-columns:1fr 1fr; row-gap:2rem;}}
+@media (max-width:560px){.value-grid-inner{grid-template-columns:1fr;}}
 @media (max-width:560px){.value-grid-inner{grid-template-columns:1fr;}}
 
 /* ---------- map section ---------- */
@@ -950,6 +967,7 @@ a.hc-card:focus-visible, a.ways-item:focus-visible{outline:2px solid #e5c158; ou
 .map-pin-label{background:rgba(255,255,255,0.96); backdrop-filter:blur(4px); color:var(--ink); font-size:11px; font-weight:600; padding:2px 8px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); white-space:nowrap; box-shadow:0 3px 10px rgba(0,0,0,0.15);}
 .map-pin-box:hover .map-pin-dot{transform:scale(1.3); background:var(--rust);}
 @media (max-width:860px){.map-grid{grid-template-columns:1fr;} .map-stage{height:clamp(300px,64vw,400px);}}
+@media (max-width:860px){.map-grid{grid-template-columns:1fr;} .map-stage{height:clamp(300px,64vw,400px);}}
 
 /* ---------- plan form ---------- */
 .plan-grid{display:grid; grid-template-columns:0.85fr 1.15fr; gap:3.2rem; align-items:start;}
@@ -966,6 +984,7 @@ a.hc-card:focus-visible, a.ways-item:focus-visible{outline:2px solid #e5c158; ou
 .form-success{display:none; margin-top:1.5rem; padding:1rem; border:1px solid var(--rust); font-size:0.9rem;}
 .form-success.show{display:block;}
 @media (max-width:860px){.plan-grid{grid-template-columns:1fr;} .form-row{grid-template-columns:1fr;}}
+@media (max-width:860px){.plan-grid{grid-template-columns:1fr;} .form-row{grid-template-columns:1fr;}}
 
 /* ---------- single tour ---------- */
 .tour-hero-split{display:grid; grid-template-columns:1.15fr 1fr;}
@@ -978,8 +997,10 @@ a.hc-card:focus-visible, a.ways-item:focus-visible{outline:2px solid #e5c158; ou
 .tour-meta-label{font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; font-weight:600; color:var(--rust);}
 .tour-meta-value{font-size:1.1rem; font-weight:500;}
 @media (max-width:900px){.tour-hero-split{grid-template-columns:1fr;} .tour-hero-photo{min-height:50vh;}}
+@media (max-width:900px){.tour-hero-split{grid-template-columns:1fr;} .tour-hero-photo{min-height:50vh;}}
 
 .tour-content-grid{display:grid; grid-template-columns:1fr 380px; gap:3.2rem; align-items:start;}
+@media (max-width:960px){.tour-content-grid{grid-template-columns:1fr;}}
 @media (max-width:960px){.tour-content-grid{grid-template-columns:1fr;}}
 
 /* itinerary accordion */
@@ -1009,6 +1030,7 @@ a.hc-card:focus-visible, a.ways-item:focus-visible{outline:2px solid #e5c158; ou
 .inc-col li{padding:0.5rem 0; border-bottom:1px solid var(--line-on-cream); font-size:0.9rem; color:var(--text-dim-on-cream);}
 .inc-col li:last-child{border-bottom:none;}
 @media (max-width:600px){.inc-grid{grid-template-columns:1fr;}}
+@media (max-width:600px){.inc-grid{grid-template-columns:1fr;}}
 
 /* ---------- footer ---------- */
 footer{
@@ -1033,11 +1055,14 @@ footer{
 .footer-col a:hover{color:#e5c158; padding-left:3px;}
 .footer-bottom{border-top:1px solid rgba(255,255,255,0.08); padding:1.4rem 0; font-size:0.76rem; color:#8e887d; display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.6rem;}
 @media (max-width:860px){.footer-top{grid-template-columns:1fr 1fr; row-gap:2.4rem;}}
+@media (max-width:860px){.footer-top{grid-template-columns:1fr 1fr; row-gap:2.4rem;}}
+@media (max-width:560px){.footer-top{grid-template-columns:1fr;}}
 @media (max-width:560px){.footer-top{grid-template-columns:1fr;}}
 
 /* ---------- reveal ---------- */
 .reveal{opacity:0; transform:translateY(16px); transition:opacity .7s ease, transform .7s ease;}
 .reveal.is-visible{opacity:1; transform:translateY(0);}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1; transform:none;}}
 @media (prefers-reduced-motion: reduce){.reveal{opacity:1; transform:none;}}
 
 /* ---------- wp-content override ---------- */
@@ -1057,6 +1082,7 @@ footer{
 .stat-block .num{font-family:'Playfair Display',serif; font-size:2.2rem;}
 .stat-block .label{margin-top:0.4rem; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim-on-cream);}
 @media (max-width:640px){.stat-block{padding:0 1.2rem;}}
+@media (max-width:640px){.stat-block{padding:0 1.2rem;}}
 
 .tour-subnav{position:sticky; top:0; z-index:9999; background:var(--white); border-bottom:1px solid var(--line-on-cream);}
 .tour-subnav-inner{display:flex; gap:2.2rem; overflow-x:auto; padding:1rem 0;}
@@ -1073,6 +1099,7 @@ footer{
 .why-item{text-align:center;}
 .why-item svg{width:44px; height:44px; color:var(--ink); margin:0 auto 1rem;}
 .why-item p{font-size:0.92rem;}
+@media (max-width:700px){.why-grid{grid-template-columns:1fr;}}
 @media (max-width:700px){.why-grid{grid-template-columns:1fr;}}
 
 .cta-banner{background:var(--cream-2); padding:clamp(1.8rem,4vw,2.6rem); display:flex; justify-content:space-between; align-items:center; gap:1.5rem; flex-wrap:wrap;}
@@ -1240,8 +1267,6 @@ footer{
   .mobile-map-overlay,
   .mobile-map-toggle-btn { display: none !important; }
 }
-
-
 
 /* ============================================================
    Single hotel — "The Address File"
@@ -1583,6 +1608,7 @@ footer{
   border-bottom:1px solid var(--rust);}
 .dest-prose-toggle:hover{color:var(--gold-deep); border-color:var(--gold-deep);}
 @media (max-width:900px){.dest-essence{grid-template-columns:1fr;}}
+@media (max-width:900px){.dest-essence{grid-template-columns:1fr;}}
 
 /* ══════════════════════════════════════════════════════════════
    TYPE OVER PHOTOGRAPHS
@@ -1611,7 +1637,14 @@ footer{
 .stay-lead-copy h3{max-width:20ch;}
 .stay-lead-copy p{color:rgba(255,255,255,0.94);}
 /* The bottom scrim on these cards has to be deep enough for body copy. */
-.stay-lead .overlay-bottom{background:linear-gradient(180deg,transparent 34%,rgba(9,8,7,0.55) 72%,rgba(9,8,7,0.88) 100%);}
+/* The lead plate carries a heading, a paragraph and a link over open
+   photograph. Cherry blossom and pale stone are the brightest thing this
+   library has, so this scrim starts earlier and lands harder than the card
+   ones. */
+.stay-lead .overlay-bottom{background:linear-gradient(180deg,transparent 22%,rgba(9,8,7,0.42) 52%,rgba(9,8,7,0.82) 80%,rgba(9,8,7,0.93) 100%);}
+.stay-lead-copy p{text-shadow:0 1px 1px rgba(9,8,7,0.7), 0 2px 10px rgba(9,8,7,0.8);}
+.stay-lead-copy .stay-plate{text-shadow:0 1px 1px rgba(9,8,7,0.8), 0 2px 8px rgba(9,8,7,0.75);}
+.stay-lead-copy .link-arrow{text-shadow:0 1px 2px rgba(9,8,7,0.8);}
 
 /* ---------- about: the team ---------- */
 .team-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:clamp(1.4rem,2.6vw,2.2rem); margin-top:2.6rem;}
@@ -1828,6 +1861,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   font-weight:400; margin-top:0.5rem; color:var(--ink);}
 .pillar-card p{margin-top:0.8rem; color:var(--text-dim-on-cream); font-size:0.95rem; line-height:1.7;}
 @media (max-width:760px){.pillar-grid{grid-template-columns:1fr;}}
+@media (max-width:760px){.pillar-grid{grid-template-columns:1fr;}}
 
 /* ══════════════════════════════════════════════════════════════
    EDIT BAR — staging only
@@ -1856,3 +1890,288 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .editbar-panel li span{display:block; margin-top:0.3rem; font-size:0.8rem; line-height:1.55;
   color:var(--text-dim-on-cream);}
 @media print{.editbar{display:none;}}
+@media print{.editbar{display:none;}}
+
+/* ══════════════════════════════════════════════════════════════
+   HERO — "The Spine"
+
+   The photograph does the selling, so it is barely veiled: a
+   soft pool behind the type and nothing across the rest of the
+   frame. Type is set like the margin of a printed volume, and
+   the slide index runs down the right edge naming the places
+   rather than numbering them — these four are not a sequence.
+
+   Palette is the site's own, taken from the logo's gold disc.
+   Both faces are already loaded; no new webfont cost.
+   ══════════════════════════════════════════════════════════════ */
+.spine-hero{
+  position:relative; min-height:min(92svh,900px);
+  display:flex; align-items:flex-end; overflow:hidden;
+  background:var(--ink);
+}
+
+/* The photograph drifts; the type above it does not. */
+.spine-plate{
+  position:absolute; inset:0; background-size:cover; background-position:center;
+  animation:spine-drift 22s ease-out both;
+  will-change:transform;
+}
+@keyframes spine-drift{ from{transform:scale(1.005);} to{transform:scale(1.055);} }
+
+/* Just enough shade to hold type in the lower-left corner. */
+.spine-veil{
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(64% 74% at 26% 78%, rgba(9,12,18,0.88) 0%, rgba(9,12,18,0.76) 30%, rgba(9,12,18,0.42) 56%, rgba(9,12,18,0.12) 76%, rgba(9,12,18,0) 90%),
+    linear-gradient(180deg, rgba(9,12,18,0.3) 0%, rgba(9,12,18,0) 30%, rgba(9,12,18,0.1) 62%, rgba(9,12,18,0.46) 88%, rgba(9,12,18,0.58) 100%);
+}
+
+.spine-inner{position:relative; z-index:2; width:100%; padding-bottom:clamp(3rem,7vw,6rem);}
+.spine-copy{max-width:min(46rem,88%);}
+
+/* Place label: a rule that draws itself, then the name. */
+.spine-place{
+  display:flex; align-items:center; gap:0.9rem;
+  font-size:0.74rem; letter-spacing:0.28em; text-transform:uppercase;
+  font-weight:600; color:var(--gold);
+  text-shadow:0 1px 3px rgba(9,12,18,0.7);
+}
+.spine-rule{
+  display:block; width:0; height:1px; background:var(--gold); flex:none;
+  animation:spine-draw .9s cubic-bezier(.2,.7,.2,1) .15s forwards;
+}
+@keyframes spine-draw{ to{ width:3.4rem; } }
+
+/* The headline hangs: the first line sits proud of the rest, the way a
+   drop-line does in a printed title page. */
+.spine-headline{
+  margin-top:1.1rem;
+  font-family:'Playfair Display',serif; font-weight:400;
+  font-size:clamp(2.6rem,7vw,5.6rem); line-height:0.98;
+  letter-spacing:-0.028em; color:#fff; text-wrap:balance;
+  padding-left:0.62em; text-indent:-0.62em;
+  text-shadow:0 1px 1px rgba(9,12,18,0.5), 0 2px 10px rgba(9,12,18,0.72), 0 10px 44px rgba(9,12,18,0.6);
+  animation:spine-rise 1s cubic-bezier(.2,.7,.2,1) both;
+}
+.spine-note{
+  margin-top:1.3rem; max-width:40ch;
+  font-size:clamp(1rem,1.35vw,1.16rem); line-height:1.65; font-weight:500;
+  color:rgba(255,255,255,0.93);
+  text-shadow:0 1px 1px rgba(9,12,18,0.6), 0 2px 10px rgba(9,12,18,0.8), 0 8px 30px rgba(9,12,18,0.6);
+  animation:spine-rise 1s cubic-bezier(.2,.7,.2,1) .09s both;
+}
+@keyframes spine-rise{ from{opacity:0; transform:translateY(1.1rem);} to{opacity:1; transform:none;} }
+
+/* A text link, not a button: nothing here is a checkout. */
+.spine-link{
+  display:inline-flex; align-items:center; gap:0.7rem; margin-top:1.9rem;
+  font-size:0.78rem; letter-spacing:0.2em; text-transform:uppercase; font-weight:600;
+  color:#fff; text-decoration:none; padding-bottom:0.5rem; position:relative;
+  animation:spine-rise 1s cubic-bezier(.2,.7,.2,1) .18s both;
+}
+.spine-link::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:1px;
+  background:rgba(255,255,255,0.42); transform-origin:left;
+  transition:background .35s ease, transform .5s cubic-bezier(.2,.7,.2,1);
+}
+.spine-link:hover::after{background:var(--gold); transform:scaleX(1.06);}
+.spine-link svg{width:15px; height:15px; transition:transform .45s cubic-bezier(.2,.7,.2,1);}
+.spine-link:hover svg{transform:translateX(6px);}
+
+/* ---------- the spine index ---------- */
+.spine-index{
+  position:absolute; right:clamp(1rem,2.4vw,2.6rem); top:50%; z-index:3;
+  transform:translateY(-50%); display:flex; flex-direction:column; gap:1.5rem;
+}
+.spine-index-item{
+  display:flex; align-items:center; gap:0.85rem; background:none; border:0;
+  padding:0.35rem 0; cursor:pointer; color:rgba(255,255,255,0.62);
+  writing-mode:vertical-rl; text-orientation:mixed;
+  transition:color .4s ease;
+}
+.spine-index-item:hover{color:#fff;}
+.spine-index-item.is-active{color:var(--gold);}
+.spine-index-label{
+  font-size:0.66rem; letter-spacing:0.24em; text-transform:uppercase; font-weight:600;
+  text-shadow:0 1px 1px rgba(9,12,18,0.9), 0 0 8px rgba(9,12,18,0.85), 0 2px 16px rgba(9,12,18,0.7);
+}
+.spine-index-tick{
+  display:block; width:1px; height:1.5rem; background:currentColor; opacity:0.72;
+  box-shadow:0 0 6px rgba(9,12,18,0.8);
+  transition:height .55s cubic-bezier(.2,.7,.2,1), opacity .4s ease;
+}
+.spine-index-item.is-active .spine-index-tick{height:3.4rem; opacity:1;}
+.spine-index-item:focus-visible{outline:2px solid var(--gold); outline-offset:4px; border-radius:2px;}
+
+@media (max-width:900px){
+  .spine-hero{min-height:82svh;}
+  /* Vertical type is unreadable at this width: the index lies down and keeps
+     only the active name. */
+  .spine-index{
+    top:auto; bottom:1.1rem; right:auto; left:0; width:100%;
+    transform:none; flex-direction:row; justify-content:center; gap:0.9rem;
+    padding:0 var(--pad);
+  }
+  .spine-index-item{writing-mode:horizontal-tb; gap:0.5rem;}
+  .spine-index-label{display:none;}
+  .spine-index-item.is-active .spine-index-label{display:block; font-size:0.6rem;}
+  .spine-index-tick{width:1.6rem; height:1px;}
+  .spine-index-item.is-active .spine-index-tick{width:2.6rem; height:1px;}
+  .spine-inner{padding-bottom:4.6rem;}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .spine-plate{animation:none;}
+  .spine-headline,.spine-note,.spine-link{animation:none;}
+  .spine-rule{width:3.4rem; animation:none;}
+  .spine-index-tick,.spine-link::after,.spine-link svg{transition:none;}
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TAB RAIL
+
+   A row you take in at once, then a link to the whole set —
+   rather than a grid that grows each time you press a button.
+   Six cards is what fits before the eye stops reading titles
+   and starts scanning shapes.
+   ══════════════════════════════════════════════════════════════ */
+.tab-rail{
+  display:grid; grid-auto-flow:column; grid-auto-columns:minmax(238px,1fr);
+  gap:clamp(1rem,1.8vw,1.6rem); overflow-x:auto; scroll-snap-type:x mandatory;
+  padding:2rem 0 0.6rem; scrollbar-width:none;
+  margin-inline:calc(var(--pad) * -1); padding-inline:var(--pad);
+}
+.tab-rail::-webkit-scrollbar{display:none;}
+
+.tab-card{
+  scroll-snap-align:start; text-decoration:none; color:inherit; display:block;
+  transition:transform .5s cubic-bezier(.2,.7,.2,1);
+}
+.tab-card-photo{
+  display:block; aspect-ratio:4/5; background-size:cover; background-position:center;
+  border-radius:3px; background-color:var(--cream-2); overflow:hidden;
+  transition:filter .5s ease;
+}
+.tab-card-photo.is-empty{background-image:linear-gradient(150deg,var(--cream-2),var(--celadon-pale));}
+.tab-card:hover{transform:translateY(-5px);}
+.tab-card:hover .tab-card-photo{filter:brightness(1.04);}
+
+.tab-card-body{display:block; padding-top:0.95rem;}
+.tab-card-body strong{
+  display:block; font-family:'Playfair Display',serif; font-weight:400;
+  font-size:clamp(1.06rem,1.5vw,1.24rem); line-height:1.25; color:var(--ink);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.tab-card-body em{
+  display:block; margin-top:0.32rem; font-style:normal;
+  font-size:0.68rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--gold-deep);
+}
+.tab-card-body > span{
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  margin-top:0.45rem; font-size:0.88rem; line-height:1.6; color:var(--text-dim-on-cream);
+}
+.tab-card:hover .tab-card-body strong{text-decoration:underline; text-underline-offset:4px;}
+
+.tab-foot{display:flex; justify-content:center; margin-top:2rem;}
+.tab-foot .btn svg{width:15px; height:15px;}
+
+@media (max-width:640px){
+  .tab-rail{grid-auto-columns:minmax(64vw,64vw); padding-top:1.5rem;}
+  .tab-card-photo{aspect-ratio:4/3;}
+}
+@media (prefers-reduced-motion: reduce){
+  .tab-card,.tab-card-photo{transition:none;}
+  .tab-card:hover{transform:none;}
+}
+
+/* ══════════════════════════════════════════════════════════════
+   THE REGISTER — homepage stays
+
+   A traveller reads hotels as a list: they compare names, then
+   look. So the names lead, set as a register, and one plate on
+   the left follows the row under the cursor. No type sits on the
+   photograph, which is what made the old lead card unreadable
+   over a bright interior.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════
+   HOMEPAGE — Hero → Trust → Intro → Tabs → Why → Journeys →
+   Cruises & Stays → Inspiration → Specialists → Enquiry
+   ══════════════════════════════════════════════════════════════ */
+
+/* ---------- 3 · trust bar ---------- */
+.trustbar{background:var(--ink); color:var(--cream); padding:1.05rem 0;}
+.trustbar-inner{
+  display:flex; flex-wrap:wrap; justify-content:center; align-items:center;
+  gap:0.9rem 2.2rem;
+  font-size:0.72rem; letter-spacing:0.18em; text-transform:uppercase; font-weight:600;
+}
+.trustbar-inner span{display:flex; align-items:center; gap:2.2rem;}
+.trustbar-inner span + span::before{
+  content:""; width:5px; height:5px; border-radius:50%; background:var(--gold); flex:none;
+}
+@media (max-width:760px){
+  .trustbar-inner{gap:0.6rem 1.2rem; font-size:0.64rem; letter-spacing:0.12em;}
+  .trustbar-inner span, .trustbar-inner span + span::before{gap:1.2rem;}
+}
+
+/* ---------- 4 · brand introduction ---------- */
+.intro-block{max-width:44rem; margin:0 auto; text-align:center;}
+.intro-headline{
+  font-family:'Playfair Display',serif; font-weight:400;
+  font-size:clamp(1.9rem,3.6vw,2.9rem); line-height:1.12; letter-spacing:-0.018em;
+  color:var(--ink); text-wrap:balance;
+}
+.intro-copy{
+  margin-top:1.2rem; font-size:clamp(1rem,1.35vw,1.14rem); line-height:1.72;
+  color:var(--text-dim-on-cream);
+}
+.intro-copy em{font-style:italic; color:var(--rust);}
+.intro-cta{margin-top:1.8rem;}
+
+/* ---------- 6 · why travel with us: see .story-bar + .value-grid ---------- */
+
+/* ---------- 7 · featured private journeys: see .hcarousel-* + .hc-card ---------- */
+/* The second route out of the card is the one this business sells. */
+@media (max-width:900px){.journey-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:900px){.journey-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:600px){.journey-grid{grid-template-columns:1fr;}}
+@media (max-width:600px){.journey-grid{grid-template-columns:1fr;}}
+
+/* ---------- 9 · travel inspiration ---------- */
+.editorial-grid{
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:clamp(1.4rem,2.6vw,2.4rem); margin-top:clamp(1.8rem,3vw,2.8rem);
+}
+.editorial-card{display:block; text-decoration:none; color:inherit;}
+.editorial-photo{
+  display:block; aspect-ratio:16/10; background-size:cover; background-position:center;
+  border-radius:3px; background-color:var(--cream-2);
+  transition:transform .6s cubic-bezier(.2,.7,.2,1);
+}
+.editorial-photo.is-empty{background-image:linear-gradient(150deg,var(--cream-2),var(--celadon-pale));}
+.editorial-card:hover .editorial-photo{transform:scale(1.02);}
+.editorial-body{display:block; padding-top:0.95rem;}
+.editorial-body em{
+  display:block; font-style:normal; font-size:0.66rem; letter-spacing:0.18em;
+  text-transform:uppercase; color:var(--gold-deep);
+}
+.editorial-body strong{
+  display:block; margin-top:0.4rem; font-family:'Playfair Display',serif; font-weight:400;
+  font-size:clamp(1.08rem,1.6vw,1.3rem); line-height:1.28; color:var(--ink);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.editorial-card:hover .editorial-body strong{text-decoration:underline; text-underline-offset:4px;}
+.editorial-body > span{
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  margin-top:0.45rem; font-size:0.88rem; line-height:1.6; color:var(--text-dim-on-cream);
+}
+@media (max-width:900px){.editorial-grid{grid-template-columns:1fr;}}
+@media (max-width:900px){.editorial-grid{grid-template-columns:1fr;}}
+
+/* ---------- 11 · enquiry ---------- */
+.plan-note{
+  margin-top:0.9rem; font-size:0.78rem; letter-spacing:0.06em;
+  color:var(--text-dim-on-cream);
+}
+

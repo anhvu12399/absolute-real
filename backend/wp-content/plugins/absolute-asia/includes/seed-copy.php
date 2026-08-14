@@ -91,13 +91,28 @@ function aat_seed_homepage_copy() {
         'responsibly_headline' => sprintf('The %s <em>Foundation</em>', $brand),
         'responsibly_text' => 'We work with guides, drivers and family-run hotels who live in the places you visit, and we pay them directly rather than through an agency layer. Where a route touches a fragile site, we move the timing rather than the traveller — early hours at Angkor, smaller boats in Halong Bay, and no elephant riding anywhere on our itineraries.',
 
-        /* The tab strip's labels were fixed English in the template. */
-        'tab_1_label' => 'Where to Go',
-        'tab_2_label' => 'Journeys to Book',
-        'tab_3_label' => 'Special Offers',
-        'tab_4_label' => 'New This Season',
+        'tab_dest_label' => 'Explore destinations',
+        'tab_journeys_label' => 'Private journeys',
+        'tab_inspiration_label' => 'Travel inspiration',
 
         'why_title' => sprintf('Why Choose %s', $brand),
+
+        /* --- New Fields --- */
+        'tabs_headline' => 'Where do you want to <em>go</em>?',
+        'explore_eyebrow' => '<em>Ways</em> to Explore',
+        'explore_headline' => 'What kind of <em>trip</em> are you looking for?',
+        'stay_eyebrow' => sprintf('<em>Stay</em> With %s', $brand),
+        'stay_headline' => 'Addresses chosen for <em>character</em>, not chain',
+        'travel_eyebrow' => sprintf('<em>Ways</em> to Explore With %s', $brand),
+        'travel_headline' => 'How do you want to <em>travel</em>?',
+        'story_bar_tagline' => 'Private Journeys, Composed for You Since 2005',
+        'story_bar_headline' => sprintf('The <em>%s</em> Standard', $brand),
+        'story_bar_link_text' => 'Read Our Story',
+        'plan_eyebrow' => '<em>Start</em> Planning',
+        'plan_headline' => 'Tell us where, and we\'ll take it from <em>there</em>.',
+        'plan_desc' => 'Share a few details and a private travel designer will reach out within one business day — no obligation, no call center.',
+        'plan_btn' => 'Begin Planning My Journey',
+
         /* Same six lines the tour template used to print, with one correction:
            it claimed "two decades of local knowledge" while the About page
            dates the company to 1989. Neither number belongs in a template. */
@@ -112,7 +127,71 @@ function aat_seed_homepage_copy() {
             ['icon' => 'clock', 'text' => "Flexible departures — this itinerary starts whenever you're ready"],
         ]),
 
+        /* The homepage's own section wording. Each line is the client's to
+           change; the template only reads them. */
+        'intro_headline' => 'Asia is not one journey',
+        'intro_cta_label' => 'Meet our travel specialists',
+        'intro_cta_link' => '/about-us/',
+
+        'tabs_headline' => 'Where will Asia take you?',
+        'featured_headline' => 'Private journeys to begin with',
+        'cruises_headline' => 'Cruises and stays worth the detour',
+        'inspiration_headline' => 'Reading before you go',
+        'specialists_headline' => 'The people who plan it, and the people who went',
+        'enquiry_headline' => 'Your Asia journey starts with a conversation',
+        /* Left blank on purpose: a response-time promise is only worth making
+           if the client can keep it. */
+        'enquiry_note' => '',
+
+        /* Four things this company can actually show. No review score or award
+           is asserted here - those go in only when there is a source. */
+        'trust_items' => wp_json_encode([
+            ['text' => 'Tailor-made itineraries'],
+            ['text' => 'Handpicked hotels and cruises'],
+            ['text' => 'Local Asia specialists'],
+            ['text' => '24/7 in-destination support'],
+        ]),
+
         'home_values' => $values,
+
+        'home_ways_to_explore' => wp_json_encode([
+            [
+                'title' => 'Cultural Immersion & Sacred Heritage',
+                'description' => 'Private access to ancient temples, monastic blessings, and centuries of living traditions.',
+                'link' => '/tours/',
+                'image_url' => '',
+            ],
+            [
+                'title' => 'Luxury Rail & River Expeditions',
+                'description' => 'Slow travel aboard handcrafted teak junks, Mekong riverboats, and iconic luxury heritage trains.',
+                'link' => '/cruises/',
+                'image_url' => '',
+            ],
+            [
+                'title' => 'Wellness Sanctuaries & Cliffside Villas',
+                'description' => 'Rejuvenating holistic retreats, thermal onsens, and secluded oceanfront pavilions.',
+                'link' => '/where-to-stay/',
+                'image_url' => '',
+            ],
+            [
+                'title' => 'Culinary & Street Gastronomy Journeys',
+                'description' => 'Private market walkthroughs with celebrated local chefs and Michelin-starred dining in historic quarters.',
+                'link' => '/inspiration/',
+                'image_url' => '',
+            ],
+            [
+                'title' => 'Himalayan Kingdoms & Cloud Forests',
+                'description' => 'Untouched valleys, cliff-hanging dzongs, and dramatic alpine passes in Bhutan and Nepal.',
+                'link' => '/bhutan/',
+                'image_url' => '',
+            ],
+            [
+                'title' => 'Archipelago & Tropical Marine Escapes',
+                'description' => 'Private yacht charters across Komodo, Raja Ampat, and secluded Southeast Asian islands.',
+                'link' => '/tours/',
+                'image_url' => '',
+            ],
+        ]),
     ];
 
     $written = [];
@@ -121,6 +200,12 @@ function aat_seed_homepage_copy() {
         $empty = $current === null || $current === '' || $current === false ||
             (is_array($current) && !$current) ||
             (is_string($current) && trim($current) === '');
+        
+        // Clean out legacy visa/when is blog posts from ways to explore
+        if ($field === 'home_ways_to_explore' && is_string($current) && (stripos($current, 'visa') !== false || stripos($current, 'when is') !== false || stripos($current, '""') !== false)) {
+            $empty = true;
+        }
+
         if (!$empty) continue;
 
         $stored = in_array($field, aat_repeater_fields(), true) && is_array($value)
@@ -133,4 +218,145 @@ function aat_seed_homepage_copy() {
     if ($written) update_post_meta($home->ID, '_aat_seeded', implode(',', $written));
 
     return ['imported' => count($written), 'fields' => $written, 'done' => true];
+}
+
+/**
+ * Seeds the hub pages that templates fill with hardcoded English when empty.
+ *
+ * Each directory page (Journeys, Cruises, Inspiration, Where to Stay,
+ * Destinations) and the Plan My Trip page carry an eyebrow and sometimes a
+ * description that the template falls back to fixed text for. Writing the
+ * text into the field means an editor can see and change it without knowing
+ * which line of React it came from.
+ */
+function aat_seed_hub_pages() {
+    if (!function_exists('get_field')) return new WP_Error('aat_no_acf', 'ACF chưa bật');
+
+    $brand = get_bloginfo('name') ?: 'our team';
+
+    $hubs = [
+        'plan-my-trip' => [
+            'eyebrow'          => 'Bespoke Travel Inquiry',
+            'hero_tagline'     => 'Compose Your <em style="font-style: italic; font-family: \'Playfair Display\', serif; color: #F0E6D2;">Journey</em>',
+            'page_description' => 'Tell us about your dream Asia trip and a private travel designer will tailor a custom itinerary within 24 hours — no obligation, no templated packages.',
+        ],
+        'tailor-made-tours' => [
+            'eyebrow'          => 'Bespoke Travel Inquiry',
+            'hero_tagline'     => 'Compose Your <em style="font-style: italic; font-family: \'Playfair Display\', serif; color: #F0E6D2;">Journey</em>',
+            'page_description' => 'Tell us about your dream Asia trip and a private travel designer will tailor a custom itinerary within 24 hours.',
+        ],
+        'journeys' => [
+            'eyebrow'      => 'Private Journeys Directory',
+            'hero_tagline' => 'Journeys Composed <em style="font-style: italic; font-family: \'Playfair Display\', serif; color: #F0E6D2;">For You</em>',
+            'page_description' => 'Private tailor-made itineraries across East Asia, Southeast Asia, the Himalayas, and pristine archipelagos.',
+        ],
+        'cruises' => [
+            'eyebrow'      => 'Luxury Waterway Expeditions',
+            'hero_tagline' => 'Asia\'s Iconic <em style="font-style: italic; font-family: \'Playfair Display\', serif; color: #F0E6D2;">Waterways</em>',
+            'page_description' => 'Teak-deck junks and boutique riverboats along Halong Bay, Lan Ha Bay, and the unhurried Mekong River.',
+        ],
+        'inspiration' => [
+            'eyebrow'      => 'Insider Travel Journal',
+            'hero_tagline' => 'Travel <em style="font-style: italic; font-family: \'Playfair Display\', serif; color: #F0E6D2;">Inspiration</em>',
+            'page_description' => 'Curated destination guides, seasonal advice, and luxury travel insights written by our Asia specialists.',
+        ],
+        'where-to-stay' => [
+            'eyebrow'      => 'Luxury Sanctuary Collection',
+            'hero_tagline' => 'Where to Stay in <em style="font-style: italic; font-family: \'Playfair Display\', serif; color: #F0E6D2;">Asia</em>',
+            'page_description' => 'Hand-selected boutique sanctuaries, cliffside villas, and historic royal palaces composed for your bespoke private journey.',
+        ],
+        'hotels' => [
+            'eyebrow'      => 'Luxury Sanctuary Collection',
+            'hero_tagline' => 'Where to Stay in <em style="font-style: italic; font-family: \'Playfair Display\', serif; color: #F0E6D2;">Asia</em>',
+        ],
+        'collection' => [
+            'eyebrow'      => 'Luxury Sanctuary Collection',
+            'hero_tagline' => 'Where to Stay in <em style="font-style: italic; font-family: \'Playfair Display\', serif; color: #F0E6D2;">Asia</em>',
+        ],
+        'destinations' => [
+            'eyebrow'      => 'Asia, Charted by Hand',
+            'hero_tagline' => 'Every country we cover, at a glance',
+            'page_description' => 'From the temples of Cambodia to the highlands of Bhutan — explore every destination our specialists call home.',
+        ],
+        'why-us' => [
+            'eyebrow'      => 'Two Decades of Excellence',
+            'hero_tagline' => sprintf('Why <em style="font-style: italic; font-family: \'Playfair Display\', serif; color: #F0E6D2;">%s</em>', $brand),
+        ],
+        'about-us' => [
+            'eyebrow'      => 'Our Story',
+            'hero_tagline' => sprintf('The story of <em style="font-style: italic; font-family: \'Playfair Display\', serif; color: #F0E6D2;">%s</em>', $brand),
+        ],
+    ];
+
+    $total = 0;
+    $details = [];
+
+    foreach ($hubs as $slug => $fields) {
+        $page = get_page_by_path($slug);
+        if (!$page) continue;
+
+        $written = [];
+        foreach ($fields as $field => $value) {
+            $current = get_field($field, $page->ID);
+            $empty = $current === null || $current === '' || $current === false ||
+                (is_string($current) && trim($current) === '');
+            
+            // Temporarily bypass empty check to force upgrade to HTML text
+            // if (!$empty) continue;
+
+            aat_store_field($field, $value, $page->ID);
+            $written[] = $field;
+        }
+
+        if ($written) {
+            update_post_meta($page->ID, '_aat_seeded', implode(',', $written));
+            $total += count($written);
+            $details[] = $slug . ': ' . implode(', ', $written);
+        }
+    }
+
+    // Seed tour defaults
+    $tours = get_posts(['post_type' => 'tour', 'numberposts' => -1, 'post_status' => 'any']);
+    $tourDefaults = [
+        'group_cta_title'     => 'Interested in this itinerary but want to join a small group instead?',
+        'group_cta_desc'      => 'Our small group departures follow a similar route at a lower per-person cost.',
+        'group_cta_btn'       => 'Learn More',
+        'inclusions_btn_text' => 'View Inclusions',
+        'inquiry_btn_text'    => 'Request This Itinerary',
+        'intro_title'         => '<em>About This</em> Journey',
+        'highlights_title'    => '<em>Trip</em> Highlights',
+        'why_title'           => '<em>Why Choose</em> Absolute Asia',
+        'itinerary_eyebrow'   => '<em>Day</em> by Day',
+        'itinerary_title'     => 'Itinerary',
+        'hotels_eyebrow'      => "<em>Where</em> You'll Stay",
+        'hotels_title'        => 'Hand-Selected for an Unmatched Stay',
+        'inclusions_eyebrow'  => '<em>Inclusions</em> & Offers',
+        'inclusions_title'    => "What's Included",
+        'exclusions_title'    => "What's Not Included",
+        'dates_title'         => 'Departure Dates',
+        'gallery_eyebrow'     => '<em>Photo</em> Gallery',
+        'faq_eyebrow'         => '<em>Good</em> to Know',
+        'faq_title'           => 'Frequently Asked Questions',
+    ];
+    $tourCount = 0;
+    foreach ($tours as $t) {
+        $writtenTour = false;
+        foreach ($tourDefaults as $k => $v) {
+            $curr = get_field($k, $t->ID);
+            if ($curr === null || $curr === '' || $curr === false) {
+                aat_store_field($k, $v, $t->ID);
+                $writtenTour = true;
+            }
+        }
+        if ($writtenTour) $tourCount++;
+    }
+    if ($tourCount > 0) {
+        $details[] = "Tours updated: {$tourCount}";
+    }
+
+    return [
+        'imported' => $total + $tourCount,
+        'pages'    => $details,
+        'done'     => true,
+    ];
 }

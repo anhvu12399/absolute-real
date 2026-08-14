@@ -22,7 +22,7 @@ function aat_repeater_fields() {
         // destination / hotel
         'nearby_places', 'related_links', 'month_guide',
         // page hubs
-        'journeys', 'cruises', 'articles', 'team', 'story_milestones', 'pillars', 'why_reasons',
+        'journeys', 'cruises', 'articles', 'team', 'story_milestones', 'milestones', 'pillars', 'why_reasons',
     ];
 }
 
@@ -96,12 +96,12 @@ function aat_register_fields() {
         'key' => 'group_aat_homepage',
         'title' => 'Homepage Content',
         'fields' => [
-            aat_tab('tab_aat_home_hero', 'Hero & Ticker'),
+            aat_tab('tab_aat_home_hero', '🖼 Banner đầu trang — Hero & Ticker'),
             aat_repeater_field('field_aat_home_slider', 'Hero Slider', 'home_banner_slider', 'home-banner', aat_fills_itself('tour')),
             aat_text('field_aat_home_ticker_text', 'Ticker Text', 'ticker_text'),
             aat_text('field_aat_home_ticker_link', 'Ticker Link', 'ticker_link'),
 
-            aat_tab('tab_aat_home_intro', 'Statement & Stats'),
+            aat_tab('tab_aat_home_intro', '📊 Câu mở đầu & Số liệu'),
             aat_textarea('field_aat_home_statement', 'Statement (HTML allowed)', 'statement_text', 3),
             aat_text('field_aat_home_stat1n', 'Stat 1 Number', 'stat_1_num'),
             aat_text('field_aat_home_stat1l', 'Stat 1 Label', 'stat_1_label'),
@@ -110,23 +110,31 @@ function aat_register_fields() {
             aat_text('field_aat_home_stat3n', 'Stat 3 Number', 'stat_3_num'),
             aat_text('field_aat_home_stat3l', 'Stat 3 Label', 'stat_3_label'),
 
-            aat_tab('tab_aat_home_tabs', 'Journey Tabs'),
-            /* The four tab labels were fixed English in the template. */
-            aat_text('field_aat_home_tab1l', 'Tab 1 Label', 'tab_1_label'),
-            aat_text('field_aat_home_tab2l', 'Tab 2 Label', 'tab_2_label'),
-            aat_text('field_aat_home_tab3l', 'Tab 3 Label', 'tab_3_label'),
-            aat_text('field_aat_home_tab4l', 'Tab 4 Label', 'tab_4_label'),
+            aat_tab('tab_aat_home_tabs', '📍 Tab Hành trình — Các thẻ trên trang chủ'),
+            aat_text('field_aat_home_tabs_head', 'Headline', 'tabs_headline'),
+            /* Three tabs: where, what kind of journey, what to read. Named
+               rather than numbered so a re-ordering does not silently move a
+               label onto the wrong tab. */
+            aat_text('field_aat_home_tab_dest', 'Tab: Destinations Label', 'tab_dest_label'),
+            aat_text('field_aat_home_tab_jour', 'Tab: Journeys Label', 'tab_journeys_label'),
+            aat_text('field_aat_home_tab_insp', 'Tab: Inspiration Label', 'tab_inspiration_label'),
             aat_repeater_field('field_aat_home_tab_dest', 'Tab: Destinations We Love', 'home_tab_destinations', 'home-cards', aat_fills_itself('điểm đến')),
             aat_repeater_field('field_aat_home_tab_jour', 'Tab: Journeys to Book Now', 'home_tab_journeys', 'home-cards', aat_fills_itself('tour')),
             aat_repeater_field('field_aat_home_tab_off', 'Tab: Limited-Time Offers', 'home_tab_offers', 'home-cards', aat_fills_itself('tour')),
             aat_repeater_field('field_aat_home_tab_new', 'Tab: New & Noteworthy', 'home_tab_new', 'home-cards', aat_fills_itself('tour')),
 
-            aat_tab('tab_aat_home_explore', 'Explore, Stay & Travel'),
+            aat_tab('tab_aat_home_explore', '🌏 Khám phá, Lưu trú & Du lịch'),
+            aat_text('field_aat_home_exp_eye', 'Ways to Explore Eyebrow', 'explore_eyebrow'),
+            aat_text('field_aat_home_exp_head', 'Ways to Explore Headline (HTML)', 'explore_headline'),
             aat_repeater_field('field_aat_home_explore', 'Ways to Explore', 'home_ways_to_explore', 'home-cards', aat_fills_itself('điểm đến', '4')),
+            aat_text('field_aat_home_stay_eye', 'Stay Eyebrow', 'stay_eyebrow'),
+            aat_text('field_aat_home_stay_head', 'Stay Headline (HTML)', 'stay_headline'),
             aat_repeater_field('field_aat_home_stay', 'Stay With Absolute Asia', 'home_stay_with', 'home-cards', aat_fills_itself('khách sạn')),
+            aat_text('field_aat_home_trv_eye', 'Ways to Travel Eyebrow', 'travel_eyebrow'),
+            aat_text('field_aat_home_trv_head', 'Ways to Travel Headline (HTML)', 'travel_headline'),
             aat_repeater_field('field_aat_home_travel', 'Ways to Travel', 'home_ways_to_travel', 'home-cards', aat_fills_itself('tour')),
 
-            aat_tab('tab_aat_home_map', 'Map & Values'),
+            aat_tab('tab_aat_home_map', '🗺 Bản đồ & Giá trị cốt lõi'),
             aat_text('field_aat_home_map_head', 'Map Headline (HTML allowed)', 'map_headline'),
             aat_textarea('field_aat_home_map_desc', 'Map Description', 'map_description', 4),
             aat_textarea('field_aat_home_quote', 'Quote Text', 'quote_text', 3),
@@ -137,13 +145,24 @@ function aat_register_fields() {
             aat_image('field_aat_home_resp_image', 'Travel Responsibly Photo', 'responsibly_image'),
             aat_repeater_field('field_aat_home_values', 'Core Values', 'home_values', 'home-values'),
 
+            aat_tab('tab_aat_home_story', '📜 Câu chuyện & Tiêu chuẩn'),
+            aat_text('field_aat_home_story_tag', 'Story Tagline', 'story_bar_tagline'),
+            aat_text('field_aat_home_story_head', 'Story Headline (HTML)', 'story_bar_headline'),
+            aat_text('field_aat_home_story_btn', 'Button Text', 'story_bar_link_text'),
+
+            aat_tab('tab_aat_home_plan', '📝 Form kế hoạch'),
+            aat_text('field_aat_home_plan_eye', 'Eyebrow', 'plan_eyebrow'),
+            aat_text('field_aat_home_plan_head', 'Headline (HTML)', 'plan_headline'),
+            aat_textarea('field_aat_home_plan_desc', 'Description', 'plan_desc', 3),
+            aat_text('field_aat_home_plan_btn', 'Button Text', 'plan_btn'),
+
             /* The six "why choose us" lines were fixed English on every tour
                page, and one of them stated an age for the company. */
-            aat_tab('tab_aat_home_why', 'Why Choose Us'),
+            aat_tab('tab_aat_home_why', '⭐ Tại sao chọn chúng tôi'),
             aat_text('field_aat_home_why_title', 'Section Title', 'why_title'),
             aat_repeater_field('field_aat_home_why', 'Reasons', 'why_reasons', 'reasons'),
 
-            aat_tab('tab_aat_home_social', 'Reviews & Contact'),
+            aat_tab('tab_aat_home_social', '💬 Đánh giá & Liên hệ'),
             aat_repeater_field('field_aat_home_testimonials', 'Testimonials', 'testimonials', 'testimonials'),
             aat_textarea('field_aat_home_review_summary', 'Review Summary (HTML)', 'review_summary', 2),
             aat_image('field_aat_home_review_logo', 'Review Site Logo', 'review_logo'),
@@ -210,13 +229,32 @@ function aat_register_fields() {
             aat_text('field_aat_tour_eyebrow_link', 'Hero Eyebrow Link', 'hero_eyebrow_link'),
             aat_text('field_aat_tour_gallery_title', 'Gallery Heading', 'gallery_title'),
             aat_text('field_aat_tour_classic', 'Classic Tour Link', 'classic_tour_link'),
-            aat_text('field_aat_tour_lbl_high', 'Highlights Heading', 'highlights_title'),
+            
+            // Section Headings with default values
+            aat_text('field_aat_tour_why_title', 'Why Us Heading', 'why_title', ['default_value' => '<em>Why Choose</em> Absolute Asia']),
+            aat_text('field_aat_tour_itin_eye', 'Itinerary Eyebrow', 'itinerary_eyebrow', ['default_value' => '<em>Day</em> by Day']),
+            aat_text('field_aat_tour_itin_head', 'Itinerary Heading', 'itinerary_title', ['default_value' => 'Itinerary']),
+            aat_text('field_aat_tour_stays_eye', 'Stays Eyebrow', 'hotels_eyebrow', ['default_value' => "<em>Where</em> You'll Stay"]),
+            aat_text('field_aat_tour_stays_head', 'Stays Heading', 'hotels_title', ['default_value' => 'Hand-Selected for an Unmatched Stay']),
+            aat_text('field_aat_tour_incl_eye', 'Inclusions Eyebrow', 'inclusions_eyebrow', ['default_value' => '<em>Inclusions</em> & Offers']),
+            aat_text('field_aat_tour_incl_head', 'Inclusions Heading', 'inclusions_title', ['default_value' => "What's Included"]),
+            aat_text('field_aat_tour_dates_head', 'Departure Dates Heading', 'dates_title', ['default_value' => 'Departure Dates']),
+            aat_text('field_aat_tour_gal_eye', 'Gallery Eyebrow', 'gallery_eyebrow', ['default_value' => '<em>Photo</em> Gallery']),
+            aat_text('field_aat_tour_faq_eye', 'FAQ Eyebrow', 'faq_eyebrow', ['default_value' => '<em>Good</em> to Know']),
+            aat_text('field_aat_tour_faq_head', 'FAQ Heading', 'faq_title', ['default_value' => 'Frequently Asked Questions']),
+
+            aat_text('field_aat_tour_lbl_high', 'Highlights Heading', 'highlights_title', ['default_value' => '<em>Trip</em> Highlights']),
             aat_text('field_aat_tour_lbl_highdesc', 'Highlights Note', 'highlights_note'),
-            aat_text('field_aat_tour_lbl_opt', 'Accommodation Heading', 'options_title'),
+            aat_text('field_aat_tour_lbl_opt', 'Accommodation Heading', 'options_title', ['default_value' => 'Accommodation Options']),
             aat_textarea('field_aat_tour_lbl_optdesc', 'Accommodation Note', 'options_note', 2),
-            aat_text('field_aat_tour_lbl_excl', 'Exclusions Heading', 'exclusions_title'),
-            aat_text('field_aat_tour_lbl_policy', 'Booking Policy Heading', 'booking_policy_title'),
-            aat_text('field_aat_tour_lbl_other', 'Related Tours Heading', 'related_tours_title'),
+            aat_text('field_aat_tour_lbl_excl', 'Exclusions Heading', 'exclusions_title', ['default_value' => "What's Not Included"]),
+            aat_text('field_aat_tour_lbl_policy', 'Booking Policy Heading', 'booking_policy_title', ['default_value' => 'Booking Policy']),
+            aat_text('field_aat_tour_lbl_other', 'Related Tours Heading', 'related_tours_title', ['default_value' => 'Related Journeys']),
+            aat_text('field_aat_tour_group_title', 'Small Group CTA Title', 'group_cta_title', ['default_value' => 'Interested in this itinerary but want to join a small group instead?']),
+            aat_textarea('field_aat_tour_group_desc', 'Small Group CTA Description', 'group_cta_desc', 2),
+            aat_text('field_aat_tour_group_btn', 'Small Group CTA Button', 'group_cta_btn', ['default_value' => 'Learn More']),
+            aat_text('field_aat_tour_btn_incl', 'View Inclusions Button Text', 'inclusions_btn_text', ['default_value' => 'View Inclusions']),
+            aat_text('field_aat_tour_btn_inquiry', 'Request Tour Button Text', 'inquiry_btn_text', ['default_value' => 'Request This Itinerary']),
             aat_text('field_aat_tour_cta_label', 'Highlight CTA Label', 'cta_label'),
             aat_text('field_aat_tour_cta_link', 'Highlight CTA Link', 'cta_link'),
             [
@@ -238,6 +276,7 @@ function aat_register_fields() {
         'key' => 'group_aat_place',
         'title' => 'Destination Details',
         'fields' => [
+            aat_tab('tab_aat_place_hero', 'Hero & Overview'),
             aat_image('field_aat_place_hero', 'Hero Image', 'hero_image'),
             aat_text('field_aat_place_tagline', 'Hero Tagline', 'hero_tagline'),
             aat_textarea('field_aat_place_overview', 'Overview', 'destination_overview', 4),
@@ -250,7 +289,7 @@ function aat_register_fields() {
             aat_text('field_aat_place_lat', 'Latitude', 'latitude'),
             aat_text('field_aat_place_lng', 'Longitude', 'longitude'),
 
-            aat_tab('tab_aat_place_related', 'Related'),
+            aat_tab('tab_aat_place_related', 'Related & Gallery'),
             aat_text('field_aat_place_rel_title', 'Related Section Title', 'related_title'),
             aat_textarea('field_aat_place_rel_desc', 'Related Section Description', 'related_description', 2),
             [
@@ -272,6 +311,19 @@ function aat_register_fields() {
                 'return_format' => 'id',
             ],
             aat_repeater_field('field_aat_place_gallery', 'Gallery', 'gallery', 'gallery'),
+
+            aat_tab('tab_aat_place_labels', 'Section Headings'),
+            aat_text('field_aat_place_test_eye', 'Testimonials Eyebrow', 'testimonials_eyebrow'),
+            aat_text('field_aat_place_test_head', 'Testimonials Heading', 'testimonials_heading'),
+            aat_text('field_aat_place_exp_eye', 'Experiences Eyebrow', 'experiences_eyebrow'),
+            aat_text('field_aat_place_exp_head', 'Experiences Heading', 'experiences_heading'),
+            aat_text('field_aat_place_stay_eye', 'Stays Eyebrow', 'stays_eyebrow'),
+            aat_text('field_aat_place_stay_head', 'Stays Heading', 'stays_heading'),
+            aat_text('field_aat_place_route_eye', 'Route Eyebrow', 'route_eyebrow'),
+            aat_text('field_aat_place_guide_eye', 'Guides Eyebrow', 'guides_eyebrow'),
+            aat_text('field_aat_place_guide_head', 'Guides Heading', 'guides_heading'),
+            aat_text('field_aat_place_plan_eye', 'Planning Eyebrow', 'planning_eyebrow'),
+            aat_text('field_aat_place_plan_head', 'Planning Heading', 'planning_heading'),
 
         ],
         'location' => [
@@ -309,14 +361,15 @@ function aat_register_fields() {
         'key' => 'group_aat_hotel',
         'title' => 'Hotel Details',
         'fields' => [
+            aat_tab('tab_aat_hotel_hero', 'Hero & Overview'),
             aat_image('field_aat_hotel_hero', 'Hero Image', 'hero_image'),
             aat_text('field_aat_hotel_location', 'Location / Subtitle', 'hotel_location'),
             aat_textarea('field_aat_hotel_highlights', 'Highlights (one per line)', 'hotel_highlights', 5),
+
+            aat_tab('tab_aat_hotel_map', 'Location & Map'),
             aat_text('field_aat_hotel_map_label', 'Map Location Label', 'location_map'),
             aat_text('field_aat_hotel_lat', 'Latitude', 'latitude'),
             aat_text('field_aat_hotel_lng', 'Longitude', 'longitude'),
-            aat_repeater_field('field_aat_hotel_gallery', 'Gallery', 'gallery', 'gallery'),
-            aat_repeater_field('field_aat_hotel_nearby', 'Nearby Places', 'nearby_places', 'nearby'),
             [
                 'key' => 'field_aat_hotel_city',
                 'label' => 'City / Destination',
@@ -325,6 +378,12 @@ function aat_register_fields() {
                 'post_type' => ['place_to_go'],
                 'return_format' => 'id',
             ],
+            aat_repeater_field('field_aat_hotel_nearby', 'Nearby Places', 'nearby_places', 'nearby'),
+
+            aat_tab('tab_aat_hotel_gallery', 'Gallery'),
+            aat_repeater_field('field_aat_hotel_gallery', 'Gallery', 'gallery', 'gallery'),
+
+            aat_tab('tab_aat_hotel_related', 'Related Content'),
             [
                 'key' => 'field_aat_hotel_tours',
                 'label' => 'Related Tours',
@@ -357,6 +416,7 @@ function aat_register_fields() {
             aat_text('field_aat_hotel_lbl_gallery', 'Gallery Heading', 'gallery_title'),
             aat_text('field_aat_hotel_lbl_tours', 'Journeys Heading', 'tours_title'),
             aat_text('field_aat_hotel_lbl_hotels', 'Nearby Hotels Heading', 'hotels_title'),
+            aat_text('field_aat_hotel_lbl_inbrief', 'In Brief Heading', 'in_brief_title'),
             aat_text('field_aat_hotel_lbl_things', 'Things to Do Heading', 'things_title'),
             aat_text('field_aat_hotel_lbl_loc', 'Location Heading', 'location_title'),
             aat_text('field_aat_hotel_lbl_locsub', 'Location Subheading', 'location_subtitle'),
@@ -372,16 +432,23 @@ function aat_register_fields() {
         'key' => 'group_aat_editorial',
         'title' => 'Article Details',
         'fields' => [
+            aat_tab('tab_aat_ed_hero', 'Hero & Content'),
             aat_image('field_aat_ed_hero', 'Hero Image', 'hero_image'),
             aat_text('field_aat_ed_minutes', 'Read Time (minutes)', 'read_minutes'),
-            aat_textarea('field_aat_ed_intro', 'Intro / Excerpt (HTML allowed)', 'intro_html', 3),
+            aat_textarea('field_aat_ed_intro', 'Intro / Excerpt (HTML)', 'intro_html', 3),
             aat_wysiwyg('field_aat_ed_left', 'Secondary Column', 'content_left'),
             aat_image('field_aat_ed_right_img', 'Secondary Image', 'content_right_image'),
-            aat_wysiwyg('field_aat_ed_plan', 'Plan Your Trip Block', 'plan_html'),
+
+            aat_tab('tab_aat_ed_sidebar', 'Sidebar'),
+            aat_text('field_aat_ed_sb_popular', 'Popular Heading', 'sidebar_popular_title'),
+            aat_text('field_aat_ed_sb_search', 'Search Heading', 'sidebar_search_title'),
+            aat_text('field_aat_ed_sb_social', 'Social Heading', 'sidebar_social_title'),
             aat_text('field_aat_ed_further', 'Further Reading Title', 'further_title'),
-            aat_text('field_aat_ed_sb_popular', 'Sidebar: Popular Heading', 'sidebar_popular_title'),
-            aat_text('field_aat_ed_sb_search', 'Sidebar: Search Heading', 'sidebar_search_title'),
-            aat_text('field_aat_ed_sb_social', 'Sidebar: Social Heading', 'sidebar_social_title'),
+            aat_text('field_aat_ed_view_more', 'View More Label', 'view_more_label'),
+            aat_text('field_aat_ed_view_more_link', 'View More Link', 'view_more_link'),
+
+            aat_tab('tab_aat_ed_gallery', 'Gallery & Related'),
+            aat_repeater_field('field_aat_ed_gallery', 'Gallery', 'gallery', 'gallery'),
             [
                 'key' => 'field_aat_ed_guides',
                 'label' => 'Related Guides',
@@ -400,14 +467,12 @@ function aat_register_fields() {
                 'multiple' => 1,
                 'return_format' => 'id',
             ],
-            aat_repeater_field('field_aat_ed_gallery', 'Gallery', 'gallery', 'gallery'),
 
-            aat_tab('tab_aat_ed_plan', 'Plan Your Trip Block'),
+            aat_tab('tab_aat_ed_plan', 'Plan Your Trip'),
             aat_text('field_aat_ed_plan_title', 'Plan Heading', 'plan_title'),
             aat_wysiwyg('field_aat_ed_plan_desc', 'Plan Description', 'plan_description'),
+            aat_wysiwyg('field_aat_ed_plan_html', 'Plan Block (HTML)', 'plan_html'),
             aat_wysiwyg('field_aat_ed_plan_bottom', 'Plan Footer', 'plan_footer'),
-            aat_text('field_aat_ed_view_more', 'View More Label', 'view_more_label'),
-            aat_text('field_aat_ed_view_more_link', 'View More Link', 'view_more_link'),
 
             ...aat_specialist_fields('ed'),
         ],
@@ -436,14 +501,19 @@ function aat_register_fields() {
             aat_text('field_aat_page_pillars_t', 'Guarantees Section Title', 'pillars_title'),
             aat_repeater_field('field_aat_page_pillars', 'Guarantees / Pillars', 'pillars', 'pillars'),
 
-            /* About Us has a "meet the team" section with no data behind it. */
-            aat_tab('tab_aat_page_story', 'Our Story'),
-            aat_text('field_aat_page_story_eyebrow', 'Story Eyebrow', 'story_eyebrow'),
-            aat_textarea('field_aat_page_story_lede', 'Story Standfirst', 'story_lede', 3),
-            aat_repeater_field('field_aat_page_milestones', 'Milestones (year + what happened)', 'milestones', 'milestones'),
-            aat_text('field_aat_page_founder', 'Founder Name', 'founder_name'),
-            aat_text('field_aat_page_founder_role', 'Founder Role', 'founder_role'),
-            aat_image('field_aat_page_founder_photo', 'Founder Photo', 'founder_photo'),
+            /* About Us / Why Us — the company's own story.
+               Field names must match seed-story.php and WhyUsTemplateV2.tsx. */
+            aat_tab('tab_aat_page_story', '📜 Câu chuyện — Our Story'),
+            aat_text('field_aat_page_story_eyebrow', 'Eyebrow phía trên tiêu đề (ví dụ: "Our Story")', 'story_eyebrow'),
+            aat_text('field_aat_page_story_headline', 'Tiêu đề lớn của phần story', 'story_headline'),
+            aat_textarea('field_aat_page_story_lede', 'Mở đầu — câu đầu tiên dưới tiêu đề', 'story_lede', 3),
+            aat_repeater_field('field_aat_page_milestones', 'Các mốc lịch sử (năm + sự kiện)', 'story_milestones', 'milestones'),
+            aat_text('field_aat_page_now_title', 'Tiêu đề phần "Hiện tại"', 'story_now_title'),
+            aat_textarea('field_aat_page_now_text', 'Nội dung phần "Hiện tại"', 'story_now_text', 3),
+            aat_text('field_aat_page_founder', 'Tên người sáng lập', 'story_founder_name'),
+            aat_text('field_aat_page_founder_role', 'Chức vụ người sáng lập', 'story_founder_role'),
+            aat_image('field_aat_page_founder_photo', 'Ảnh người sáng lập', 'story_founder_photo'),
+            aat_textarea('field_aat_page_founder_quote', 'Câu nói của người sáng lập', 'story_founder_quote', 2),
 
             aat_tab('tab_aat_page_team', 'Team'),
             aat_text('field_aat_page_team_title', 'Team Section Title', 'team_title'),

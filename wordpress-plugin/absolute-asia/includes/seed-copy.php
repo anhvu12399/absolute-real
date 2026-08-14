@@ -91,11 +91,9 @@ function aat_seed_homepage_copy() {
         'responsibly_headline' => sprintf('The %s <em>Foundation</em>', $brand),
         'responsibly_text' => 'We work with guides, drivers and family-run hotels who live in the places you visit, and we pay them directly rather than through an agency layer. Where a route touches a fragile site, we move the timing rather than the traveller — early hours at Angkor, smaller boats in Halong Bay, and no elephant riding anywhere on our itineraries.',
 
-        /* The tab strip's labels were fixed English in the template. */
-        'tab_1_label' => 'Where to Go',
-        'tab_2_label' => 'Journeys to Book',
-        'tab_3_label' => 'Special Offers',
-        'tab_4_label' => 'New This Season',
+        'tab_dest_label' => 'Explore destinations',
+        'tab_journeys_label' => 'Private journeys',
+        'tab_inspiration_label' => 'Travel inspiration',
 
         'why_title' => sprintf('Why Choose %s', $brand),
 
@@ -107,7 +105,12 @@ function aat_seed_homepage_copy() {
         'stay_headline' => 'Addresses chosen for <em>character</em>, not chain',
         'travel_eyebrow' => sprintf('<em>Ways</em> to Explore With %s', $brand),
         'travel_headline' => 'How do you want to <em>travel</em>?',
-        'story_bar_tagline' => 'Private Journeys, Composed for You Since 2005',
+        /* The founding year is a setting, not a constant - this line used to
+           publish "Since 2005" beside an About page that says 1989. With no
+           year set, the sentence simply drops the clause. */
+        'story_bar_tagline' => (int) get_option('aat_founded_year', 0)
+            ? 'Private Journeys, Composed for You Since ' . (int) get_option('aat_founded_year')
+            : 'Private Journeys, Composed for You',
         'story_bar_headline' => sprintf('The <em>%s</em> Standard', $brand),
         'story_bar_link_text' => 'Read Our Story',
         'plan_eyebrow' => '<em>Start</em> Planning',
@@ -127,6 +130,31 @@ function aat_seed_homepage_copy() {
             ['icon' => 'key', 'text' => 'Hand-selected hotels chosen for character, not chain'],
             ['icon' => 'car', 'text' => 'Private transfers and drivers for a seamless day-to-day'],
             ['icon' => 'clock', 'text' => "Flexible departures — this itinerary starts whenever you're ready"],
+        ]),
+
+        /* The homepage's own section wording. Each line is the client's to
+           change; the template only reads them. */
+        'intro_headline' => 'Asia is not one journey',
+        'intro_cta_label' => 'Meet our travel specialists',
+        'intro_cta_link' => '/about-us/',
+
+        'tabs_headline' => 'Where will Asia take you?',
+        'featured_headline' => 'Private journeys to begin with',
+        'cruises_headline' => 'Cruises and stays worth the detour',
+        'inspiration_headline' => 'Reading before you go',
+        'specialists_headline' => 'The people who plan it, and the people who went',
+        'enquiry_headline' => 'Your Asia journey starts with a conversation',
+        /* Left blank on purpose: a response-time promise is only worth making
+           if the client can keep it. */
+        'enquiry_note' => '',
+
+        /* Four things this company can actually show. No review score or award
+           is asserted here - those go in only when there is a source. */
+        'trust_items' => wp_json_encode([
+            ['text' => 'Tailor-made itineraries'],
+            ['text' => 'Handpicked hotels and cruises'],
+            ['text' => 'Local Asia specialists'],
+            ['text' => '24/7 in-destination support'],
         ]),
 
         'home_values' => $values,

@@ -282,7 +282,7 @@ export type ArchiveItem = {
   /** Present from bridge 2.0 onwards. */
   duration?: string;
   price?: string;
-  categories?: Array<{ id: number; name: string; slug: string; path: string | null }>;
+  categories?: Array<{ id: number; name: string; slug: string; path: string | null; taxonomy?: string }>;
   acf: Record<string, unknown>;
 };
 

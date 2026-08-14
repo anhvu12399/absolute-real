@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { ContentRecord } from "@/lib/types";
-import type { ArchiveItem } from "@/lib/wp";
+import type { ArchiveItem, TermInfo } from "@/lib/wp";
 import dynamic from "next/dynamic";
 import { toLocalHref } from "@/lib/links";
 import { BRAND_SHORT } from "@/lib/site";
@@ -28,12 +28,21 @@ export default function HomeTemplateV2({
   tours = [],
   places = [],
   hotels = [],
+  countries = [],
+  cruises = [],
+  guides = [],
 }: {
   homeData?: ContentRecord | null;
   /** Live WordPress content used whenever the matching homepage cards are empty. */
   tours?: ArchiveItem[];
   places?: ArchiveItem[];
   hotels?: ArchiveItem[];
+  /** The country taxonomy — what "where to go" actually means. */
+  countries?: TermInfo[];
+  /** Cruise content, filed under the asia-cruises category on the legacy site. */
+  cruises?: ArchiveItem[];
+  /** Editorial: guides and stories. */
+  guides?: ArchiveItem[];
 }) {
   const acf = homeData?.acf || {};
 
@@ -87,30 +96,53 @@ export default function HomeTemplateV2({
     return text.length > max ? `${text.slice(0, max).trimEnd()}…` : text;
   };
 
-  const destinations = cards(acf.home_tab_destinations, places);
-  const journeys = cards(acf.home_tab_journeys, tours);
-  const offers = cards(acf.home_tab_offers, tours.slice(3));
-  const newItems = cards(acf.home_tab_new, tours.slice(0, 3));
+  /**
+   * A tab shows what its label promises, and links on to the full set.
+   *
+   * The legacy import filled these four fields one-for-one, but their meaning
+   * did not survive the move: "where to go" arrived holding trip *types*
+   * ("Cycling Tours"), and "journeys to book" arrived holding blog posts. So
+   * each tab states the kind of link that belongs in it — authored rows that
+   * fit are kept and win, rows that do not step aside for live content of the
+   * right kind.
+   *
+   * Six at a time, then "view all". A row the eye takes in at once beats a
+   * grid that grows every time you press a button.
+   */
+  const tabCards = (value: unknown, belongs: RegExp, fallback: any[]) => {
+    const kept = cards(value, []).filter((card: any) => belongs.test(String(card?.link || "")));
+    return (kept.length ? kept : fallback).slice(0, 6);
+  };
 
-  /* Clean authored ways to explore: filter out visa guides / blog questions and guarantee description text */
-  const validAuthoredWays = cards(acf.home_ways_to_explore, []).filter(
-    (c: any) => c.title && !/visa|when is|transit|best time/i.test(c.title)
-  );
+  const IS_PLACE = /^\/(places-to-go\/|[a-z-]+\/$)/;
+  const IS_TOUR = /^\/tours\//;
+  const IS_STAY = /^\/collection\//;
 
-  const fallbackWaysSources = (places.length ? places : tours).filter(
-    (p) => !/visa|when is|transit|best time/i.test(p.title)
-  );
+  /* "Where do you want to go" is answered with countries, not with individual
+     towns — a visitor picks Vietnam before they pick Hoi An. The country
+     taxonomy carries them; the photograph is borrowed from that country's own
+     content, so nothing is invented. */
+  const countryCards = countries.map((term) => {
+    const own = [...places, ...tours, ...hotels].filter((item) =>
+      item.categories?.some((c) => c.slug === term.slug),
+    );
+    return {
+      image_url: term.image || own.find((i) => i.featuredMedia?.url)?.featuredMedia?.url || "",
+      badge: "",
+      title: term.name,
+      meta: term.count ? `${term.count} journeys & places` : "",
+      description: term.description || "",
+      link: `/${term.slug}/`,
+      link_text: "Explore",
+      ph: "",
+    };
+  });
 
-  const waysToExplore = (
-    validAuthoredWays.length >= 4
-      ? validAuthoredWays
-      : [...validAuthoredWays, ...fallbackWaysSources.filter((p) => !validAuthoredWays.some((c: any) => c.title === p.title)).map(toCard)]
-  ).slice(0, 6).map((item: any) => ({
-    ...item,
-    description: item.description || `Private tailor-made exploration of ${item.title.split(/[:|–—]/)[0].trim()} with expert local guides and handpicked boutique sanctuaries.`,
-  }));
-  const stayWith = cards(acf.home_stay_with, hotels.slice(0, 4));
-  const waysToTravel = cards(acf.home_ways_to_travel, tours.slice(0, 5));
+  const destinations = tabCards(acf.home_tab_destinations, IS_PLACE, countryCards);
+  const journeys = tabCards(acf.home_tab_journeys, IS_TOUR, tours.map(toCard));
+  /* The homepage now runs three tabs, not five: where, what kind, what to
+     read. The "special offers" and "new this season" sets, and the separate
+     "ways to explore" carousel, folded into those three. */
 
   /* Hero: the WordPress slider drives it; live tours stand in until it is filled. */
   const authoredSlides = safeParse(acf.home_banner_slider);
@@ -161,6 +193,28 @@ export default function HomeTemplateV2({
   const insetImage = hero.image_url_2 || nextSlide?.image_url || "";
   const insetCaption = hero.meta || nextSlide?.description || "Mekong Delta";
   const insetPlate = hero.meta_plate || (nextSlide ? "Next" : hero.tagline || BRAND_SHORT);
+
+  /**
+   * The place a slide is about, taken from where it points.
+   *
+   * Every slide links to its own country page (/japan/, /bali/), so the
+   * destination is a fact already in the data. The `tagline` field holds the
+   * word "Travel" on every slide, which as a label above a headline says
+   * nothing - better to show no label than a meaningless one.
+   */
+  const placeOf = (slide: any) => {
+    const slug = String(slide?.link || "").split("/").filter(Boolean).pop() || "";
+    if (slug && !slug.includes(".")) {
+      return slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+    }
+    /* No link to read: the first clause of the title is the place. */
+    return String(slide?.description || "").replace(/<[^>]+>/g, "").split(/[,:|–—]/)[0].trim();
+  };
+
+  /* WordPress keeps the real headline in `description` ("Timeless Japan"),
+     with `title` holding a generic word. */
+  const heroHeadline = String(hero.description || hero.title || "").replace(/<[^>]+>/g, "").trim();
+  const heroPlace = placeOf(hero);
   const coreValues = safeParse(acf.home_values);
   const testimonials = safeParse(acf.testimonials);
   const reviewSummary = typeof acf.review_summary === "string" ? acf.review_summary : "";
@@ -198,15 +252,56 @@ export default function HomeTemplateV2({
 
   /* --- tabs --- */
   const [activeTab, setActiveTab] = useState("dest");
-  /* Three at a time. The grid used to drop every card at once, which made the
-     section taller than the rest of the page put together. */
-  const STEP = 3;
-  const [shown, setShown] = useState<Record<string, number>>({});
-  const visible = (key: string) => shown[key] ?? STEP;
-  const showMore = (key: string) => setShown((prev) => ({ ...prev, [key]: visible(key) + STEP }));
 
-  /* --- trip carousel --- */
-  const tripTrackRef = useRef<HTMLDivElement>(null);
+  /* ── Section copy and data, all from WordPress ── */
+  const str = (key: string, fallback = "") =>
+    (typeof acf[key] === "string" && (acf[key] as string).trim()) || fallback;
+
+  const trustItems = (() => {
+    const authored = safeParse(acf.trust_items);
+    if (authored.length) return authored;
+    /* Four things this company can show. No score or award is asserted -
+       those go in only when WordPress holds a source. */
+    return [
+      { text: "Tailor-made itineraries" },
+      { text: "Handpicked hotels & cruises" },
+      { text: "Local Asia specialists" },
+      { text: "24/7 in-destination support" },
+    ];
+  })();
+  const introHeadline = str("intro_headline", "Asia is not one journey");
+  const introCtaLabel = str("intro_cta_label");
+  const introCtaLink = str("intro_cta_link", "/about-us/");
+  const statementHtml = String(acf.statement_text || "");
+
+  const tabsHeadline = str("tabs_headline", "Where will Asia take you?");
+  const featuredHeadline = str("featured_headline", "Private journeys to begin with");
+  const cruisesHeadline = str("cruises_headline", "Cruises and stays worth the detour");
+  const inspirationHeadline = str("inspiration_headline", "Reading before you go");
+  const specialistsHeadline = str("specialists_headline", "The people who plan it");
+  const enquiryHeadline = str("enquiry_headline", "Your Asia journey starts with a conversation");
+  const enquiryNote = str("enquiry_note");
+
+  const team = safeParse(acf.team);
+
+  /* Three to six itineraries with enough on them to judge: a country, a
+     duration and a sentence. Tours that carry a duration lead, because that is
+     the first thing a traveller asks. */
+  const featuredJourneys = [...tours]
+    .sort((a, b) => (b.duration ? 1 : 0) - (a.duration ? 1 : 0))
+    .slice(0, 6);
+
+  /* Cruises first — they are the distinctive half of this section — then the
+     stays, with no repeats. */
+  const register = [
+    ...cruises,
+    ...hotels.filter((h) => !cruises.some((c) => c.id === h.id)),
+  ].slice(0, 6);
+
+  const editorial = guides.slice(0, 3);
+
+  /* --- journeys carousel --- */
+  const journeyTrackRef = useRef<HTMLDivElement>(null);
 
   /* --- map pills --- */
   const [activeCountry, setActiveCountry] = useState<string | null>(null);
@@ -223,11 +318,36 @@ export default function HomeTemplateV2({
   const label = (key: string, fallback: string) =>
     (typeof acf[key] === "string" && (acf[key] as string).trim()) || fallback;
 
+  /**
+   * Three tabs, in the order a traveller decides.
+   *
+   * Where first, then what kind of journey, then what to read while they think
+   * about it. Four tabs — with "special offers" and "new this season" among
+   * them — asked the visitor to care about our merchandising before they had
+   * chosen a country.
+   */
   const tabs = [
-    { key: "dest", label: label("tab_1_label", "Where to Go") },
-    { key: "journeys", label: label("tab_2_label", "Journeys to Book") },
-    { key: "offers", label: label("tab_3_label", "Special Offers") },
-    { key: "new", label: label("tab_4_label", "New This Season") },
+    {
+      key: "dest",
+      label: label("tab_dest_label", "Explore destinations"),
+      rows: destinations,
+      all: "/destinations/",
+      allLabel: "View all destinations",
+    },
+    {
+      key: "journeys",
+      label: label("tab_journeys_label", "Private journeys"),
+      rows: journeys,
+      all: "/tours/",
+      allLabel: "View all journeys",
+    },
+    {
+      key: "inspiration",
+      label: label("tab_inspiration_label", "Travel inspiration"),
+      rows: guides.slice(0, 6).map(toCard),
+      all: "/inspirations/",
+      allLabel: "All travel inspiration",
+    },
   ];
 
   return (
@@ -238,268 +358,379 @@ export default function HomeTemplateV2({
       )}
 
       {/* ═══ KIỂU 2: PANORAMA HORIZON & DESTINATION STRIP HERO ═══ */}
-      <section id="hero" className={`dest-strip-hero ph ${hero.image_url ? '' : 'ph-hero'}`} style={hero.image_url ? bg(hero.image_url, "hero") : {}}>
-        <div className="dest-strip-cinema-overlay"></div>
+      {/* ═══ HERO — "The Spine" ═══
+          The photograph carries the page; everything else is set like the
+          margin and spine of a printed volume.
 
-        <div className="container dest-strip-content-wrap">
-          <div className="dest-strip-copy">
-            <div className="dest-strip-eyebrow">
-              <span className="dest-strip-eyebrow-line"></span>
-              <span className="dest-strip-eyebrow-text">
-                <em>{String(hero.tagline || "Private Bespoke")}</em> {String(hero.title || "Journeys")}
-              </span>
-            </div>
+          The right-hand index names the places rather than numbering them.
+          These four slides are not a sequence — Japan is not step one of
+          anything — so "01 02 03 04" would assert an order that does not
+          exist. Reading the place names down the spine is both the honest
+          label and the navigation. */}
+      <section
+        id="hero"
+        className={`spine-hero ph ${hero.image_url ? "" : "ph-hero"}`}
+      >
+        {/* A separate layer so the photograph can drift without moving the
+            type sitting on top of it. */}
+        <div
+          key={heroIndex}
+          className="spine-plate"
+          style={hero.image_url ? bg(hero.image_url, "hero") : undefined}
+          aria-hidden="true"
+        />
+        <div className="spine-veil" aria-hidden="true" />
 
-            <h1
-              className="dest-strip-headline"
-              dangerouslySetInnerHTML={{ __html: String(hero.description || "Vietnam: The <em>Slow Gold</em> of the Mekong at Dawn") }}
-            />
-
-            {hero.subtitle && (
-              <p className="dest-strip-subtitle">{String(hero.subtitle)}</p>
+        <div className="container spine-inner">
+          <div className="spine-copy" key={`copy-${heroIndex}`}>
+            {heroPlace && (
+              <p className="spine-place">
+                <span className="spine-rule" aria-hidden="true" />
+                {heroPlace}
+              </p>
             )}
 
-            <div className="dest-strip-actions">
-              <Link href={toLocalHref(hero.link, "#plan")} className="btn btn-line-white">
-                <span>{String(hero.link_text || "Explore This Journey")}</span>
-                <ArrowSvg />
-              </Link>
+            <h1 className="spine-headline">{heroHeadline}</h1>
 
-              {/* Running Progress Bar & Indicator for Desktop & Mobile */}
-              {slides.length > 1 && (
-                <div className="dest-hero-counter">
-                  <span className="dest-counter-curr">{String(heroIndex + 1).padStart(2, "0")}</span>
-                  <div className="dest-counter-bar">
-                    <div key={heroIndex} className="dest-counter-fill"></div>
-                  </div>
-                  <span className="dest-counter-total">{String(slides.length).padStart(2, "0")}</span>
-                </div>
-              )}
-            </div>
+            {hero.subtitle && <p className="spine-note">{clamp(hero.subtitle, 132)}</p>}
+
+            <Link href={toLocalHref(hero.link, "#plan")} className="spine-link">
+              {String(hero.link_text || "See this journey")}
+              <ArrowSvg />
+            </Link>
           </div>
         </div>
 
-        {/* Bottom Destination Tabs Strip */}
         {slides.length > 1 && (
-          <div className="dest-strip-bar">
-            <div className="container dest-strip-bar-inner">
-              <div className="dest-strip-tabs" ref={tabsContainerRef}>
-                {slides.map((s, idx) => {
-                  const isActive = idx === heroIndex;
-                  const rawTitle = String(s.description || s.title || `Journey ${idx + 1}`).replace(/<[^>]+>/g, "");
-                  const countryName = rawTitle.split(/[:|–—]/)[0].trim();
-                  const shortSub = rawTitle.split(/[:|–—]/)[1]?.trim() || s.tagline || "Private Expedition";
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      className={`dest-strip-tab${isActive ? " is-active" : ""}`}
-                      onClick={() => setHeroIndex(idx)}
-                    >
-                      <div className="dest-tab-top-line"></div>
-                      <div className="dest-tab-header">
-                        <span className="dest-tab-num">{String(idx + 1).padStart(2, "0")}</span>
-                        <span className="dest-tab-country">{countryName}</span>
-                      </div>
-                      <span className="dest-tab-sub">{clamp(shortSub, 32)}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+          <nav className="spine-index" aria-label="Choose a destination">
+            {slides.map((slide, idx) => {
+              /* Place names, not full titles: "Bali" reads down a spine,
+                 "Bali, Culture & Island Escapes" does not. */
+              const label = placeOf(slide);
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`spine-index-item${idx === heroIndex ? " is-active" : ""}`}
+                  onClick={() => setHeroIndex(idx)}
+                  aria-current={idx === heroIndex ? "true" : undefined}
+                >
+                  <span className="spine-index-tick" aria-hidden="true" />
+                  <span className="spine-index-label">{label || `Slide ${idx + 1}`}</span>
+                </button>
+              );
+            })}
+          </nav>
         )}
       </section>
 
-      {/* ═══ STATEMENT + STATS ═══ */}
-      <section id="statement" className="section on-cream" style={{ paddingTop: "clamp(2.2rem, 3.8vw, 3.2rem)", paddingBottom: 0 }}>
-        {/* A div, not a p: the WordPress statement carries block tags, and the
-            browser would close a <p> around them and break hydration. */}
-        <div className="statement center reveal" dangerouslySetInnerHTML={{ __html: String(acf.statement_text || "For more than twenty years, we have been turning a single idea for a trip into an itinerary that could belong to no one else. A journey through Asia should never feel arranged — it should feel like it was always <em>composed, not booked.</em>") }}></div>
-        <div className="stat-row reveal">
-          <div className="stat-item"><div className="stat-num">{String(acf.stat_1_num || "20")}</div><div className="stat-label">{String(acf.stat_1_label || "Years in Asia")}</div></div>
-          <div className="stat-item"><div className="stat-num">{String(acf.stat_2_num || "6")}</div><div className="stat-label">{String(acf.stat_2_label || "Countries, One Itinerary")}</div></div>
-          <div className="stat-item"><div className="stat-num">{String(acf.stat_3_num || "24")}</div><div className="stat-label">{String(acf.stat_3_label || "Hour Concierge")}</div></div>
+      {/* ═══ 3 · TRUST BAR ═══
+          Four things this company can show, not four adjectives. Nothing here
+          asserts a score or an award — those appear only when WordPress holds
+          a source for them. */}
+      {trustItems.length > 0 && (
+        <section className="trustbar">
+          <div className="container trustbar-inner">
+            {trustItems.map((item: any, idx: number) => (
+              <span key={idx}>{String(item.text || "")}</span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ═══ 4 · BRAND INTRODUCTION ═══ */}
+      <section className="section on-cream" id="statement">
+        <div className="container intro-block">
+          <h2 className="intro-headline">{introHeadline}</h2>
+          {statementHtml && (
+            <div className="intro-copy" dangerouslySetInnerHTML={{ __html: statementHtml }} />
+          )}
+          {introCtaLabel && (
+            <Link href={toLocalHref(introCtaLink, "/about-us/")} className="btn btn-line-ink intro-cta">
+              {introCtaLabel}
+              <ArrowSvg />
+            </Link>
+          )}
         </div>
-        <div style={{ height: "clamp(1.5rem, 2.8vw, 2.4rem)" }}></div>
       </section>
 
-      {/* ═══ TABBED JOURNEY CARDS ═══ */}
+      {/* ═══ 5 · DISCOVER YOUR ASIA ═══
+          Three tabs, in the order a traveller decides: first where, then what
+          kind of journey, then what to read while they think about it. */}
       <section className="section on-white" id="journeys">
         <div className="container">
-          <h2 className="center reveal" style={{ fontSize: "clamp(1.8rem,3.2vw,2.4rem)" }} dangerouslySetInnerHTML={{ __html: String(acf.tabs_headline || "Where do you want to <em>go</em>?") }}></h2>
+          <div className="center reveal">
+            {/* Headings authored in WordPress carry <em> for the accented word.
+                Printed as text they showed the tag itself. */}
+            <h2
+              style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}
+              dangerouslySetInnerHTML={{ __html: tabsHeadline }}
+            />
+          </div>
+
           <div className="tabs-row reveal" role="tablist">
-            {tabs.map((t) => (
-              <button key={t.key} className={`tab-btn${activeTab === t.key ? " is-active" : ""}`} role="tab" aria-selected={activeTab === t.key} onClick={() => setActiveTab(t.key)}>
-                {t.label}
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                className={`tab-btn${activeTab === tab.key ? " is-active" : ""}`}
+                role="tab"
+                aria-selected={activeTab === tab.key}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label}
               </button>
             ))}
           </div>
 
-          <div className={`tab-panel${activeTab === "dest" ? " is-active" : ""} reveal`} data-panel="dest">
-            <div className="card-grid">
-              {destinations.slice(0, visible("dest")).map((card: any, idx: number) => (
-                <OfferCard key={idx} badge={String(card.badge || "")} title={String(card.title || "")} desc={clamp(card.description, 150)} link={toLocalHref(card.link, "#plan")} linkText={String(card.link_text || "")} ph={String(card.ph || "")} imageUrl={card.image_url} />
-              ))}
-            </div>
-            {destinations.length > visible("dest") && (
-              <div className="center" style={{ marginTop: "1.8rem" }}>
-                <button type="button" className="btn btn-line-ink" onClick={() => showMore("dest")}>
-                  Load more
-                </button>
-              </div>
-            )}
-          </div>
-          <div className={`tab-panel${activeTab === "journeys" ? " is-active" : ""} reveal`} data-panel="journeys">
-            <div className="card-grid">
-              {journeys.slice(0, visible("journeys")).map((card: any, idx: number) => (
-                <OfferCard key={idx} badge={String(card.badge || "")} title={String(card.title || "")} meta={String(card.meta || "")} desc={clamp(card.description, 150)} link={toLocalHref(card.link, "#plan")} linkText={String(card.link_text || "")} ph={String(card.ph || "")} imageUrl={card.image_url} />
-              ))}
-            </div>
-            {journeys.length > visible("journeys") && (
-              <div className="center" style={{ marginTop: "1.8rem" }}>
-                <button type="button" className="btn btn-line-ink" onClick={() => showMore("journeys")}>
-                  Load more
-                </button>
-              </div>
-            )}
-          </div>
-          <div className={`tab-panel${activeTab === "offers" ? " is-active" : ""} reveal`} data-panel="offers">
-            <div className="card-grid">
-              {offers.slice(0, visible("offers")).map((card: any, idx: number) => (
-                <OfferCard key={idx} badge={String(card.badge || "")} title={String(card.title || "")} desc={clamp(card.description, 150)} link={toLocalHref(card.link, "#plan")} linkText={String(card.link_text || "")} ph={String(card.ph || "")} imageUrl={card.image_url} />
-              ))}
-            </div>
-            {offers.length > visible("offers") && (
-              <div className="center" style={{ marginTop: "1.8rem" }}>
-                <button type="button" className="btn btn-line-ink" onClick={() => showMore("offers")}>
-                  Load more
-                </button>
-              </div>
-            )}
-          </div>
-          <div className={`tab-panel${activeTab === "new" ? " is-active" : ""} reveal`} data-panel="new">
-            <div className="card-grid">
-              {newItems.slice(0, visible("new")).map((card: any, idx: number) => (
-                <OfferCard key={idx} badge={String(card.badge || "")} title={String(card.title || "")} desc={clamp(card.description, 150)} link={toLocalHref(card.link, "#plan")} linkText={String(card.link_text || "")} ph={String(card.ph || "")} imageUrl={card.image_url} />
-              ))}
-            </div>
-            {newItems.length > visible("new") && (
-              <div className="center" style={{ marginTop: "1.8rem" }}>
-                <button type="button" className="btn btn-line-ink" onClick={() => showMore("new")}>
-                  Load more
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="center reveal" style={{ marginTop: "3rem" }}><Link href="#plan" className="btn btn-fill-ink">View All Journeys</Link></div>
-        </div>
-      </section>
-
-      {/* ═══ WAYS TO EXPLORE CAROUSEL ═══ */}
-      <section id="explore" className="section on-cream">
-        <div className="container">
-          <div className="hcarousel-head reveal">
-            <div>
-              <p className="eyebrow"><em dangerouslySetInnerHTML={{ __html: String(acf.explore_eyebrow || "<em>Ways</em> to Explore") }}></em></p>
-              <h2 style={{ fontSize: "clamp(1.6rem,2.8vw,2.1rem)" }} dangerouslySetInnerHTML={{ __html: String(acf.explore_headline || "What kind of <em>trip</em> are you looking for?") }}></h2>
-            </div>
-            <div className="hcarousel-arrows">
-              <button className="hc-btn" aria-label="Previous" onClick={() => tripTrackRef.current?.scrollBy({ left: -320, behavior: "smooth" })}><svg style={{ transform: "rotate(180deg)" }}><use href="#i-arrow"></use></svg></button>
-              <button className="hc-btn" aria-label="Next" onClick={() => tripTrackRef.current?.scrollBy({ left: 320, behavior: "smooth" })}><svg><use href="#i-arrow"></use></svg></button>
-            </div>
-          </div>
-          <div className="hcarousel-track reveal" ref={tripTrackRef}>
-            {waysToExplore.map((item: any, idx: number) => (
-              <Link
-                href={toLocalHref(item.link, "#plan")}
-                className={`hc-card ph ${item.image_url ? "" : item.ph || "ph-th"}`}
-                style={item.image_url ? bg(item.image_url, "card") : {}}
-                key={idx}
-              >
-                <div className="overlay-bottom"></div>
-                <h3>{String(item.title || "")}</h3>
-                <p>{clamp(item.description)}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ STAY WITH ═══ */}
-      <section className="section on-white" id="stay">
-        <div className="container">
-          <div className="center reveal">
-            <p className="eyebrow"><em dangerouslySetInnerHTML={{ __html: String(acf.stay_eyebrow || `<em>Stay</em> With ${BRAND_SHORT}`) }}></em></p>
-            <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }} dangerouslySetInnerHTML={{ __html: String(acf.stay_headline || "Addresses chosen for <em>character</em>, not chain") }}></h2>
-          </div>
-          {/* Editorial layout: one lead address, the rest as a numbered index —
-              and a hotel with no photograph still reads as a plate, not a hole. */}
-          <div className="stay-editorial reveal">
-            {stayWith.slice(0, 1).map((item: any, idx: number) => (
-              <Link
-                href={toLocalHref(item.link, "#plan")}
-                key={idx}
-                className={`stay-lead ${item.image_url ? "has-photo" : ""}`}
-                style={item.image_url ? bg(item.image_url, "panel") : undefined}
-              >
-                <div className="overlay-bottom"></div>
-                <div className="stay-lead-copy">
-                  <span className="stay-plate">Address No. 01</span>
-                  <h3>{String(item.title || "")}</h3>
-                  <p>{clamp(item.description, 150)}</p>
-                  <span className="link-arrow">{String(item.link_text || "Discover")}<ArrowSvg /></span>
-                </div>
-              </Link>
-            ))}
-
-            <ol className="stay-index">
-              {stayWith.slice(1, 5).map((item: any, idx: number) => (
-                <li key={idx}>
-                  <Link href={toLocalHref(item.link, "#plan")}>
-                    <span className="stay-index-num">{String(idx + 2).padStart(2, "0")}</span>
+          {tabs.map((tab) => (
+            <div
+              key={tab.key}
+              className={`tab-panel${activeTab === tab.key ? " is-active" : ""} reveal`}
+              data-panel={tab.key}
+            >
+              {/* A row the eye takes in at once, then a link to the whole set —
+                  rather than a grid that grows each time you press a button. */}
+              <div className="tab-rail">
+                {tab.rows.map((card: any, idx: number) => (
+                  <Link key={idx} href={toLocalHref(card.link, "#plan")} className="tab-card">
                     <span
-                      className={`stay-index-thumb ${item.image_url ? "" : "is-empty"}`}
-                      style={item.image_url ? bg(item.image_url, "thumb") : undefined}
+                      className={`tab-card-photo ${card.image_url ? "" : "is-empty"}`}
+                      style={bg(card.image_url, "card")}
                       aria-hidden="true"
-                    >
-                      {!item.image_url && String(item.title || "?").trim().charAt(0)}
+                    />
+                    <span className="tab-card-body">
+                      <strong>{String(card.title || "")}</strong>
+                      {card.meta && <em>{String(card.meta)}</em>}
+                      {card.description && <span>{clamp(card.description, 96)}</span>}
                     </span>
-                    <span className="stay-index-copy">
-                      <strong>{String(item.title || "")}</strong>
-                      <em>{clamp(item.meta || item.badge || item.description, 68)}</em>
-                    </span>
-                    <ArrowSvg />
                   </Link>
-                </li>
-              ))}
-            </ol>
-          </div>
+                ))}
+              </div>
+
+              <div className="tab-foot">
+                <Link href={tab.all} className="btn btn-line-ink">
+                  {tab.allLabel}
+                  <ArrowSvg />
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
+      {/* ═══ 6 · WHY TRAVEL WITH US ═══
+          The numbered 01–06 list that briefly stood here said less in more
+          space: six clipped lines, no headings, nothing to look at. This is
+          the treatment that was here before — a full-bleed statement, then
+          four value blocks that each get a heading and a real sentence. */}
+      <section id="values" className="story-bar ph ph-desert">
+        <div className="overlay-full"></div>
+        <div className="container story-bar-inner reveal">
+          <div>
+            <p className="story-tag">{String(acf.story_bar_tagline || "Private Journeys, Composed for You")}</p>
+            <h2 dangerouslySetInnerHTML={{ __html: String(acf.story_bar_headline || `The <em>${BRAND_SHORT}</em> Standard`) }}></h2>
+          </div>
+          <Link href="/about-us/" className="btn btn-line-white">{String(acf.story_bar_link_text || "Read Our Story")}</Link>
+        </div>
+      </section>
+
+      {coreValues.length > 0 && (
+        <section className="value-grid ph ph-desert" id="why">
+          <div className="container value-grid-inner reveal">
+            {coreValues.map((val: any, idx: number) => (
+              <div className="value-item" key={idx}>
+                <h4>{String(val.title || "")}</h4>
+                <p>{String(val.description || "")}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ═══ 7 · FEATURED PRIVATE JOURNEYS ═══
+          Two routes out of every card: read it, or ask us to change it. The
+          second is the one this business actually sells. */}
+      {featuredJourneys.length > 0 && (
+        <section className="section on-cream" id="featured">
+          <div className="container">
+            <div className="hcarousel-head reveal">
+              <div>
+                <p className="eyebrow">
+                  <em dangerouslySetInnerHTML={{ __html: String(acf.featured_eyebrow || "<em>Private</em> Journeys") }} />
+                </p>
+                <h2
+                  style={{ fontSize: "clamp(1.6rem,2.8vw,2.1rem)" }}
+                  dangerouslySetInnerHTML={{ __html: featuredHeadline }}
+                />
+              </div>
+              <div className="hcarousel-arrows">
+                <button className="hc-btn" aria-label="Previous journey" onClick={() => journeyTrackRef.current?.scrollBy({ left: -320, behavior: "smooth" })}>
+                  <svg style={{ transform: "rotate(180deg)" }}><use href="#i-arrow" /></svg>
+                </button>
+                <button className="hc-btn" aria-label="Next journey" onClick={() => journeyTrackRef.current?.scrollBy({ left: 320, behavior: "smooth" })}>
+                  <svg><use href="#i-arrow" /></svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="hcarousel-track reveal" ref={journeyTrackRef}>
+              {featuredJourneys.map((item, idx) => (
+                <Link
+                  href={item.path}
+                  key={idx}
+                  /* `ph` carries background-size:cover — without it a card
+                     photograph sits at its natural size in the corner. */
+                  className={`hc-card ph ${item.featuredMedia?.url ? "" : "ph-th"}`}
+                  style={bg(item.featuredMedia?.url, "card")}
+                >
+                  <div className="overlay-bottom" />
+                  <h3>{item.title}</h3>
+                  <p>{clamp(item.excerpt, 110)}</p>
+                </Link>
+              ))}
+            </div>
+
+            <div className="tab-foot">
+              <Link href="/tours/" className="btn btn-line-ink">View all journeys<ArrowSvg /></Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══ 8 · CRUISES AND SELECTED STAYS ═══
+          One lead address carrying its own photograph, then the rest as a
+          numbered index — the layout this section had before, now fed by
+          cruises as well as hotels. A property with no photograph still
+          reads as a plate rather than a hole. */}
+      {register.length > 0 && (
+        <section className="section on-white" id="stay">
+          <div className="container">
+            <div className="center reveal">
+              <p className="eyebrow">
+                <em dangerouslySetInnerHTML={{ __html: String(acf.stay_eyebrow || `<em>Stay</em> With ${BRAND_SHORT}`) }} />
+              </p>
+              <h2
+                style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}
+                dangerouslySetInnerHTML={{ __html: cruisesHeadline }}
+              />
+            </div>
+
+            <div className="stay-editorial reveal">
+              {register.slice(0, 1).map((item, idx) => (
+                <Link
+                  href={item.path}
+                  key={idx}
+                  className={`stay-lead ${item.featuredMedia?.url ? "has-photo" : ""}`}
+                  style={bg(item.featuredMedia?.url, "panel")}
+                >
+                  <div className="overlay-bottom" />
+                  <div className="stay-lead-copy">
+                    <span className="stay-plate">Address No. 01</span>
+                    <h3>{item.title}</h3>
+                    <p>{clamp(item.excerpt, 150)}</p>
+                    <span className="link-arrow">Discover<ArrowSvg /></span>
+                  </div>
+                </Link>
+              ))}
+
+              <ol className="stay-index">
+                {register.slice(1, 5).map((item, idx) => (
+                  <li key={idx}>
+                    <Link href={item.path}>
+                      <span className="stay-index-num">{String(idx + 2).padStart(2, "0")}</span>
+                      <span
+                        className={`stay-index-thumb ${item.featuredMedia?.url ? "" : "is-empty"}`}
+                        style={bg(item.featuredMedia?.url, "thumb")}
+                        aria-hidden="true"
+                      >
+                        {!item.featuredMedia?.url && String(item.title || "?").trim().charAt(0)}
+                      </span>
+                      <span className="stay-index-copy">
+                        <strong>{item.title}</strong>
+                        <em>
+                          {clamp(
+                            item.categories?.find((c) => c.taxonomy === "country")?.name || item.excerpt,
+                            68,
+                          )}
+                        </em>
+                      </span>
+                      <ArrowSvg />
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div className="tab-foot">
+              <Link href="/where-to-stay/" className="btn btn-line-ink">View all stays<ArrowSvg /></Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══ 9 · TRAVEL INSPIRATION ═══ */}
+      {editorial.length > 0 && (
+        <section className="section on-white" id="inspiration">
+          <div className="container">
+            <div className="center reveal">
+              <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{inspirationHeadline}</h2>
+            </div>
+            <div className="editorial-grid reveal">
+              {editorial.map((item) => (
+                <Link href={item.path} key={item.id} className="editorial-card">
+                  <span
+                    className={`editorial-photo ${item.featuredMedia?.url ? "" : "is-empty"}`}
+                    style={bg(item.featuredMedia?.url, "card")}
+                    aria-hidden="true"
+                  />
+                  <span className="editorial-body">
+                    <em>{item.categories?.find((c) => c.taxonomy === "country")?.name || "Guide"}</em>
+                    <strong>{item.title}</strong>
+                    <span>{clamp(item.excerpt, 104)}</span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div className="tab-foot">
+              <Link href="/inspirations/" className="btn btn-line-ink">All travel inspiration<ArrowSvg /></Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══ 10 · SPECIALISTS AND CLIENT STORIES ═══
+          The people who plan it beside the people who went. The specialist row
+          appears only when WordPress holds real team photographs — a stock
+          portrait of someone who does not work here is worse than none. */}
       {/* ═══ MAP ═══ */}
       <section id="map" className="section on-cream">
         <div className="container map-grid">
           <div className="map-copy reveal">
             <p className="eyebrow"><em>One</em> Itinerary, Six Countries</p>
-            <h2 dangerouslySetInnerHTML={{ __html: String(acf.map_headline || "Your journey, <em>charted</em> by hand") }} style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}></h2>
-            <p style={{ marginTop: "1.2rem" }}>{String(acf.map_description || "Cross a border without feeling the seam. Our specialists route each leg together — flights, drivers, and guides handed off quietly between countries — so a journey through the Mekong, the Himalaya, or the Indonesian archipelago reads as one continuous story.")}</p>
+            <h2
+              dangerouslySetInnerHTML={{ __html: String(acf.map_headline || "Your journey, <em>charted</em> by hand") }}
+              style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}
+            />
+            <p style={{ marginTop: "1.2rem" }}>{String(acf.map_description || "")}</p>
             <div className="pill-list">
-              {["bhutan", "laos", "vietnam", "cambodia", "thailand", "indonesia"].map((c) => (
-                <button key={c} className={`pill${activeCountry === c ? " is-active" : ""}`} data-country={c} onMouseEnter={() => setActiveCountry(c)} onClick={() => setActiveCountry(c)}>
-                  {c.charAt(0).toUpperCase() + c.slice(1)}
-                </button>
-              ))}
+              {MAP_COUNTRIES.map((name) => {
+                const key = name.toLowerCase();
+                return (
+                  <button
+                    key={key}
+                    className={`pill${activeCountry === key ? " is-active" : ""}`}
+                    data-country={key}
+                    onMouseEnter={() => setActiveCountry(key)}
+                    onClick={() => setActiveCountry(key)}
+                  >
+                    {name}
+                  </button>
+                );
+              })}
             </div>
           </div>
-          {/* A real map, not a drawing.
-              The hand-drawn blob that used to sit here put the six countries in
-              positions that matched nothing on earth - and it rendered at 16px
-              anyway. This is the same Leaflet map the destination and tour pages
-              use, so a route reads the same way everywhere on the site. The
-              pills beside it drive the camera. */}
+          {/* The same Leaflet map the destination and tour pages use, so a
+              route reads the same way everywhere on the site. */}
           <div className="map-stage reveal">
             <RealMapComponent
               stopsList={MAP_COUNTRIES}
@@ -510,139 +741,107 @@ export default function HomeTemplateV2({
         </div>
       </section>
 
-      <section id="travel" className="section on-white">
-        <div className="container">
-          <div className="center reveal">
-            <p className="eyebrow"><em dangerouslySetInnerHTML={{ __html: String(acf.travel_eyebrow || `<em>Ways</em> to Explore With ${BRAND_SHORT}`) }}></em></p>
-            <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }} dangerouslySetInnerHTML={{ __html: String(acf.travel_headline || "How do you want to <em>travel</em>?") }}></h2>
-          </div>
-          <div className="ways-grid reveal">
-            {waysToTravel.slice(0, 3).map((item: any, idx: number) => (
-              <Link href={toLocalHref(item.link, "#plan")} className={`ways-item ph ${item.image_url ? "" : item.ph || "ph-vn"}`} style={item.image_url ? bg(item.image_url, "card") : {}} key={idx}>
-                <div className="overlay-bottom"></div>
-                <h3>{String(item.title || "")}</h3>
-                <p>{clamp(item.description, 90)}</p>
-              </Link>
-            ))}
-          </div>
-          <div className="ways-row2 reveal">
-            {waysToTravel.slice(3, 5).map((item: any, idx: number) => (
-              <Link href={toLocalHref(item.link, "#plan")} className={`ways-item ph ${item.image_url ? "" : item.ph || "ph-vn"}`} style={item.image_url ? bg(item.image_url, "card") : {}} key={idx}>
-                <div className="overlay-bottom"></div>
-                <h3>{String(item.title || "")}</h3>
-                <p>{clamp(item.description, 90)}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ TESTIMONIALS ═══ */}
-      {testimonials.length > 0 && (
-        <section className="section on-white" id="reviews">
+      {(team.length > 0 || testimonials.length > 0) && (
+        <section className="section on-white" id="specialists">
           <div className="container">
             <div className="center reveal">
-              <p className="eyebrow"><em>What</em> Travelers Say</p>
-              {reviewSummary && (
-                <div style={{ marginTop: "0.6rem" }} dangerouslySetInnerHTML={{ __html: reviewSummary }} />
-              )}
-              {reviewLink && (
-                <a href={reviewLink} target="_blank" rel="noopener noreferrer" className="link-arrow" style={{ marginTop: "0.4rem", display: "inline-flex" }}>
-                  {reviewLogo && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={optimized(reviewLogo, 240)} alt={reviewText || "Review site"} style={{ height: "20px", marginRight: "8px" }} />
-                  )}
-                  {reviewText || "Read reviews"}
-                </a>
-              )}
+              <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{specialistsHeadline}</h2>
             </div>
-            <div className="card-grid reveal" style={{ marginTop: "2.4rem" }}>
-              {testimonials.slice(0, 6).map((item: any, idx: number) => (
-                <div className="review-card" key={idx}>
-                  {item.vote && <p className="review-stars" aria-label={`${item.vote} out of 5`}>{"★".repeat(Math.min(5, Number(item.vote) || 5))}</p>}
-                  <p className="review-quote">“{clamp(item.content, 260)}”</p>
-                  {/* WordPress stores a photograph with every review; the card
-                      printed the name alone and left it on the shelf. */}
-                  <div className="review-by">
-                    {item.avatar ? (
+
+            {team.length > 0 && (
+              <div className="team-grid reveal">
+                {team.slice(0, 4).map((member: any, idx: number) => (
+                  <article className="team-card" key={idx}>
+                    {member.photo ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img className="review-avatar" src={optimized(String(item.avatar), "thumb")} alt="" loading="lazy" />
+                      <img className="team-photo" src={optimized(member.photo, "card")} alt={String(member.name || "")} loading="lazy" />
                     ) : (
-                      <span className="review-avatar is-empty" aria-hidden="true">
-                        {String(item.user_name || "?").trim().charAt(0)}
+                      <span className="team-photo is-empty" aria-hidden="true">
+                        {String(member.name || "?").trim().charAt(0)}
                       </span>
                     )}
-                    <span>
-                      <strong>{String(item.user_name || "")}</strong>
-                      {item.date && <em>{String(item.date)}</em>}
-                    </span>
+                    <h3>{String(member.name || "")}</h3>
+                    {member.role && <p className="team-role">{String(member.role)}</p>}
+                  </article>
+                ))}
+              </div>
+            )}
+
+            {testimonials.length > 0 && (
+              <div className="card-grid reveal" style={{ marginTop: team.length ? "3rem" : "2.4rem" }}>
+                {testimonials.slice(0, 3).map((item: any, idx: number) => (
+                  <div className="review-card" key={idx}>
+                    {item.vote && (
+                      <p className="review-stars" aria-label={`${item.vote} out of 5`}>
+                        {"★".repeat(Math.min(5, Number(item.vote) || 5))}
+                      </p>
+                    )}
+                    <p className="review-quote">“{clamp(item.content, 240)}”</p>
+                    <div className="review-by">
+                      {item.avatar ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img className="review-avatar" src={optimized(String(item.avatar), "thumb")} alt="" loading="lazy" />
+                      ) : (
+                        <span className="review-avatar is-empty" aria-hidden="true">
+                          {String(item.user_name || "?").trim().charAt(0)}
+                        </span>
+                      )}
+                      <span>
+                        <strong>{String(item.user_name || "")}</strong>
+                        {item.date && <em>{String(item.date)}</em>}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
 
-      {/* ═══ QUOTE ═══ */}
-      <section id="quote" className="quote-wrap ph ph-quote">
-        <div className="overlay-full"></div>
-        <div className="quote-inner reveal">
-          <q>{String(acf.quote_text || "We don't plan trips. We compose, in advance, the version of Asia you didn't know you were looking for.")}</q>
-          <cite>{String(acf.quote_citation || `The Founders, ${BRAND_SHORT}`)}</cite>
-        </div>
-      </section>
 
-      {/* ═══ RESPONSIBLY ═══ */}
-      <section id="responsibly" className="split">
-        <div className="split-copy on-cream reveal">
-          <p className="eyebrow"><em>Travel</em> Responsibly</p>
-          <h2 dangerouslySetInnerHTML={{ __html: String(acf.responsibly_headline || `The ${BRAND_SHORT} <em>Foundation</em>`) }} style={{ fontSize: "clamp(1.6rem,2.8vw,2.1rem)" }}></h2>
-          {/* An empty field used to render as a lone drop-capped "W". */}
-          {responsiblyText && (
+      {/* ═══ QUOTE ═══ */}
+      {String(acf.quote_text || "").trim() && (
+        <section id="quote" className="quote-wrap ph ph-quote">
+          <div className="overlay-full" />
+          <div className="quote-inner reveal">
+            <q>{String(acf.quote_text)}</q>
+            <cite>{String(acf.quote_citation || `The Founders, ${BRAND_SHORT}`)}</cite>
+          </div>
+        </section>
+      )}
+
+      {/* ═══ TRAVEL RESPONSIBLY ═══
+          The photograph comes from WordPress; until one is set it borrows a
+          real plate from the site's own content rather than a coloured smear. */}
+      {responsiblyText && (
+        <section id="responsibly" className="split">
+          <div className="split-copy on-cream reveal">
+            <p className="eyebrow"><em>Travel</em> Responsibly</p>
+            <h2
+              dangerouslySetInnerHTML={{ __html: String(acf.responsibly_headline || `The ${BRAND_SHORT} <em>Foundation</em>`) }}
+              style={{ fontSize: "clamp(1.6rem,2.8vw,2.1rem)" }}
+            />
             <p>
               <span className="dropcap">{responsiblyText.charAt(0)}</span>
               {responsiblyText.slice(1)}
             </p>
-          )}
-          <Link href="#plan" className="btn btn-line-ink">See Our Impact</Link>
-        </div>
-        {/* `ph-la` is a flat CSS gradient - a placeholder that shipped. The
-            photograph comes from WordPress (Travel Responsibly Photo); until
-            one is set it borrows a real plate from the site's own content
-            rather than showing a coloured smear. */}
-        <div
-          className={`split-photo ${responsiblyImage ? "" : "ph ph-la"}`}
-          style={responsiblyImage ? bg(responsiblyImage, "hero") : undefined}
-        />
-      </section>
-
-      {/* ═══ STORY BAR + VALUES ═══ */}
-      <section id="values" className="story-bar ph ph-desert">
-        <div className="overlay-full"></div>
-        <div className="container story-bar-inner reveal">
-          <div>
-            <p className="story-tag">{String(acf.story_bar_tagline || "Private Journeys, Composed for You Since 2005")}</p>
-            <h2 dangerouslySetInnerHTML={{ __html: String(acf.story_bar_headline || `The <em>${BRAND_SHORT}</em> Standard`) }}></h2>
+            <Link href="/about-us/" className="btn btn-line-ink">See Our Impact</Link>
           </div>
-          <Link href="/about-us/" className="btn btn-line-white">{String(acf.story_bar_link_text || "Read Our Story")}</Link>
-        </div>
-      </section>
-      <section className="value-grid ph ph-desert">
-        <div className="container value-grid-inner reveal">
-          {coreValues.map((val: any, idx: number) => (
-            <div className="value-item" key={idx}><h4>{String(val.title || "")}</h4><p>{String(val.description || "")}</p></div>
-          ))}
-        </div>
-      </section>
+          <div
+            className={`split-photo ${responsiblyImage ? "" : "ph ph-la"}`}
+            style={responsiblyImage ? bg(responsiblyImage, "hero") : undefined}
+          />
+        </section>
+      )}
 
-      {/* ═══ PLAN FORM ═══ */}
       <section className="section on-cream" id="plan">
         <div className="container plan-grid">
           <div className="plan-copy reveal">
             <p className="eyebrow"><em dangerouslySetInnerHTML={{ __html: String(acf.plan_eyebrow || "<em>Start</em> Planning") }}></em></p>
             <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }} dangerouslySetInnerHTML={{ __html: String(acf.plan_headline || "Tell us where, and we'll take it from <em>there</em>.") }}></h2>
             <p>{String(acf.plan_desc || "Share a few details and a private travel designer will reach out within one business day — no obligation, no call center.")}</p>
+            {enquiryNote && <p className="plan-note">{enquiryNote}</p>}
           </div>
           <form className="form-card reveal" onSubmit={handleSubmit}>
             <div className="form-row">

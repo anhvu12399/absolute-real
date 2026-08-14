@@ -112,11 +112,12 @@ function aat_register_fields() {
 
             aat_tab('tab_aat_home_tabs', '📍 Tab Hành trình — Các thẻ trên trang chủ'),
             aat_text('field_aat_home_tabs_head', 'Headline', 'tabs_headline'),
-            /* The four tab labels were fixed English in the template. */
-            aat_text('field_aat_home_tab1l', 'Tab 1 Label', 'tab_1_label'),
-            aat_text('field_aat_home_tab2l', 'Tab 2 Label', 'tab_2_label'),
-            aat_text('field_aat_home_tab3l', 'Tab 3 Label', 'tab_3_label'),
-            aat_text('field_aat_home_tab4l', 'Tab 4 Label', 'tab_4_label'),
+            /* Three tabs: where, what kind of journey, what to read. Named
+               rather than numbered so a re-ordering does not silently move a
+               label onto the wrong tab. */
+            aat_text('field_aat_home_tab_dest', 'Tab: Destinations Label', 'tab_dest_label'),
+            aat_text('field_aat_home_tab_jour', 'Tab: Journeys Label', 'tab_journeys_label'),
+            aat_text('field_aat_home_tab_insp', 'Tab: Inspiration Label', 'tab_inspiration_label'),
             aat_repeater_field('field_aat_home_tab_dest', 'Tab: Destinations We Love', 'home_tab_destinations', 'home-cards', aat_fills_itself('điểm đến')),
             aat_repeater_field('field_aat_home_tab_jour', 'Tab: Journeys to Book Now', 'home_tab_journeys', 'home-cards', aat_fills_itself('tour')),
             aat_repeater_field('field_aat_home_tab_off', 'Tab: Limited-Time Offers', 'home_tab_offers', 'home-cards', aat_fills_itself('tour')),
