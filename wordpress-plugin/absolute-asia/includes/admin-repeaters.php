@@ -16,12 +16,12 @@ if (!defined('ABSPATH')) exit;
 function aat_repeater_specs() {
     return [
         'home-banner' => [
-            ['key' => 'image_url', 'label' => 'Large Image (Ảnh nền)', 'type' => 'image'],
-            ['key' => 'tagline', 'label' => 'Country / Destination (Tên điểm đến, vd: Japan, Vietnam)'],
-            ['key' => 'description', 'label' => 'Headline (Tiêu đề lớn, vd: Timeless Japan)', 'type' => 'textarea'],
-            ['key' => 'subtitle', 'label' => 'Standfirst (Mô tả dưới ảnh)', 'type' => 'textarea'],
-            ['key' => 'link', 'label' => 'Button Link (Link nút bấm, vd: /japan/)'],
-            ['key' => 'link_text', 'label' => 'Button Text (Chữ nút, vd: Learn More)'],
+            ['key' => 'image_url', 'label' => 'Large Image', 'type' => 'image'],
+            ['key' => 'tagline', 'label' => 'Country / Destination'],
+            ['key' => 'description', 'label' => 'Headline', 'type' => 'textarea'],
+            ['key' => 'subtitle', 'label' => 'Standfirst', 'type' => 'textarea'],
+            ['key' => 'link', 'label' => 'Button Link'],
+            ['key' => 'link_text', 'label' => 'Button Text'],
         ],
         'home-cards' => [
             ['key' => 'image_url', 'label' => 'Image', 'type' => 'image'],
@@ -90,7 +90,7 @@ function aat_repeater_specs() {
             ['key' => 'longitude', 'label' => 'Longitude'],
         ],
         'trust' => [
-            ['key' => 'text', 'label' => 'Điểm tin cậy'],
+            ['key' => 'text', 'label' => 'Trust Badge Text'],
         ],
         'reasons' => [
             ['key' => 'icon', 'label' => 'Icon (guide/chat/gem/key/car/clock)'],
@@ -244,19 +244,19 @@ function aat_repeater_admin_ui() {
                 data.forEach(function(item, i) {
                     var summary = esc(item.title || item.name || item.question || item.month || item.year || ('Row ' + (i + 1)));
                     html += '<tr class="cfr-row" data-index="' + i + '">';
-                    html += '<td style="text-align:center;vertical-align:middle"><span class="cfr-drag" title="Kéo để sắp xếp">☰</span><span class="cfr-row-num">' + (i + 1) + '</span></td>';
+                    html += '<td style="text-align:center;vertical-align:middle"><span class="cfr-drag" title="Drag to reorder">☰</span><span class="cfr-row-num">' + (i + 1) + '</span></td>';
                     spec.forEach(function(col) { html += '<td>' + cell(col, item[col.key]) + '</td>'; });
                     html += '<td class="cfr-actions">' +
-                        '<a href="#" class="cfr-collapse-btn" title="Thu gọn / mở rộng">▾</a>' +
-                        '<a href="#" class="cfr-remove-btn" title="Xóa dòng này">&times;</a>' +
+                        '<a href="#" class="cfr-collapse-btn" title="Toggle collapse">▾</a>' +
+                        '<a href="#" class="cfr-remove-btn" title="Delete row">&times;</a>' +
                         '</td></tr>';
                 });
 
                 html += '</tbody></table>';
-                html += '<div class="cfr-toolbar"><span class="cfr-count">' + data.length + ' dòng</span>' +
+                html += '<div class="cfr-toolbar"><span class="cfr-count">' + data.length + ' rows</span>' +
                     '<div style="display:flex;gap:6px">' +
-                    '<a class="button cfr-collapse-all-btn" title="Thu gọn / mở rộng tất cả">▾ Thu gọn</a>' +
-                    '<a class="button cfr-add-btn">+ Thêm dòng</a>' +
+                    '<a class="button cfr-collapse-all-btn" title="Toggle collapse all">▾ Collapse All</a>' +
+                    '<a class="button cfr-add-btn">+ Add Row</a>' +
                     '</div></div>';
                 $ui.html(html);
 

@@ -118,13 +118,13 @@ function aat_admin_preview_panel() {
     <div id="aat-preview-panel">
         <div id="aat-preview-header">
             <span><span class="aat-live-dot"></span>Live Preview <span class="aat-section-label" id="aat-preview-section"></span></span>
-            <button id="aat-preview-close" title="Đóng preview">&times;</button>
+            <button id="aat-preview-close" title="Close preview">&times;</button>
         </div>
-        <div id="aat-preview-status">Gõ vào bất kỳ field nào — thay đổi sẽ hiện ngay bên dưới</div>
+        <div id="aat-preview-status">Type into any field to see real-time updates below</div>
         <iframe id="aat-preview-iframe" src="about:blank"></iframe>
     </div>
 
-    <button id="aat-preview-toggle" title="Mở/đóng live preview">👁</button>
+    <button id="aat-preview-toggle" title="Toggle live preview">👁</button>
 
     <script>
     jQuery(function($) {
@@ -454,23 +454,14 @@ function aat_admin_preview_panel() {
         $(document).on('click', '.acf-tab-button, .acf-tab-group a', function() {
             var label = $(this).text().trim();
             var TAB_SECTIONS = {
-                '🖼 1. Banner đầu trang — Hero & Ticker': 'hero',
-                '📊 2. Câu mở đầu & Giới thiệu': 'statement',
-                '📍 3. Tab Hành trình — Khám phá Châu Á': 'journeys',
-                '✨ 4. Hành trình nổi bật & Lưu trú': 'featured',
-                '🗺 5. Bản đồ & Giá trị cốt lõi': 'map',
-                '📜 6. Câu chuyện & Tiêu chuẩn': 'values',
-                '📝 7. Form kế hoạch chuyến đi': 'plan',
-                '💬 8. Chuyên gia, Đánh giá & Liên hệ': 'reviews',
-                '🖼 Banner đầu trang — Hero & Ticker': 'hero',
-                '📊 Câu mở đầu & Số liệu': 'statement',
-                '📍 Tab Hành trình — Các thẻ trên trang chủ': 'journeys',
-                '🌏 Khám phá, Lưu trú & Du lịch': 'featured',
-                '🗺 Bản đồ & Giá trị cốt lõi': 'map',
-                '⭐ Tại sao chọn chúng tôi': 'why',
-                '💬 Đánh giá & Liên hệ': 'reviews',
-                '📜 Câu chuyện & Tiêu chuẩn': 'values',
-                '📝 Form kế hoạch': 'plan',
+                'Hero Banner & Trust': 'hero',
+                'Brand Statement & Intro': 'statement',
+                'Destinations & Journeys Tabs': 'journeys',
+                'Featured Journeys & Stays': 'featured',
+                'Map & Core Values': 'map',
+                'Story & Standards': 'values',
+                'Plan Your Trip Form': 'plan',
+                'Specialists & Reviews': 'reviews',
                 'Key Facts': 'hero',
                 'Overview': 'overview',
                 'Itinerary': 'itinerary',

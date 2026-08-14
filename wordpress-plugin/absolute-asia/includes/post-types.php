@@ -82,14 +82,12 @@ function aat_register_post_types() {
             'name' => 'Homepage',
             'singular_name' => 'Homepage',
             'menu_name' => 'Homepage',
-            'add_new' => 'Edit Homepage',
-            'add_new_item' => 'Homepage Content',
+            'all_items' => 'Edit Homepage',
+            'edit_item' => 'Edit Homepage',
         ],
         'public' => false,
         'show_ui' => true,
-        'show_in_menu' => true,
-        'menu_position' => 2,
-        'menu_icon' => 'dashicons-admin-home',
+        'show_in_menu' => false,
         'supports' => ['title', 'revisions'],
         'show_in_rest' => true,
         'capability_type' => 'page',
@@ -168,3 +166,18 @@ add_filter('use_block_editor_for_post_type', function ($enabled, $post_type) {
     $classic = array_merge(aat_public_types(), ['homepage', 'order']);
     return in_array($post_type, $classic, true) ? false : $enabled;
 }, 10, 2);
+
+/** Add a single direct "Homepage" link in the admin menu, eliminating submenus. */
+add_action('admin_menu', function () {
+    $home = function_exists('aat_front_page_post') ? aat_front_page_post() : null;
+    $url = $home ? 'post.php?post=' . $home->ID . '&action=edit' : 'edit.php?post_type=homepage';
+    add_menu_page(
+        'Homepage',
+        'Homepage',
+        'edit_pages',
+        $url,
+        '',
+        'dashicons-admin-home',
+        2
+    );
+}, 99);
