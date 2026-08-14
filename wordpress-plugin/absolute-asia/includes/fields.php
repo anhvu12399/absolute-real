@@ -115,11 +115,11 @@ function aat_register_fields() {
             /* Three tabs: where, what kind of journey, what to read. Named
                rather than numbered so a re-ordering does not silently move a
                label onto the wrong tab. */
-            aat_text('field_aat_home_tab_dest', 'Tab: Destinations Label', 'tab_dest_label'),
-            aat_text('field_aat_home_tab_jour', 'Tab: Journeys Label', 'tab_journeys_label'),
-            aat_text('field_aat_home_tab_insp', 'Tab: Inspiration Label', 'tab_inspiration_label'),
-            aat_repeater_field('field_aat_home_tab_dest', 'Tab: Destinations We Love', 'home_tab_destinations', 'home-cards', aat_fills_itself('điểm đến')),
-            aat_repeater_field('field_aat_home_tab_jour', 'Tab: Journeys to Book Now', 'home_tab_journeys', 'home-cards', aat_fills_itself('tour')),
+            aat_text('field_aat_home_tab_dest_label', 'Tab: Destinations Label', 'tab_dest_label'),
+            aat_text('field_aat_home_tab_jour_label', 'Tab: Journeys Label', 'tab_journeys_label'),
+            aat_text('field_aat_home_tab_insp_label', 'Tab: Inspiration Label', 'tab_inspiration_label'),
+            aat_repeater_field('field_aat_home_tab_dest_cards', 'Tab: Destinations We Love', 'home_tab_destinations', 'home-cards', aat_fills_itself('điểm đến')),
+            aat_repeater_field('field_aat_home_tab_jour_cards', 'Tab: Journeys to Book Now', 'home_tab_journeys', 'home-cards', aat_fills_itself('tour')),
             aat_repeater_field('field_aat_home_tab_off', 'Tab: Limited-Time Offers', 'home_tab_offers', 'home-cards', aat_fills_itself('tour')),
             aat_repeater_field('field_aat_home_tab_new', 'Tab: New & Noteworthy', 'home_tab_new', 'home-cards', aat_fills_itself('tour')),
 

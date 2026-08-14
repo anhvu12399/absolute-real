@@ -177,12 +177,28 @@ export default function HomeTemplateV2({
 
   const [heroIndex, setHeroIndex] = useState(0);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const resetHeroTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (slides.length > 1) {
+      timerRef.current = setInterval(() => {
+        setHeroIndex((i) => (i + 1) % slides.length);
+      }, 6000);
+    }
+  };
 
   useEffect(() => {
-    if (slides.length < 2) return;
-    const timer = window.setInterval(() => setHeroIndex((i) => (i + 1) % slides.length), 6000);
-    return () => window.clearInterval(timer);
+    resetHeroTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [slides.length]);
+
+  const selectHeroSlide = (idx: number) => {
+    setHeroIndex(idx);
+    resetHeroTimer();
+  };
 
   // Auto-scroll active destination tab within container ONLY (never hijacks window scroll)
   useEffect(() => {
@@ -427,7 +443,7 @@ export default function HomeTemplateV2({
                     key={idx}
                     type="button"
                     className={`spine-index-item${idx === heroIndex ? " is-active" : ""}`}
-                    onClick={() => setHeroIndex(idx)}
+                    onClick={() => selectHeroSlide(idx)}
                     aria-current={idx === heroIndex ? "true" : undefined}
                   >
                     <span className="spine-index-tick" aria-hidden="true" />
