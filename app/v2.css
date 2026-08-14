@@ -856,11 +856,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   background:linear-gradient(180deg, rgba(9,8,7,0.62) 0%, rgba(9,8,7,0.28) 55%, rgba(9,8,7,0) 100%);}
 .hc-card h3{color:var(--white); font-size:1.24rem; line-height:1.24; position:relative; z-index:2;
   display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
-  text-shadow:0 1px 2px rgba(9,8,7,0.55), 0 2px 10px rgba(9,8,7,0.5);}
+  text-shadow:0 1px 2px rgba(9,8,7,0.55), 0 2px 10px rgba(9,8,7,0.5);
+  text-decoration:none !important; border-bottom:none !important;}
 .hc-card p{color:rgba(255,255,255,0.94); font-size:0.86rem; line-height:1.55; position:relative; z-index:2;
   display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;
   text-shadow:0 1px 2px rgba(9,8,7,0.6), 0 2px 10px rgba(9,8,7,0.5);}
-.hc-card:hover h3{text-decoration:underline; text-underline-offset:4px;}
+.hc-card:hover h3{text-decoration:none !important; border-bottom:none !important;}
 .hc-card-tag{position:relative; z-index:2; font-size:0.66rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--celadon-pale);}
 
 /* ---------- testimonials ---------- */
@@ -2156,7 +2157,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
   margin-top:0.45rem; font-size:0.88rem; line-height:1.6; color:var(--text-dim-on-cream);
 }
-.tab-card:hover .tab-card-body strong{text-decoration:underline; text-underline-offset:4px;}
+.tab-card:hover .tab-card-body strong{text-decoration:none !important; border-bottom:none !important;}
 
 .tab-foot{display:flex; justify-content:center; margin-top:2rem;}
 .tab-foot .btn svg{width:15px; height:15px;}
@@ -2250,7 +2251,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   font-size:clamp(1.08rem,1.6vw,1.3rem); line-height:1.28; color:var(--ink);
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
-.editorial-card:hover .editorial-body strong{text-decoration:underline; text-underline-offset:4px;}
+.editorial-card:hover .editorial-body strong{text-decoration:none !important; border-bottom:none !important;}
 .editorial-body > span{
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
   margin-top:0.45rem; font-size:0.88rem; line-height:1.6; color:var(--text-dim-on-cream);
