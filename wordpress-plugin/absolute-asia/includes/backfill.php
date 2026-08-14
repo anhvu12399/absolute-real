@@ -676,6 +676,14 @@ function aat_enrich_hotels($offset = 0, $limit = 20) {
             ]));
         }
 
+        // 4. Specialist Block
+        if (!get_post_meta($post_id, 'specialist_title', true)) update_post_meta($post_id, 'specialist_title', 'Speak to an Asia Travel Specialist');
+        if (!get_post_meta($post_id, 'specialist_text', true)) update_post_meta($post_id, 'specialist_text', 'Every journey with Absolute Asia is private, tailor-made, and planned around your exact pace, interests, and preferred style of travel. Connect with a specialist to begin designing your bespoke itinerary.');
+        if (!get_post_meta($post_id, 'specialist_button', true)) update_post_meta($post_id, 'specialist_button', 'Plan Your Trip');
+        if (!get_post_meta($post_id, 'specialist_link', true)) update_post_meta($post_id, 'specialist_link', '/#plan');
+        if (!get_post_meta($post_id, 'specialist_phone', true)) update_post_meta($post_id, 'specialist_phone', '+1 (800) 736-8187');
+        if (!get_post_meta($post_id, 'specialist_photo', true)) update_post_meta($post_id, 'specialist_photo', 'https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Village-Suite.jpg');
+
         $filled++;
     }
 
@@ -721,6 +729,14 @@ function aat_enrich_places($offset = 0, $limit = 20) {
         if (!get_post_meta($post_id, 'location_map', true)) update_post_meta($post_id, 'location_map', $title);
         if (!get_post_meta($post_id, 'map_headline', true)) update_post_meta($post_id, 'map_headline', 'Highlights of ' . $title);
 
+        // 5. Specialist Block
+        if (!get_post_meta($post_id, 'specialist_title', true)) update_post_meta($post_id, 'specialist_title', 'Speak to an Asia Travel Specialist');
+        if (!get_post_meta($post_id, 'specialist_text', true)) update_post_meta($post_id, 'specialist_text', 'Every journey with Absolute Asia is private, tailor-made, and planned around your exact pace, interests, and preferred style of travel. Connect with a specialist to begin designing your bespoke itinerary.');
+        if (!get_post_meta($post_id, 'specialist_button', true)) update_post_meta($post_id, 'specialist_button', 'Plan Your Trip');
+        if (!get_post_meta($post_id, 'specialist_link', true)) update_post_meta($post_id, 'specialist_link', '/#plan');
+        if (!get_post_meta($post_id, 'specialist_phone', true)) update_post_meta($post_id, 'specialist_phone', '+1 (800) 736-8187');
+        if (!get_post_meta($post_id, 'specialist_photo', true)) update_post_meta($post_id, 'specialist_photo', 'https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Village-Suite.jpg');
+
         $filled++;
     }
 
@@ -764,6 +780,14 @@ function aat_enrich_articles($offset = 0, $limit = 20) {
             $excerpt = get_the_excerpt($post_id);
             if ($excerpt) update_post_meta($post_id, 'intro_html', $excerpt);
         }
+
+        // 4. Specialist Block
+        if (!get_post_meta($post_id, 'specialist_title', true)) update_post_meta($post_id, 'specialist_title', 'Speak to an Asia Travel Specialist');
+        if (!get_post_meta($post_id, 'specialist_text', true)) update_post_meta($post_id, 'specialist_text', 'Every journey with Absolute Asia is private, tailor-made, and planned around your exact pace, interests, and preferred style of travel. Connect with a specialist to begin designing your bespoke itinerary.');
+        if (!get_post_meta($post_id, 'specialist_button', true)) update_post_meta($post_id, 'specialist_button', 'Plan Your Trip');
+        if (!get_post_meta($post_id, 'specialist_link', true)) update_post_meta($post_id, 'specialist_link', '/#plan');
+        if (!get_post_meta($post_id, 'specialist_phone', true)) update_post_meta($post_id, 'specialist_phone', '+1 (800) 736-8187');
+        if (!get_post_meta($post_id, 'specialist_photo', true)) update_post_meta($post_id, 'specialist_photo', 'https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Village-Suite.jpg');
 
         $filled++;
     }

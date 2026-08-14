@@ -8,6 +8,7 @@ import type { ArchiveItem, SitePayload } from "@/lib/wp";
 import { BRAND_SHORT } from "@/lib/site";
 import { bg, optimized } from "@/lib/images";
 import { CITY_COORDS, resolveCityCoords } from "../destination/RealMapComponent";
+import { SpecialistBlock } from "../v2/SpecialistBlock";
 
 const RealMapComponent = dynamic(() => import("../destination/RealMapComponent"), { ssr: false });
 
@@ -677,6 +678,8 @@ export default function SingleTourTemplateV2({
           </div>
         </section>
       )}
+
+      <SpecialistBlock acf={acf} />
     </>
   );
 }

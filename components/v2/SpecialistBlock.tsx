@@ -3,9 +3,8 @@ import Link from "next/link";
 /**
  * "Speak to a specialist" panel.
  *
- * The legacy site repeated this block on destinations, places, hotels and
- * guides under different field names; the importer collapses them all into the
- * shared specialist_* fields. Renders nothing when the post has no such block.
+ * Renders on destinations, places, hotels, tours and guides.
+ * Uses custom ACF fields if provided, otherwise displays polished default luxury brand copy.
  */
 export function SpecialistBlock({ acf }: { acf?: Record<string, unknown> | null }) {
   const str = (key: string) => {
@@ -13,14 +12,16 @@ export function SpecialistBlock({ acf }: { acf?: Record<string, unknown> | null 
     return typeof value === "string" ? value.trim() : "";
   };
 
-  const title = str("specialist_title");
-  const text = str("specialist_text");
-  const photo = str("specialist_photo");
-  const phone = str("specialist_phone");
-  const button = str("specialist_button");
-  const link = str("specialist_link");
-
-  if (!title && !text) return null;
+  const title = str("specialist_title") || "Speak to an Asia Travel Specialist";
+  const text =
+    str("specialist_text") ||
+    "Every journey with Absolute Asia is private, tailor-made, and planned around your exact pace, interests, and preferred style of travel. Connect with a destination specialist to begin designing your bespoke itinerary.";
+  const photo =
+    str("specialist_photo") ||
+    "https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Village-Suite.jpg";
+  const phone = str("specialist_phone") || "+1 (800) 736-8187";
+  const button = str("specialist_button") || "Plan Your Trip";
+  const link = str("specialist_link") || "/#plan";
 
   return (
     <section className="section on-cream">
@@ -42,28 +43,24 @@ export function SpecialistBlock({ acf }: { acf?: Record<string, unknown> | null 
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={photo}
-              alt={title || "Travel specialist"}
+              alt={title}
               loading="lazy"
-              style={{ width: "104px", height: "104px", objectFit: "cover", borderRadius: "50%" }}
+              style={{ width: "96px", height: "96px", objectFit: "cover", borderRadius: "50%", border: "2px solid var(--line-on-cream)" }}
             />
           )}
           <div>
-            {title && (
-              <h3 style={{ fontSize: "clamp(1.25rem,2vw,1.6rem)", fontFamily: "'Playfair Display', serif", fontWeight: 400 }}>
-                {title}
-              </h3>
-            )}
-            {text && (
-              <p style={{ marginTop: "0.6rem", color: "var(--text-dim-on-cream)", fontSize: "0.95rem", lineHeight: 1.7 }}>
-                {text}
-              </p>
-            )}
+            <h3 style={{ fontSize: "clamp(1.25rem,2vw,1.6rem)", fontFamily: "'Playfair Display', serif", fontWeight: 400 }}>
+              {title}
+            </h3>
+            <p style={{ marginTop: "0.6rem", color: "var(--text-dim-on-cream)", fontSize: "0.95rem", lineHeight: 1.7 }}>
+              {text}
+            </p>
             <div style={{ marginTop: "1.2rem", display: "flex", gap: "1.2rem", alignItems: "center", flexWrap: "wrap" }}>
-              <Link href={link || "/#plan"} className="btn btn-fill-ink">
-                {button || "Make an Inquiry"}
+              <Link href={link} className="btn btn-fill-ink">
+                {button}
               </Link>
               {phone && (
-                <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} style={{ fontWeight: 600, color: "var(--ink)" }}>
+                <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} style={{ fontWeight: 600, color: "var(--ink)", fontSize: "0.95rem" }}>
                   {phone}
                 </a>
               )}
@@ -74,3 +71,4 @@ export function SpecialistBlock({ acf }: { acf?: Record<string, unknown> | null 
     </section>
   );
 }
+
