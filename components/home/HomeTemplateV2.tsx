@@ -231,6 +231,11 @@ export default function HomeTemplateV2({
    * nothing - better to show no label than a meaningless one.
    */
   const placeOf = (slide: any) => {
+    if (slide?.tagline && String(slide.tagline).trim() && String(slide.tagline).trim().toLowerCase() !== "travel") {
+      return String(slide.tagline).trim();
+    }
+    if (slide?.place && String(slide.place).trim()) return String(slide.place).trim();
+    if (slide?.country && String(slide.country).trim()) return String(slide.country).trim();
     const slug = String(slide?.link || "").split("/").filter(Boolean).pop() || "";
     if (slug && !slug.includes(".")) {
       return slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());

@@ -16,15 +16,12 @@ if (!defined('ABSPATH')) exit;
 function aat_repeater_specs() {
     return [
         'home-banner' => [
-            ['key' => 'image_url', 'label' => 'Large Image', 'type' => 'image'],
-            ['key' => 'image_url_2', 'label' => 'Inset Image', 'type' => 'image'],
-            ['key' => 'tagline', 'label' => 'Eyebrow (italic)'],
-            ['key' => 'title', 'label' => 'Eyebrow (roman)'],
-            ['key' => 'description', 'label' => 'Headline (HTML allowed)', 'type' => 'textarea'],
-            ['key' => 'subtitle', 'label' => 'Standfirst', 'type' => 'textarea'],
-            ['key' => 'meta', 'label' => 'Inset Caption'],
-            ['key' => 'link', 'label' => 'Button Link'],
-            ['key' => 'link_text', 'label' => 'Button Text'],
+            ['key' => 'image_url', 'label' => 'Large Image (Ảnh nền)', 'type' => 'image'],
+            ['key' => 'tagline', 'label' => 'Country / Destination (Tên điểm đến, vd: Japan, Vietnam)'],
+            ['key' => 'description', 'label' => 'Headline (Tiêu đề lớn, vd: Timeless Japan)', 'type' => 'textarea'],
+            ['key' => 'subtitle', 'label' => 'Standfirst (Mô tả dưới ảnh)', 'type' => 'textarea'],
+            ['key' => 'link', 'label' => 'Button Link (Link nút bấm, vd: /japan/)'],
+            ['key' => 'link_text', 'label' => 'Button Text (Chữ nút, vd: Learn More)'],
         ],
         'home-cards' => [
             ['key' => 'image_url', 'label' => 'Image', 'type' => 'image'],
