@@ -592,13 +592,35 @@ function aat_enrich_hotels($limit = 40) {
 
     $filled = 0;
     foreach ($posts as $post_id) {
-        update_post_meta($post_id, '_aat_hotel_enriched', 1);
-
-        // 1. Hero image
+        // 1. Hero image - use authentic curated image if available, else thumbnail or library search
+        $slug = get_post_field('post_name', $post_id);
+        $curated_map = function_exists('aat_hotel_curated_images') ? aat_hotel_curated_images() : [];
         $hero = get_post_meta($post_id, 'hero_image', true);
-        if (!$hero) {
+        
+        if (isset($curated_map[$slug]) && (!empty($curated_map[$slug]))) {
+            update_post_meta($post_id, 'hero_image', $curated_map[$slug]);
+        } elseif (!$hero) {
             $thumb = get_the_post_thumbnail_url($post_id, 'full');
+            if (!$thumb && function_exists('aat_suggest_image')) {
+                $att_id = aat_suggest_image($post_id);
+                if ($att_id) $thumb = wp_get_attachment_url($att_id);
+            }
             if ($thumb) update_post_meta($post_id, 'hero_image', $thumb);
+        }
+
+        // Auto-extract gallery from body <img> tags if gallery is empty
+        $existing_gallery = get_post_meta($post_id, 'gallery', true);
+        if (!$existing_gallery || $existing_gallery === '[]') {
+            $content = get_post_field('post_content', $post_id);
+            if (preg_match_all('/<img[^>]+src=(["\'])(https?:\/\/[^"\']+)\1/i', $content, $matches)) {
+                $gallery_rows = [];
+                foreach (array_unique($matches[2]) as $img_url) {
+                    $gallery_rows[] = ['image_url' => $img_url, 'caption' => ''];
+                }
+                if ($gallery_rows) {
+                    update_post_meta($post_id, 'gallery', wp_slash(wp_json_encode(array_slice($gallery_rows, 0, 8))));
+                }
+            }
         }
 
         // 2. Location
