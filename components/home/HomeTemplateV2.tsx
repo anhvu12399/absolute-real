@@ -779,7 +779,10 @@ export default function HomeTemplateV2({
         <section className="section on-cream" id="inspiration">
           <div className="container">
             <div className="center reveal">
-              <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{inspirationHeadline}</h2>
+              <h2
+                style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}
+                dangerouslySetInnerHTML={{ __html: inspirationHeadline }}
+              />
             </div>
             <div className="editorial-grid reveal">
               {editorial.map((item) => (
@@ -852,7 +855,10 @@ export default function HomeTemplateV2({
         <section className="section on-cream" id="specialists">
           <div className="container">
             <div className="center reveal">
-              <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{specialistsHeadline}</h2>
+              <h2
+                style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}
+                dangerouslySetInnerHTML={{ __html: specialistsHeadline }}
+              />
             </div>
             <div className="team-grid reveal">
               {team.slice(0, 4).map((member: any, idx: number) => (
@@ -1007,8 +1013,11 @@ export default function HomeTemplateV2({
           everywhere, is better than two that disagree. */}
       <section className="section on-ink" id="plan">
         <div className="container plan-cta reveal">
-          <p className="eyebrow"><em dangerouslySetInnerHTML={{ __html: String(acf.plan_eyebrow || "<em>Start</em> Planning") }}></em></p>
-          <h2 style={{ fontSize: "clamp(1.9rem,3.6vw,2.8rem)" }}>{enquiryHeadline}</h2>
+          <p className="eyebrow" dangerouslySetInnerHTML={{ __html: String(acf.plan_eyebrow || "<em>Start</em> Planning") }} />
+          <h2
+            style={{ fontSize: "clamp(1.9rem,3.6vw,2.8rem)" }}
+            dangerouslySetInnerHTML={{ __html: enquiryHeadline }}
+          />
           <p>
             {enquiryNote ||
               String(acf.plan_desc) ||
