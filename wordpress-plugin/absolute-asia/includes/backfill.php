@@ -128,13 +128,36 @@ function aat_backfill_country_images() {
     $terms = get_terms(['taxonomy' => 'country', 'hide_empty' => false]);
     if (is_wp_error($terms)) return [];
 
+    $CURATED = [
+        'cambodia'    => 'https://backend.absoluteasiatours.com/wp-content/uploads/2025/06/pexels-sergk1-158907081.jpg',
+        'bhutan'      => 'https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-infinityadventure-5011707.jpg',
+        'vietnam'     => 'https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Ninh-Binh-2000.jpg',
+        'thailand'    => 'https://backend.absoluteasiatours.com/wp-content/uploads/2025/03/Grand-Palace-12121.jpg',
+        'japan'       => 'https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Kyoto-1211-scaled-1.jpg',
+        'china'       => 'https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/fisherman-Guangxi-China.jpg',
+        'laos'        => 'https://backend.absoluteasiatours.com/wp-content/uploads/2025/02/Luang-Prabang-30-1.jpg',
+        'indonesia'   => 'https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-joyston-judah-331625-27682192.jpg',
+        'bali'        => 'https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-iqxazmi-3935736.jpg',
+        'india'       => 'https://backend.absoluteasiatours.com/wp-content/uploads/2025/08/pexels-jodaarba-860577.jpg',
+        'malaysia'    => 'https://backend.absoluteasiatours.com/wp-content/uploads/2025/08/Pangkor-islands-12.jpg',
+        'south-korea' => 'https://backend.absoluteasiatours.com/wp-content/uploads/2025/05/seoul2.jpg',
+    ];
+
     $filled = [];
     foreach ($terms as $term) {
         if (get_term_meta($term->term_id, 'image', true)) continue;
 
+        $slug = $term->slug;
+        if (isset($CURATED[$slug])) {
+            update_term_meta($term->term_id, 'image', $CURATED[$slug]);
+            update_term_meta($term->term_id, '_aat_backfilled_image', 1);
+            $filled[] = $term->name . ' → ' . basename($CURATED[$slug]);
+            continue;
+        }
+
         $best = 0;
         $best_width = -1;
-        foreach (['place', 'tour', 'hotel', 'post'] as $type) {
+        foreach (['place_to_go', 'tour', 'travel_guide', 'hotel'] as $type) {
             $posts = get_posts([
                 'post_type' => $type,
                 'post_status' => 'publish',

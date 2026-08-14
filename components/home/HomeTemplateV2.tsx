@@ -118,22 +118,48 @@ export default function HomeTemplateV2({
   const IS_TOUR = /^\/tours\//;
   const IS_STAY = /^\/collection\//;
 
+  const AUTHENTIC_COUNTRY_PHOTOS: Record<string, string> = {
+    cambodia: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/06/pexels-sergk1-158907081.jpg", // Angkor Wat
+    bhutan: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-infinityadventure-5011707.jpg", // Tiger's Nest Monastery
+    vietnam: "https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Ninh-Binh-2000.jpg", // Ninh Binh
+    thailand: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/03/Grand-Palace-12121.jpg", // Grand Palace
+    japan: "https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Kyoto-1211-scaled-1.jpg", // Kyoto
+    china: "https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/fisherman-Guangxi-China.jpg", // Guangxi
+    laos: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/02/Luang-Prabang-30-1.jpg", // Luang Prabang
+    indonesia: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-joyston-judah-331625-27682192.jpg", // Bali & Indonesia
+    bali: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-iqxazmi-3935736.jpg", // Bali
+    india: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/08/pexels-jodaarba-860577.jpg", // India
+    malaysia: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/08/Pangkor-islands-12.jpg", // Malaysia
+    "south-korea": "https://backend.absoluteasiatours.com/wp-content/uploads/2025/05/seoul2.jpg", // Seoul
+    singapore: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-chaitgawat-2128033.jpg",
+    myanmar: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/06/Bagan-Plains.jpg",
+    nepal: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/08/pexels-samrat-maharjan-156568-14496011.jpg",
+    "sri-lanka": "https://backend.absoluteasiatours.com/wp-content/uploads/2025/08/pexels-godson-bright-352845-962464.jpg",
+    taiwan: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/06/Taiwan-Lantern.jpg",
+    philippines: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/El-Nido-Palawan.jpg",
+  };
+
   /* "Where do you want to go" is answered with countries, not with individual
      towns — a visitor picks Vietnam before they pick Hoi An. The country
      taxonomy carries them; the photograph is borrowed from that country's own
      content, so nothing is invented. */
-  let destPhotoOffset = 0;
   const countryCards = countries.map((term) => {
     const cleanTermSlug = term.slug.toLowerCase().replace(/-tours|-vacations/g, "");
-    const own = [...places, ...tours, ...hotels, ...cruises, ...guides].filter((item) =>
-      item.categories?.some((c) => c.slug === term.slug || c.slug === cleanTermSlug) ||
-      item.path?.toLowerCase().includes(`/${cleanTermSlug}/`) ||
-      item.title?.toLowerCase().includes(cleanTermSlug)
-    );
+    const own = [...places, ...tours, ...hotels, ...cruises, ...guides].filter((item) => {
+      const itemTitle = (item.title || "").toLowerCase();
+      if (cleanTermSlug === "cambodia" && (itemTitle.includes("seoul") || itemTitle.includes("korea"))) return false;
+      if (cleanTermSlug === "bhutan" && (itemTitle.includes("seoul") || itemTitle.includes("korea") || itemTitle.includes("vietnam"))) return false;
+      return (
+        item.categories?.some((c) => c.slug === term.slug || c.slug === cleanTermSlug) ||
+        item.path?.toLowerCase().includes(`/${cleanTermSlug}/`) ||
+        item.title?.toLowerCase().includes(cleanTermSlug)
+      );
+    });
     const foundImage =
       term.image ||
+      AUTHENTIC_COUNTRY_PHOTOS[cleanTermSlug] ||
+      AUTHENTIC_COUNTRY_PHOTOS[term.slug] ||
       own.find((i) => i.featuredMedia?.url)?.featuredMedia?.url ||
-      photoPool[destPhotoOffset++ % Math.max(photoPool.length, 1)] ||
       "";
     return {
       image_url: foundImage,
@@ -147,10 +173,13 @@ export default function HomeTemplateV2({
     };
   });
 
-  const destinations = tabCards(acf.home_tab_destinations, IS_PLACE, countryCards).map((card: any) => ({
-    ...card,
-    image_url: card.image_url || photoPool[destPhotoOffset++ % Math.max(photoPool.length, 1)] || "",
-  }));
+  const destinations = tabCards(acf.home_tab_destinations, IS_PLACE, countryCards).map((card: any) => {
+    const slug = String(card?.link || "").replace(/\//g, "").toLowerCase().replace(/-tours|-vacations/g, "");
+    return {
+      ...card,
+      image_url: card.image_url || AUTHENTIC_COUNTRY_PHOTOS[slug] || "",
+    };
+  });
   const journeys = tabCards(acf.home_tab_journeys, IS_TOUR, tours.map(toCard));
   /* The homepage now runs three tabs, not five: where, what kind, what to
      read. The "special offers" and "new this season" sets, and the separate
