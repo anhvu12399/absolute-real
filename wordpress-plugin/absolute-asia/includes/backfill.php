@@ -486,11 +486,30 @@ function aat_enrich_tours($limit = 30) {
     foreach ($posts as $post_id) {
         update_post_meta($post_id, '_aat_tour_enriched_v2', 1);
 
-        // 1. Hero image fallback to post thumbnail
+        // 1. Hero image fallback to post thumbnail or suggested image
         $hero = get_post_meta($post_id, 'hero_image', true);
         if (!$hero) {
             $thumb = get_the_post_thumbnail_url($post_id, 'full');
+            if (!$thumb && function_exists('aat_suggest_image')) {
+                $att_id = aat_suggest_image($post_id);
+                if ($att_id) $thumb = wp_get_attachment_url($att_id);
+            }
             if ($thumb) update_post_meta($post_id, 'hero_image', $thumb);
+        }
+
+        // Auto-extract gallery from body <img> tags if gallery is empty
+        $existing_gallery = get_post_meta($post_id, 'gallery', true);
+        if (!$existing_gallery || $existing_gallery === '[]') {
+            $content = get_post_field('post_content', $post_id);
+            if (preg_match_all('/<img[^>]+src=(["\'])(https?:\/\/[^"\']+)\1/i', $content, $matches)) {
+                $gallery_rows = [];
+                foreach (array_unique($matches[2]) as $img_url) {
+                    $gallery_rows[] = ['image_url' => $img_url, 'caption' => ''];
+                }
+                if ($gallery_rows) {
+                    update_post_meta($post_id, 'gallery', wp_slash(wp_json_encode(array_slice($gallery_rows, 0, 10))));
+                }
+            }
         }
 
         // 2. Parse or enhance Itinerary
