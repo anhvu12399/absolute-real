@@ -1129,12 +1129,22 @@ add_action('rest_api_init', function () {
         if ($type === 'seed-copy') return rest_ensure_response(aat_seed_homepage_copy());
         if ($type === 'fill-images') return rest_ensure_response(aat_backfill_images(20));
         if ($type === 'fill-excerpts') return rest_ensure_response(aat_backfill_excerpts(30));
-        if ($type === 'fill-itineraries') return rest_ensure_response(aat_backfill_itineraries(25));
-        if ($type === 'enrich-tours') return rest_ensure_response(aat_enrich_tours(30));
-        if ($type === 'enrich-hotels') return rest_ensure_response(aat_enrich_hotels(40));
-        if ($type === 'enrich-places') return rest_ensure_response(aat_enrich_places(40));
-        if ($type === 'enrich-articles') return rest_ensure_response(aat_enrich_articles(40));
-        if ($type === 'hotel-copy') return rest_ensure_response(aat_seed_hotel_copy());
+        if ($type === 'enrich-tours') {
+            $offset = max(0, (int) ($r['offset'] ?: 0));
+            return rest_ensure_response(aat_enrich_tours($offset, 20));
+        }
+        if ($type === 'enrich-hotels') {
+            $offset = max(0, (int) ($r['offset'] ?: 0));
+            return rest_ensure_response(aat_enrich_hotels($offset, 20));
+        }
+        if ($type === 'enrich-places') {
+            $offset = max(0, (int) ($r['offset'] ?: 0));
+            return rest_ensure_response(aat_enrich_places($offset, 20));
+        }
+        if ($type === 'enrich-articles') {
+            $offset = max(0, (int) ($r['offset'] ?: 0));
+            return rest_ensure_response(aat_enrich_articles($offset, 20));
+        }
         if ($type === 'story') return rest_ensure_response(aat_seed_story());
         if ($type === 'hub-pages') return rest_ensure_response(aat_seed_hub_pages());
         if ($type === 'rebrand') return rest_ensure_response(aat_rebrand_run(40));

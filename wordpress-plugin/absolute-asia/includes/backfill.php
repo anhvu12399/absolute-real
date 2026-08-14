@@ -440,16 +440,16 @@ function aat_parse_body_itinerary($body) {
  * - Highlights list
  * - FAQs and accommodation options
  */
-function aat_enrich_tours($limit = 30) {
+function aat_enrich_tours($offset = 0, $limit = 20) {
     $posts = get_posts([
         'post_type' => 'tour',
-        'post_status' => 'publish',
+        'post_status' => ['publish', 'draft'],
         'posts_per_page' => $limit,
+        'offset' => $offset,
         'fields' => 'ids',
-        'meta_query' => [[['key' => '_aat_tour_enriched_v2', 'compare' => 'NOT EXISTS']]],
     ]);
 
-    if (!$posts) return ['imported' => 0, 'done' => true];
+    if (!$posts) return ['imported' => 0, 'done' => true, 'offset' => $offset];
 
     $CITIES = [
         'seoul', 'busan', 'gyeongju', 'jeju', 'incheon', 'dmz',
@@ -484,8 +484,6 @@ function aat_enrich_tours($limit = 30) {
 
     $filled = 0;
     foreach ($posts as $post_id) {
-        update_post_meta($post_id, '_aat_tour_enriched_v2', 1);
-
         // 1. Hero image fallback to post thumbnail or suggested image
         $hero = get_post_meta($post_id, 'hero_image', true);
         if (!$hero) {
@@ -555,6 +553,35 @@ function aat_enrich_tours($limit = 30) {
             update_post_meta($post_id, 'destinations_count', count($cities_list));
         }
 
+        $current_route = get_post_meta($post_id, 'tour_route', true);
+        if (empty($current_route) && count($cities_list) > 0) {
+            update_post_meta($post_id, 'tour_route', implode(' – ', $cities_list));
+        }
+
+        // 5. Activity level & Min guests
+        if (!get_post_meta($post_id, 'tour_level', true)) update_post_meta($post_id, 'tour_level', 'Moderate');
+        if (!get_post_meta($post_id, 'min_guests', true)) update_post_meta($post_id, 'min_guests', 2);
+
+        // 6. Inclusions & Exclusions
+        $current_inc = get_post_meta($post_id, 'inclusions_list', true);
+        if (empty($current_inc)) update_post_meta($post_id, 'inclusions_list', $STANDARD_INCLUSIONS);
+
+        $current_exc = get_post_meta($post_id, 'exclusions_list', true);
+        if (empty($current_exc)) update_post_meta($post_id, 'exclusions_list', $STANDARD_EXCLUSIONS);
+
+        // 7. Highlights list
+        $current_high = get_post_meta($post_id, 'highlights_list', true);
+        if (empty($current_high) && is_array($rows) && count($rows) > 0) {
+            $extracted_highlights = [];
+            foreach (array_slice($rows, 0, 5) as $r) {
+                $t = trim(preg_replace('/^Day\s*\d+\s*[:.\-–—]\s*/iu', '', $r['title'] ?? ''));
+                if ($t) $extracted_highlights[] = $t;
+            }
+            if ($extracted_highlights) {
+                update_post_meta($post_id, 'highlights_list', implode("\n", $extracted_highlights));
+            }
+        }
+
         // 8. Sample Dates & FAQs if empty
         if (!get_post_meta($post_id, 'departure_dates', true)) {
             update_post_meta($post_id, 'departure_dates', wp_slash(wp_json_encode([
@@ -575,37 +602,41 @@ function aat_enrich_tours($limit = 30) {
         $filled++;
     }
 
-    return ['imported' => $filled, 'done' => false];
+    $next_offset = $offset + count($posts);
+    return ['imported' => $filled, 'offset' => $next_offset, 'done' => false];
 }
 
 /** Enriches hotel records with location, highlights, and hero image. */
-function aat_enrich_hotels($limit = 40) {
+function aat_enrich_hotels($offset = 0, $limit = 20) {
     $posts = get_posts([
         'post_type' => 'hotel',
-        'post_status' => 'publish',
+        'post_status' => ['publish', 'draft'],
         'posts_per_page' => $limit,
+        'offset' => $offset,
         'fields' => 'ids',
-        'meta_query' => [[['key' => '_aat_hotel_enriched', 'compare' => 'NOT EXISTS']]],
     ]);
 
-    if (!$posts) return ['imported' => 0, 'done' => true];
+    if (!$posts) return ['imported' => 0, 'done' => true, 'offset' => $offset];
 
+    $curated_map = function_exists('aat_hotel_curated_images') ? aat_hotel_curated_images() : [];
     $filled = 0;
+
     foreach ($posts as $post_id) {
-        // 1. Hero image - use authentic curated image if available, else thumbnail or library search
         $slug = get_post_field('post_name', $post_id);
-        $curated_map = function_exists('aat_hotel_curated_images') ? aat_hotel_curated_images() : [];
-        $hero = get_post_meta($post_id, 'hero_image', true);
         
-        if (isset($curated_map[$slug]) && (!empty($curated_map[$slug]))) {
+        // 1. Hero image - use authentic curated image if available, else thumbnail or library search
+        if (isset($curated_map[$slug]) && !empty($curated_map[$slug])) {
             update_post_meta($post_id, 'hero_image', $curated_map[$slug]);
-        } elseif (!$hero) {
-            $thumb = get_the_post_thumbnail_url($post_id, 'full');
-            if (!$thumb && function_exists('aat_suggest_image')) {
-                $att_id = aat_suggest_image($post_id);
-                if ($att_id) $thumb = wp_get_attachment_url($att_id);
+        } else {
+            $hero = get_post_meta($post_id, 'hero_image', true);
+            if (!$hero) {
+                $thumb = get_the_post_thumbnail_url($post_id, 'full');
+                if (!$thumb && function_exists('aat_suggest_image')) {
+                    $att_id = aat_suggest_image($post_id);
+                    if ($att_id) $thumb = wp_get_attachment_url($att_id);
+                }
+                if ($thumb) update_post_meta($post_id, 'hero_image', $thumb);
             }
-            if ($thumb) update_post_meta($post_id, 'hero_image', $thumb);
         }
 
         // Auto-extract gallery from body <img> tags if gallery is empty
@@ -648,25 +679,24 @@ function aat_enrich_hotels($limit = 40) {
         $filled++;
     }
 
-    return ['imported' => $filled, 'done' => false];
+    $next_offset = $offset + count($posts);
+    return ['imported' => $filled, 'offset' => $next_offset, 'done' => false];
 }
 
 /** Enriches destination places with tagline, overview, and map info. */
-function aat_enrich_places($limit = 40) {
+function aat_enrich_places($offset = 0, $limit = 20) {
     $posts = get_posts([
         'post_type' => 'place_to_go',
-        'post_status' => 'publish',
+        'post_status' => ['publish', 'draft'],
         'posts_per_page' => $limit,
+        'offset' => $offset,
         'fields' => 'ids',
-        'meta_query' => [[['key' => '_aat_place_enriched', 'compare' => 'NOT EXISTS']]],
     ]);
 
-    if (!$posts) return ['imported' => 0, 'done' => true];
+    if (!$posts) return ['imported' => 0, 'done' => true, 'offset' => $offset];
 
     $filled = 0;
     foreach ($posts as $post_id) {
-        update_post_meta($post_id, '_aat_place_enriched', 1);
-
         $title = get_the_title($post_id);
 
         // 1. Hero image
@@ -694,25 +724,24 @@ function aat_enrich_places($limit = 40) {
         $filled++;
     }
 
-    return ['imported' => $filled, 'done' => false];
+    $next_offset = $offset + count($posts);
+    return ['imported' => $filled, 'offset' => $next_offset, 'done' => false];
 }
 
 /** Enriches articles (guides, things to do, blogs) with hero image and read time. */
-function aat_enrich_articles($limit = 40) {
+function aat_enrich_articles($offset = 0, $limit = 20) {
     $posts = get_posts([
         'post_type' => ['travel_guide', 'thing_to_do', 'blog'],
-        'post_status' => 'publish',
+        'post_status' => ['publish', 'draft'],
         'posts_per_page' => $limit,
+        'offset' => $offset,
         'fields' => 'ids',
-        'meta_query' => [[['key' => '_aat_article_enriched', 'compare' => 'NOT EXISTS']]],
     ]);
 
-    if (!$posts) return ['imported' => 0, 'done' => true];
+    if (!$posts) return ['imported' => 0, 'done' => true, 'offset' => $offset];
 
     $filled = 0;
     foreach ($posts as $post_id) {
-        update_post_meta($post_id, '_aat_article_enriched', 1);
-
         // 1. Hero image
         $hero = get_post_meta($post_id, 'hero_image', true);
         if (!$hero) {
@@ -739,7 +768,8 @@ function aat_enrich_articles($limit = 40) {
         $filled++;
     }
 
-    return ['imported' => $filled, 'done' => false];
+    $next_offset = $offset + count($posts);
+    return ['imported' => $filled, 'offset' => $next_offset, 'done' => false];
 }
 
 /**
