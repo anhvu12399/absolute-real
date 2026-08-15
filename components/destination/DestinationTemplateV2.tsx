@@ -10,6 +10,7 @@ import { SpecialistBlock } from "../v2/SpecialistBlock";
 import { BRAND_SHORT } from "@/lib/site";
 import { toLocalHref } from "@/lib/links";
 import { bg, optimized } from "@/lib/images";
+import { BackToTop } from "../v2/BackToTop";
 
 const RealMapComponent = dynamic(() => import("./RealMapComponent"), { ssr: false });
 
@@ -398,9 +399,7 @@ export default function DestinationTemplateV2({
       {/* ═══ SUBNAV ═══ */}
       <nav className="tour-subnav" id="tourSubnav">
         <div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", background: "none", border: "none", cursor: "pointer", color: "var(--ink)", paddingBottom: "0.3rem" }}>
-            Back to Top <svg style={{ width: "16px", height: "16px", transform: "rotate(-90deg)" }}><use href="#i-arrow"></use></svg>
-          </button>
+          <BackToTop />
           
           <div className="tour-subnav-inner" style={{ flex: 1, justifyContent: "center" }}>
             <Link href="#journeys" className={activeSection === "journeys" ? "is-active" : ""}>Our Journeys</Link>

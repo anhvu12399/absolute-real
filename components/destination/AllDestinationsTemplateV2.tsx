@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import type { ArchiveItem, TermInfo } from "@/lib/wp";
 import { BRAND_SHORT } from "@/lib/site";
 import { bg, optimized } from "@/lib/images";
+import { BackToTop } from "../v2/BackToTop";
 
 const RealMapComponent = dynamic(() => import("./RealMapComponent"), { ssr: false });
 
@@ -184,21 +185,29 @@ export default function AllDestinationsTemplateV2({
 
           <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", color: "#E2C38E", fontSize: "0.78rem", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, marginBottom: "0.8rem", textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>
             <span style={{ width: "26px", height: "2px", background: "#E2C38E" }} />
-            <span>Composed For You · All Destinations Directory</span>
+            <span>{data?.acf?.eyebrow || "Composed For You · All Destinations Directory"}</span>
           </div>
 
+          {/* Every word on this page used to be a template literal — the only
+              page on the site an editor could not touch at all. */}
           <h1 style={{ color: "var(--white)", fontSize: "clamp(2.6rem,5.8vw,4.8rem)", lineHeight: 1.04, maxWidth: "18ch", fontWeight: 400, textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
-            Explore Asia, <em style={{ fontStyle: "italic", fontFamily: "'Playfair Display', serif", color: "#F0E6D2" }}>Unbound</em>
+            {data?.acf?.hero_tagline ? (
+              <span dangerouslySetInnerHTML={{ __html: String(data.acf.hero_tagline) }} />
+            ) : (
+              <>Explore Asia, <em style={{ fontStyle: "italic", fontFamily: "'Playfair Display', serif", color: "#F0E6D2" }}>Unbound</em></>
+            )}
           </h1>
 
           <p style={{ color: "rgba(255,255,255,0.95)", fontSize: "clamp(1.05rem,1.6vw,1.25rem)", maxWidth: "56ch", marginTop: "1.2rem", fontWeight: 400, lineHeight: 1.6, textShadow: "0 1px 6px rgba(0,0,0,0.6)" }}>
-            From imperial sanctuaries and mist-shrouded peaks to tropical archipelagos — 21 extraordinary Asian destinations composed for discerning travelers.
+            {data?.acf?.page_description ||
+              `From imperial sanctuaries and mist-shrouded peaks to tropical archipelagos — ${destinations.length} extraordinary Asian destinations composed for discerning travelers.`}
           </p>
 
           {/* Region Quick Stats Badges */}
           <div style={{ marginTop: "2rem", display: "flex", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
             <span style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.35)", color: "var(--white)", fontSize: "0.78rem", fontWeight: 500, padding: "0.55rem 1.1rem", borderRadius: "2px", letterSpacing: "0.08em" }}>
-              <strong style={{ color: "#E2C38E" }}>21</strong> Countries
+              {/* Asserted "21" regardless of how many countries the site holds. */}
+              <strong style={{ color: "#E2C38E" }}>{destinations.length}</strong> Countries
             </span>
             <span style={{ background: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.35)", color: "var(--white)", fontSize: "0.78rem", fontWeight: 500, padding: "0.55rem 1.1rem", borderRadius: "2px", letterSpacing: "0.08em" }}>
               <strong style={{ color: "#E2C38E" }}>100%</strong> Tailor-Made &amp; Private
@@ -213,9 +222,7 @@ export default function AllDestinationsTemplateV2({
       {/* ═══ SUBNAV ═══ */}
       <nav className="tour-subnav" id="tourSubnav" style={{ background: "var(--cream)", borderBottom: "1px solid var(--line-on-cream)" }}>
         <div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", background: "none", border: "none", cursor: "pointer", color: "var(--ink)", paddingBottom: "0.3rem" }}>
-            Back to Top <svg style={{ width: "16px", height: "16px", transform: "rotate(-90deg)" }}><use href="#i-arrow"></use></svg>
-          </button>
+          <BackToTop />
 
           <div className="tour-subnav-inner" style={{ flex: 1, justifyContent: "center" }}>
             <Link href="#featured" className={activeSection === "featured" ? "is-active" : ""}>All Destinations</Link>
@@ -231,10 +238,14 @@ export default function AllDestinationsTemplateV2({
       <section className="section on-cream" id="featured" style={{ background: "var(--cream)" }}>
         <div className="container">
           <div className="center">
-            <p className="eyebrow"><em>See Where</em> {BRAND_SHORT} Can Take You</p>
-            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.5rem)" }}>Discover All Asia Destinations</h2>
+            {data?.acf?.directory_eyebrow ? (
+              <p className="eyebrow" dangerouslySetInnerHTML={{ __html: String(data.acf.directory_eyebrow) }} />
+            ) : (
+              <p className="eyebrow"><em>See Where</em> {BRAND_SHORT} Can Take You</p>
+            )}
+            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.5rem)" }}>{data?.acf?.directory_headline || "Discover All Asia Destinations"}</h2>
             <p style={{ marginTop: "0.6rem", color: "var(--text-dim-on-cream)", fontSize: "0.95rem" }}>
-              Filter by region or scroll to explore our full directory of private luxury travel.
+              {data?.acf?.directory_description || "Filter by region or scroll to explore our full directory of private luxury travel."}
             </p>
           </div>
 
@@ -335,11 +346,12 @@ export default function AllDestinationsTemplateV2({
       {/* ═══ CTA ═══ */}
       <section className="section on-ink">
         <div className="container center">
-          <p className="eyebrow" style={{ justifyContent: "center" }}><em>Start</em> Planning</p>
-          <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>Ready to compose your private Asia journey?</h2>
-          <p style={{ marginTop: "1rem", color: "var(--text-dim-on-ink)" }}>Share your preferences and a private travel designer will reach out within one business day.</p>
+          <p className="eyebrow" style={{ justifyContent: "center" }} dangerouslySetInnerHTML={{ __html: String(data?.acf?.cta_eyebrow || "<em>Start</em> Planning") }} />
+          <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{data?.acf?.cta_headline || "Ready to compose your private Asia journey?"}</h2>
+          <p style={{ marginTop: "1rem", color: "var(--text-dim-on-ink)" }}>{data?.acf?.cta_description || "Share your preferences and a private travel designer will reach out within one business day."}</p>
           <div style={{ marginTop: "1.8rem" }}>
-            <Link href="/vietnam-tours/" className="btn btn-line-white">Explore All Journeys</Link>
+            {/* Sent everyone to Vietnam from a page about all of Asia. */}
+            <Link href="/tours/" className="btn btn-line-white">{data?.acf?.cta_button || "Explore All Journeys"}</Link>
           </div>
         </div>
       </section>

@@ -251,12 +251,10 @@ export default function HomeTemplateV2({
   }, [heroIndex]);
 
   const hero = slides[heroIndex] || slides[0] || {};
-  /* The legacy slider has no second image, so the inset frame previews the next
-     slide instead of sitting empty. */
-  const nextSlide = slides.length > 1 ? slides[(heroIndex + 1) % slides.length] : null;
-  const insetImage = hero.image_url_2 || nextSlide?.image_url || "";
-  const insetCaption = hero.meta || nextSlide?.description || "Mekong Delta";
-  const insetPlate = hero.meta_plate || (nextSlide ? "Next" : hero.tagline || BRAND_SHORT);
+  /* The inset frame these fed - a small second photograph beside the headline -
+     went when the hero became a single full-bleed plate. They were still being
+     computed on every render, one of them defaulting to the literal words
+     "Mekong Delta" for a site that also sells Japan. */
 
   /**
    * The place a slide is about, taken from where it points.

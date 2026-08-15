@@ -78,8 +78,8 @@ export default function InspirationDirectoryTemplateV2({
       <section className="section on-cream" style={{ background: "var(--cream)" }}>
         <div className="container">
           <div className="center">
-            <p className="eyebrow"><em>Curated</em> Journal Articles</p>
-            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.5rem)" }}>Explore Our Travel Journal</h2>
+            <p className="eyebrow" dangerouslySetInnerHTML={{ __html: String(data?.acf?.directory_eyebrow || "<em>Curated</em> Journal Articles") }} />
+            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.5rem)" }}>{data?.acf?.directory_headline || "Explore Our Travel Journal"}</h2>
           </div>
 
           {/* Filter Pills */}

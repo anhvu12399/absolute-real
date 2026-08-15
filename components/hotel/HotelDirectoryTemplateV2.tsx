@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ArchiveItem } from "@/lib/wp";
 import { BRAND_SHORT } from "@/lib/site";
+import { BackToTop } from "../v2/BackToTop";
 
 function ArrowSvg() {
   return <svg><use href="#i-arrow"></use></svg>;
@@ -120,9 +121,7 @@ export default function HotelDirectoryTemplateV2({
       {/* ═══ SUBNAV ═══ */}
       <nav className="tour-subnav" id="tourSubnav" style={{ background: "var(--cream)", borderBottom: "1px solid var(--line-on-cream)" }}>
         <div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", background: "none", border: "none", cursor: "pointer", color: "var(--ink)", paddingBottom: "0.3rem" }}>
-            Back to Top <svg style={{ width: "16px", height: "16px", transform: "rotate(-90deg)" }}><use href="#i-arrow"></use></svg>
-          </button>
+          <BackToTop />
 
           <div className="tour-subnav-inner" style={{ flex: 1, justifyContent: "center" }}>
             <Link href="#collection" className={activeSection === "collection" ? "is-active" : ""}>Sanctuary Collection</Link>
@@ -137,10 +136,10 @@ export default function HotelDirectoryTemplateV2({
       <section className="section on-cream" id="collection" style={{ background: "var(--cream)" }}>
         <div className="container">
           <div className="center">
-            <p className="eyebrow"><em>Curated</em> Accommodations</p>
-            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.5rem)" }}>The Asia Hotel Collection</h2>
+            <p className="eyebrow" dangerouslySetInnerHTML={{ __html: String(data?.acf?.directory_eyebrow || "<em>Curated</em> Accommodations") }} />
+            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.5rem)" }}>{data?.acf?.directory_headline || "The Asia Hotel Collection"}</h2>
             <p style={{ marginTop: "0.6rem", color: "var(--text-dim-on-cream)", fontSize: "0.95rem" }}>
-              Filter by destination to explore our favorite private villas and boutique hotels.
+              {data?.acf?.directory_description || "Filter by destination to explore our favorite private villas and boutique hotels."}
             </p>
           </div>
 
@@ -198,11 +197,12 @@ export default function HotelDirectoryTemplateV2({
       {/* ═══ CTA ═══ */}
       <section className="section on-ink" id="explore">
         <div className="container center">
-          <p className="eyebrow" style={{ justifyContent: "center" }}><em>Bespoke</em> Stays</p>
-          <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>Have a specific hotel in mind?</h2>
-          <p style={{ marginTop: "1rem", color: "var(--text-dim-on-ink)" }}>We match your preferred sanctuary and secure exclusive perks with every private itinerary.</p>
+          <p className="eyebrow" style={{ justifyContent: "center" }} dangerouslySetInnerHTML={{ __html: String(data?.acf?.cta_eyebrow || "<em>Bespoke</em> Stays") }} />
+          <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{data?.acf?.cta_headline || "Have a specific hotel in mind?"}</h2>
+          <p style={{ marginTop: "1rem", color: "var(--text-dim-on-ink)" }}>{data?.acf?.cta_description || "We match your preferred sanctuary and secure exclusive perks with every private itinerary."}</p>
           <div style={{ marginTop: "1.8rem" }}>
-            <Link href="/vietnam-tours/" className="btn btn-line-white">Plan Your Bespoke Journey</Link>
+            {/* Pointed at /vietnam-tours/ - one country, on a page about all of Asia. */}
+            <Link href="/plan-my-trip/" className="btn btn-line-white">{data?.acf?.cta_button || "Plan Your Bespoke Journey"}</Link>
           </div>
         </div>
       </section>

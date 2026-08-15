@@ -546,6 +546,21 @@ function aat_register_fields() {
             aat_text('field_aat_page_tagline', 'Hero Tagline / Headline', 'hero_tagline'),
             aat_textarea('field_aat_page_desc', 'Page Description', 'page_description', 3),
 
+            /* The five directory pages - All Destinations, Where to Stay,
+               Cruises, Journeys, Travel Inspiration - are all `page` and share
+               one shape: hero, a filtered list, a closing invitation. The list
+               heading and the closing band were fixed English in five separate
+               template files, so the same sentence appeared on pages an editor
+               could not reach. One set of fields serves all five. */
+            aat_tab('tab_aat_page_directory', 'Directory & CTA'),
+            aat_text('field_aat_page_dir_eyebrow', 'Directory Eyebrow (HTML)', 'directory_eyebrow'),
+            aat_text('field_aat_page_dir_head', 'Directory Headline', 'directory_headline'),
+            aat_textarea('field_aat_page_dir_desc', 'Directory Description', 'directory_description', 3),
+            aat_text('field_aat_page_cta_eyebrow', 'Closing CTA Eyebrow (HTML)', 'cta_eyebrow'),
+            aat_text('field_aat_page_cta_head', 'Closing CTA Headline', 'cta_headline'),
+            aat_textarea('field_aat_page_cta_desc', 'Closing CTA Description', 'cta_description', 3),
+            aat_text('field_aat_page_cta_btn', 'Closing CTA Button', 'cta_button'),
+
             /* Country landing pages (/china/, /thailand/) render from the page
                the legacy site called /{country}-tours/, using the destination
                template. Without these fields an editor could change the body

@@ -46,37 +46,6 @@ function safeParse(val: unknown) {
   return [];
 }
 
-const FALLBACK_TRIPADVISOR_REVIEWS = [
-  {
-    user_name: "Eleanor & David Thornton",
-    date: "March 2026",
-    vote: 5,
-    content:
-      "Absolute Asia planned our 25th anniversary to Vietnam and Cambodia. Every private guide was deeply knowledgeable, the Aman and Belmond accommodations were sublime, and the private sunrise tour of Angkor Wat with zero crowds was the highlight of our lives.",
-  },
-  {
-    user_name: "Sir Julian & Lady Mercer",
-    date: "November 2025",
-    vote: 5,
-    content:
-      "The attention to detail is unmatched. Having a private luxury car, seamless airport escorts at every stop, and dining in private monastery gardens made this our most effortless and awe-inspiring journey to date.",
-  },
-  {
-    user_name: "Dr. Marcus Vance & Family",
-    date: "January 2026",
-    vote: 5,
-    content:
-      "Traveling with two teenagers can be challenging, but our travel designer crafted an itinerary that kept everyone enchanted — from tea masters in Kyoto to private elephant sanctuaries in Chiang Mai. 10/10 service.",
-  },
-  {
-    user_name: "Claire & Thomas Dubois",
-    date: "February 2026",
-    vote: 5,
-    content:
-      "From our private yacht charter in Komodo to cliffside dinners at Nihi Sumba, Absolute Asia delivered sheer perfection. Their 24/7 on-the-ground concierge resolved our last-minute helicopter transfer without a hitch.",
-  },
-];
-
 export default function PlanTripTemplateV2({
   data,
   homeData,
@@ -139,7 +108,11 @@ export default function PlanTripTemplateV2({
   /* Reviews data aligned with Homepage */
   const acf = homeData?.acf || data?.acf || {};
   const parsedReviews = safeParse(acf.testimonials);
-  const testimonials = parsedReviews.length > 0 ? parsedReviews : FALLBACK_TRIPADVISOR_REVIEWS;
+  /* Four invented reviews used to stand in here - named couples with dates
+     and itineraries, printed as real customer quotes whenever WordPress held
+     none. The section hides instead, the way every other section on this site
+     does when it has no data. */
+  const testimonials = parsedReviews;
   const reviewSummary = typeof acf.review_summary === "string" ? acf.review_summary : "";
   const reviewLogo = typeof acf.review_logo === "string" ? acf.review_logo : "";
   const reviewLink = typeof acf.review_link === "string" ? acf.review_link : "";
@@ -282,19 +255,26 @@ export default function PlanTripTemplateV2({
                 routed to our senior destination designer. We will review your preferences and deliver your personalized
                 draft itinerary within one business day.
               </p>
-              <div
-                style={{
-                  marginTop: "2rem",
-                  padding: "1.2rem",
-                  background: "var(--cream)",
-                  borderRadius: "4px",
-                  display: "inline-block",
-                  fontSize: "0.9rem",
-                  color: "var(--ink)",
-                }}
-              >
-                Need urgent assistance? Call us directly: <strong>+1 (800) 736-8187</strong>
-              </div>
+              {/* This printed +1 (800) 736-8187 while every other page showed
+                  the number from WordPress. One of the two was wrong and
+                  nobody could tell which; with no number set, the offer to
+                  call goes away rather than trailing off. */}
+              {String(acf.phone || "") && (
+                <div
+                  style={{
+                    marginTop: "2rem",
+                    padding: "1.2rem",
+                    background: "var(--cream)",
+                    borderRadius: "4px",
+                    display: "inline-block",
+                    fontSize: "0.9rem",
+                    color: "var(--ink)",
+                  }}
+                >
+                  Need urgent assistance? Call us directly:{" "}
+                  <strong>{String(acf.phone)}</strong>
+                </div>
+              )}
               <div style={{ marginTop: "2.4rem" }}>
                 <Link href="/" className="btn btn-fill-ink">
                   Return to Homepage

@@ -56,7 +56,14 @@ export default function TourListingTemplateV2({
       {/* ═══ SUBNAV FILTER ═══ */}
       <nav className="subnav">
         <div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1.5rem", flexWrap: "wrap", padding: "1rem var(--pad)" }}>
-          <p style={{ fontSize: "0.85rem", color: "var(--text-dim-on-cream)" }}>Showing 5 of 24 journeys</p>
+          {/* Was the fixed string "Showing 5 of 24 journeys" — two numbers that
+              matched neither the six cards on screen nor however many the site
+              actually holds. */}
+          <p style={{ fontSize: "0.85rem", color: "var(--text-dim-on-cream)" }}>
+            {tours.length === 0
+              ? "No journeys yet"
+              : `Showing ${visible.length} of ${tours.length} ${tours.length === 1 ? "journey" : "journeys"}`}
+          </p>
         </div>
       </nav>
 
@@ -89,7 +96,7 @@ export default function TourListingTemplateV2({
 
           {tours.length === 0 && (
             <p className="center" style={{ color: "var(--text-dim-on-cream)", padding: "2rem 0" }}>
-              Chưa có hành trình nào được đăng.
+              No journeys are published yet.
             </p>
           )}
 

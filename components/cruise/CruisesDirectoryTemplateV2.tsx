@@ -6,6 +6,7 @@ import { toLocalHref } from "@/lib/links";
 import type { ArchiveItem } from "@/lib/wp";
 import { BRAND_SHORT } from "@/lib/site";
 import { optimized } from "@/lib/images";
+import { BackToTop } from "../v2/BackToTop";
 
 function ArrowSvg() {
   return <svg><use href="#i-arrow"></use></svg>;
@@ -88,9 +89,7 @@ export default function CruisesDirectoryTemplateV2({
       {/* ═══ SUBNAV ═══ */}
       <nav className="tour-subnav" id="tourSubnav" style={{ background: "var(--cream)", borderBottom: "1px solid var(--line-on-cream)" }}>
         <div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", background: "none", border: "none", cursor: "pointer", color: "var(--ink)", paddingBottom: "0.3rem" }}>
-            Back to Top <svg style={{ width: "16px", height: "16px", transform: "rotate(-90deg)" }}><use href="#i-arrow"></use></svg>
-          </button>
+          <BackToTop />
 
           <div className="tour-subnav-inner" style={{ flex: 1, justifyContent: "center" }}>
             <Link href="#cruises" className={activeSection === "cruises" ? "is-active" : ""}>Cruise Collection</Link>
@@ -105,8 +104,8 @@ export default function CruisesDirectoryTemplateV2({
       <section className="section on-cream" id="cruises" style={{ background: "var(--cream)" }}>
         <div className="container">
           <div className="center">
-            <p className="eyebrow"><em>Boutique</em> Ships &amp; Junks</p>
-            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.5rem)" }}>Luxury Asian Cruises</h2>
+            <p className="eyebrow" dangerouslySetInnerHTML={{ __html: String(data?.acf?.directory_eyebrow || "<em>Boutique</em> Ships &amp; Junks") }} />
+            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.5rem)" }}>{data?.acf?.directory_headline || "Luxury Asian Cruises"}</h2>
           </div>
 
           {/* Filter Pills */}
@@ -168,11 +167,11 @@ export default function CruisesDirectoryTemplateV2({
       {/* ═══ CTA ═══ */}
       <section className="section on-ink" id="charter">
         <div className="container center">
-          <p className="eyebrow" style={{ justifyContent: "center" }}><em>Private Charter</em></p>
-          <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>Charter a private vessel for your family or friends</h2>
-          <p style={{ marginTop: "1rem", color: "var(--text-dim-on-ink)" }}>Enjoy 100% exclusive use of a luxury junk or boutique riverboat with your private chef &amp; captain.</p>
+          <p className="eyebrow" style={{ justifyContent: "center" }} dangerouslySetInnerHTML={{ __html: String(data?.acf?.cta_eyebrow || "<em>Private Charter</em>") }} />
+          <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{data?.acf?.cta_headline || "Charter a private vessel for your family or friends"}</h2>
+          <p style={{ marginTop: "1rem", color: "var(--text-dim-on-ink)" }}>{data?.acf?.cta_description || "Enjoy 100% exclusive use of a luxury junk or boutique riverboat with your private chef & captain."}</p>
           <div style={{ marginTop: "1.8rem" }}>
-            <Link href="/plan-my-trip/" className="btn btn-line-white">Inquire Private Charter</Link>
+            <Link href="/plan-my-trip/" className="btn btn-line-white">{data?.acf?.cta_button || "Inquire Private Charter"}</Link>
           </div>
         </div>
       </section>

@@ -6,6 +6,7 @@ import { toLocalHref } from "@/lib/links";
 import type { ArchiveItem } from "@/lib/wp";
 import { BRAND_SHORT } from "@/lib/site";
 import { optimized } from "@/lib/images";
+import { BackToTop } from "../v2/BackToTop";
 
 function ArrowSvg() {
   return <svg><use href="#i-arrow"></use></svg>;
@@ -90,9 +91,7 @@ export default function JourneysDirectoryTemplateV2({
       {/* ═══ SUBNAV ═══ */}
       <nav className="tour-subnav" id="tourSubnav" style={{ background: "var(--cream)", borderBottom: "1px solid var(--line-on-cream)" }}>
         <div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", background: "none", border: "none", cursor: "pointer", color: "var(--ink)", paddingBottom: "0.3rem" }}>
-            Back to Top <svg style={{ width: "16px", height: "16px", transform: "rotate(-90deg)" }}><use href="#i-arrow"></use></svg>
-          </button>
+          <BackToTop />
 
           <div className="tour-subnav-inner" style={{ flex: 1, justifyContent: "center" }}>
             <Link href="#journeys" className={activeSection === "journeys" ? "is-active" : ""}>All Travel Styles</Link>
@@ -107,8 +106,8 @@ export default function JourneysDirectoryTemplateV2({
       <section className="section on-cream" id="journeys" style={{ background: "var(--cream)" }}>
         <div className="container">
           <div className="center">
-            <p className="eyebrow"><em>Curated</em> Travel Styles</p>
-            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.5rem)" }}>Find Your Travel Style</h2>
+            <p className="eyebrow" dangerouslySetInnerHTML={{ __html: String(data?.acf?.directory_eyebrow || "<em>Curated</em> Travel Styles") }} />
+            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.5rem)" }}>{data?.acf?.directory_headline || "Find Your Travel Style"}</h2>
           </div>
 
           {/* Filter Pills */}
@@ -165,11 +164,11 @@ export default function JourneysDirectoryTemplateV2({
       {/* ═══ CTA ═══ */}
       <section className="section on-ink" id="why">
         <div className="container center">
-          <p className="eyebrow" style={{ justifyContent: "center" }}><em>Start</em> Planning</p>
-          <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>Ready to compose your bespoke private journey?</h2>
-          <p style={{ marginTop: "1rem", color: "var(--text-dim-on-ink)" }}>Share your travel dates and our private designers will customize your perfect itinerary.</p>
+          <p className="eyebrow" style={{ justifyContent: "center" }} dangerouslySetInnerHTML={{ __html: String(data?.acf?.cta_eyebrow || "<em>Start</em> Planning") }} />
+          <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{data?.acf?.cta_headline || "Ready to compose your bespoke private journey?"}</h2>
+          <p style={{ marginTop: "1rem", color: "var(--text-dim-on-ink)" }}>{data?.acf?.cta_description || "Share your travel dates and our private designers will customize your perfect itinerary."}</p>
           <div style={{ marginTop: "1.8rem" }}>
-            <Link href="/plan-my-trip/" className="btn btn-line-white">Plan My Trip</Link>
+            <Link href="/plan-my-trip/" className="btn btn-line-white">{data?.acf?.cta_button || "Plan My Trip"}</Link>
           </div>
         </div>
       </section>
