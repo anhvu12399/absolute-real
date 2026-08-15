@@ -149,6 +149,13 @@ export default function SingleArticleTemplateV2({
   const quote = pullQuote(bodyRaw);
   const gallery = (Array.isArray(acf.gallery) ? acf.gallery : []).filter((row: GalleryRow) => row?.image_url) as GalleryRow[];
   const extraBody = text(acf.content_left);
+  const planTitle = text(acf.plan_title);
+  const planDescription = text(acf.plan_description);
+  const planHtml = text(acf.plan_html);
+  const planFooter = text(acf.plan_footer);
+  const planLink = text(acf.view_more_link) || "/#plan";
+  const planLinkLabel = text(acf.view_more_label) || "Start Planning";
+  const hasPlan = Boolean(planTitle || planDescription || planHtml || planFooter);
 
   const published = data?.date
     ? new Date(data.date).toLocaleDateString("en-US", { month: "long", year: "numeric" })
@@ -262,13 +269,15 @@ export default function SingleArticleTemplateV2({
       )}
 
       {/* ═══ ENDNOTE ═══ */}
-      {text(acf.plan_html) && (
-        <section className="section on-cream">
+      {hasPlan && (
+        <section className="section on-cream" id="plan">
           <div className="container dispatch-endnote">
             <span className="dispatch-rule" />
-            {text(acf.plan_title) && <h2 className="dispatch-endnote-title">{text(acf.plan_title)}</h2>}
-            <div className="wordpress-content" dangerouslySetInnerHTML={{ __html: text(acf.plan_html) }} />
-            <Link href="/#plan" className="btn btn-fill-ink">Start Planning</Link>
+            {planTitle && <h2 className="dispatch-endnote-title">{planTitle}</h2>}
+            {planDescription && <div className="wordpress-content" dangerouslySetInnerHTML={{ __html: planDescription }} />}
+            {planHtml && <div className="wordpress-content plan-block" dangerouslySetInnerHTML={{ __html: planHtml }} />}
+            {planFooter && <div className="wordpress-content" dangerouslySetInnerHTML={{ __html: planFooter }} />}
+            <Link href={planLink} className="btn btn-fill-ink">{planLinkLabel}</Link>
           </div>
         </section>
       )}

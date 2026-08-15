@@ -137,13 +137,10 @@ function aat_seed_homepage_copy() {
 
         'tabs_headline' => 'Where will Asia take you?',
         'featured_headline' => 'Private journeys to begin with',
-        'cruises_headline' => 'Cruises and stays worth the detour',
         'inspiration_headline' => 'Reading before you go',
         'specialists_headline' => 'The people who plan it, and the people who went',
-        'enquiry_headline' => 'Your Asia journey starts with a conversation',
         /* Left blank on purpose: a response-time promise is only worth making
            if the client can keep it. */
-        'enquiry_note' => '',
 
         /* Four things this company can actually show. No review score or award
            is asserted here - those go in only when there is a source. */

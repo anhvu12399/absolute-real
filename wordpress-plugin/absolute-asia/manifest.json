@@ -1,6 +1,6 @@
 {
-  "pluginVersion": "3.0.8",
-  "schemaVersion": 8,
+  "pluginVersion": "3.0.9",
+  "schemaVersion": 9,
   "profiles": ["generic", "absolute"],
   "defaultProfile": "generic",
   "sourceSnapshotMeta": "_aat_source_acf_json",

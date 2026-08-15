@@ -25,6 +25,9 @@ function ChevronSvg() { return <svg><use href="#i-chevron"></use></svg>; }
 function SparkleSvg() { return <svg><use href="#i-sparkle"></use></svg>; }
 function CheckSvg() { return <svg><use href="#i-check"></use></svg>; }
 
+type ExperienceRow = { image_url?: string; image?: string; title?: string; description?: string; link?: string };
+type AccommodationRow = { title?: string; nights?: string; description?: string; link?: string };
+
 /* The six lines this section shows were fixed English in the template, and one
    of them stated the company's age. They live on the homepage now, reachable
    from any page through the site payload. */
@@ -117,6 +120,8 @@ export default function SingleTourTemplateV2({
   const highlights = lines(acf.highlights_list);
   const inclusions = lines(acf.inclusions_list);
   const exclusions = lines(acf.exclusions_list);
+  const experiences = rows<ExperienceRow>(acf.experiences).filter((row) => row.title || row.description || row.image_url || row.image);
+  const accommodationOptions = rows<AccommodationRow>(acf.accommodation_options).filter((row) => row.title || row.description);
 
   /* WordPress stores the itinerary flat, one row per day, tagged with its region. */
   const authoredItinerary = rows<ItineraryRow>(acf.itinerary);
@@ -304,13 +309,27 @@ export default function SingleTourTemplateV2({
   const minGuests = text(acf.min_guests);
   const durationLabel = text(acf.duration_label);
   const offerText = text(acf.special_offer_text);
+  const introDescription = text(acf.intro_description).trim();
+  const normalizeCopy = (value: string) => value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+  const showIntroDescription = Boolean(
+    introDescription && !normalizeCopy(overviewBody).includes(normalizeCopy(introDescription)),
+  );
+  const tourRoute = text(acf.tour_route).trim();
+  const tourLevel = text(acf.tour_level).trim();
+  const tourCode = text(acf.tour_code).trim();
+  const isFeatured = Boolean(acf.is_featured && acf.is_featured !== "0");
+  const legacyCtaLabel = text(acf.cta_label).trim();
+  const legacyCtaLink = text(acf.cta_link).trim();
+  const relatedTours = tourData?.related?.related_tours || [];
 
   /* Subnav only advertises sections that actually rendered. */
   const navItems = [
     { id: "overview", label: "Overview", show: true },
     { id: "itinerary", label: "Itinerary", show: itineraryGroups.length > 0 },
-    { id: "stays", label: "Stays", show: stays.length > 0 },
+    { id: "experiences", label: "Highlights", show: experiences.length > 0 },
+    { id: "stays", label: "Stays", show: stays.length > 0 || accommodationOptions.length > 0 },
     { id: "inclusions", label: "Inclusions", show: inclusions.length > 0 || dates.length > 0 },
+    { id: "gallery", label: "Gallery", show: gallery.length > 0 },
   ].filter((item) => item.show);
   const country = tourData?.terms?.find((term) => term.taxonomy === "country" || term.taxonomy === "category");
 
@@ -351,10 +370,10 @@ export default function SingleTourTemplateV2({
         <div className="container" style={{ position: "relative", zIndex: 2, paddingBottom: "1rem" }}>
           <div style={{ marginBottom: "1rem" }}>
             {text(acf.hero_eyebrow) ? (
-              <span className="hero-tag" dangerouslySetInnerHTML={{ __html: text(acf.hero_eyebrow) }} />
+              <span className="hero-tag hero-eyebrow" dangerouslySetInnerHTML={{ __html: text(acf.hero_eyebrow) }} />
             ) : (
               <>
-                <span className="hero-tag">Tailor-Made</span>
+                <span className="hero-tag">{isFeatured ? "Featured Journey" : "Tailor-Made"}</span>
                 <span className="hero-tag">Offer</span>
               </>
             )}
@@ -410,10 +429,25 @@ export default function SingleTourTemplateV2({
               here too would print the whole tour twice. A tour with no body
               text shows no lede — it does not borrow a description of
               somewhere else. */}
-          {overviewBody && (
+          {(showIntroDescription || overviewBody) && (
             <div className="overview-lede reveal">
               <span className="tag">Overview</span>
+              {showIntroDescription && <p data-preview="intro_description">{introDescription}</p>}
               <div className="wordpress-content" dangerouslySetInnerHTML={{ __html: overviewBody }} />
+            </div>
+          )}
+
+          {(tourRoute || tourLevel || tourCode) && (
+            <div className="inclusion-list reveal" style={{ marginTop: "1.8rem" }}>
+              {tourRoute && <div className="inclusion-item"><strong>Route</strong><p className="tour-route">{tourRoute}</p></div>}
+              {tourLevel && <div className="inclusion-item"><strong>Travel style</strong><p className="tour-level">{tourLevel}</p></div>}
+              {tourCode && <div className="inclusion-item"><strong>Journey code</strong><p className="tour-code">{tourCode}</p></div>}
+            </div>
+          )}
+
+          {legacyCtaLabel && (
+            <div className="reveal" style={{ marginTop: "1.8rem" }}>
+              <Link href={legacyCtaLink || "/#plan"} className="btn btn-fill-ink">{legacyCtaLabel}</Link>
             </div>
           )}
 
@@ -577,14 +611,14 @@ export default function SingleTourTemplateV2({
       )}
 
       {/* ═══ STAYS ═══ */}
-      {stays.length > 0 && (
+      {(stays.length > 0 || accommodationOptions.length > 0) && (
         <section className="section on-cream" id="stays">
           <div className="container">
             <div className="center reveal">
               <p className="eyebrow" style={{ justifyContent: "center" }}>{text(acf.hotels_eyebrow) ? <span dangerouslySetInnerHTML={{ __html: text(acf.hotels_eyebrow) }} /> : <><em>Where</em> You&apos;ll Stay</>}</p>
               <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{text(acf.hotels_title).split("\n")[0] || "Hand-Selected for an Unmatched Stay"}</h2>
             </div>
-            <div className="hcarousel-track reveal" id="stayTrack" ref={stayTrackRef} style={{ justifyContent: "center" }}>
+            {stays.length > 0 && <div className="hcarousel-track reveal" id="stayTrack" ref={stayTrackRef} style={{ justifyContent: "center" }}>
               {stays.map((stay, idx) => (
                 <Link
                   href={stay.path || "/where-to-stay/"}
@@ -599,6 +633,56 @@ export default function SingleTourTemplateV2({
                   <p>{clampText(stay.desc, 110)}</p>
                 </Link>
               ))}
+            </div>}
+
+            {accommodationOptions.length > 0 && (
+              <div className="reveal" style={{ maxWidth: "900px", margin: "2.8rem auto 0" }}>
+                <h3 className="center" style={{ fontSize: "1.35rem" }}>{text(acf.options_title) || "Accommodation Options"}</h3>
+                {text(acf.options_note) && <p className="center" style={{ marginTop: ".7rem" }}>{text(acf.options_note)}</p>}
+                <div className="inclusion-list">
+                  {accommodationOptions.map((option, idx) => (
+                    <div className="inclusion-item" key={`${option.title}-${idx}`} style={{ alignItems: "flex-start" }}>
+                      <CheckSvg />
+                      <div>
+                        <p><strong>{option.title || `Option ${idx + 1}`}</strong>{option.nights ? ` · ${option.nights}` : ""}</p>
+                        {option.description && <p style={{ marginTop: ".35rem", opacity: .78 }}>{option.description}</p>}
+                        {option.link && <Link href={option.link} className="link-arrow">View option <ArrowSvg /></Link>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {experiences.length > 0 && (
+        <section className="section on-white" id="experiences">
+          <div className="container">
+            <div className="center reveal">
+              <p className="eyebrow" style={{ justifyContent: "center" }}><em>Journey</em> Highlights</p>
+              <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>Experiences Along the Way</h2>
+            </div>
+            <div className="hcarousel-track reveal" style={{ justifyContent: experiences.length < 4 ? "center" : undefined }}>
+              {experiences.map((item, idx) => {
+                const image = item.image_url || item.image;
+                const card = (
+                  <>
+                    <div className="overlay-bottom" />
+                    <span className="hc-card-tag">Experience {String(idx + 1).padStart(2, "0")}</span>
+                    <div>
+                      {item.title && <h3>{item.title}</h3>}
+                      {item.description && <p>{clampText(item.description, 150)}</p>}
+                    </div>
+                  </>
+                );
+                return item.link ? (
+                  <Link href={item.link} className={`hc-card ph ${image ? "" : "ph-vn"}`} style={{ ...(bg(image, "card") || {}) }} key={idx}>{card}</Link>
+                ) : (
+                  <article className={`hc-card ph ${image ? "" : "ph-vn"}`} style={{ ...(bg(image, "card") || {}) }} key={idx}>{card}</article>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -663,7 +747,7 @@ export default function SingleTourTemplateV2({
           )}
 
           <div className="center reveal" style={{ marginTop: "2.6rem" }}>
-            <Link href="/#plan" className="btn btn-fill-ink">{text(acf.inquiry_btn_text) || "Request This Itinerary"}</Link>
+            <Link href={legacyCtaLink || "/#plan"} className="btn btn-fill-ink">{legacyCtaLabel || text(acf.inquiry_btn_text) || "Request This Itinerary"}</Link>
           </div>
         </div>
       </section>
@@ -674,6 +758,7 @@ export default function SingleTourTemplateV2({
           <div className="container">
             <div className="center reveal">
               <p className="eyebrow" style={{ justifyContent: "center" }}>{text(acf.gallery_eyebrow) ? <span dangerouslySetInnerHTML={{ __html: text(acf.gallery_eyebrow) }} /> : <><em>Photo</em> Gallery</>}</p>
+              <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{text(acf.gallery_title) || "Scenes from the Journey"}</h2>
             </div>
             <div className="hcarousel-track reveal">
               {gallery.map((item, idx) => (
@@ -704,6 +789,26 @@ export default function SingleTourTemplateV2({
                   <summary style={{ cursor: "pointer", fontWeight: 600 }}>{faq.question}</summary>
                   <p style={{ marginTop: "0.6rem" }}>{faq.answer}</p>
                 </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {relatedTours.length > 0 && (
+        <section className="section on-white" id="related-tours">
+          <div className="container">
+            <div className="center reveal">
+              <p className="eyebrow" style={{ justifyContent: "center" }}><em>Continue</em> Exploring</p>
+              <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{text(acf.related_tours_title) || "Related Private Journeys"}</h2>
+            </div>
+            <div className="hcarousel-track reveal" style={{ justifyContent: relatedTours.length < 4 ? "center" : undefined }}>
+              {relatedTours.map((item) => (
+                <Link href={item.path} className={`hc-card ph ${item.featuredMedia?.url ? "" : "ph-vn"}`} style={{ ...(bg(item.featuredMedia?.url, "card") || {}) }} key={item.id}>
+                  <div className="overlay-bottom" />
+                  <h3>{item.title}</h3>
+                  {item.excerpt && <p>{clampText(item.excerpt, 120)}</p>}
+                </Link>
               ))}
             </div>
           </div>

@@ -219,6 +219,13 @@ function aat_register_fields() {
             aat_text('field_aat_tour_itin_title', 'Itinerary Heading', 'itinerary_title'),
 
             aat_tab('tab_aat_tour_stays', 'Stays & Accommodations'),
+            aat_repeater_field(
+                'field_aat_tour_accommodation_options',
+                'Legacy Accommodation Options',
+                'accommodation_options',
+                'options',
+                'Các lựa chọn chỗ ở đã import từ list_option của website cũ. Frontend hiển thị các dòng này bên dưới khách sạn được chọn.'
+            ),
             [
                 'key' => 'field_aat_tour_stays',
                 'label' => 'Hand-Selected Stays',
