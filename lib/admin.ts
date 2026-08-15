@@ -12,9 +12,16 @@
  * does its own checking regardless.
  */
 
+import { WP_ORIGIN } from "@/lib/wp-origin";
+
+/* Same origin the content comes from. Reading only NEXT_PUBLIC_WP_URL here
+   meant a deployment that sets WORDPRESS_API_URL instead — or sets nothing and
+   relies on the fallback — served pages perfectly while every edit link came
+   back empty, so the bar had nothing to show and never rendered. */
 const ADMIN_ORIGIN = (
   process.env.NEXT_PUBLIC_WP_URL ||
   process.env.WORDPRESS_ORIGIN ||
+  WP_ORIGIN ||
   ""
 ).replace(/\/+$/, "");
 

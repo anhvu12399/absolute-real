@@ -18,6 +18,7 @@ function resolveApiBase() {
   return "https://backend.absoluteasiatours.com/wp-json";
 }
 
+
 /**
  * Some origins serve per-host content and need the public hostname spelled out
  * in the request; a local backend 404s on a spoofed Host. Set

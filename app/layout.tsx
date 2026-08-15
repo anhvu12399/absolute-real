@@ -11,13 +11,10 @@ import { getSiteDataSafe } from "@/lib/wp";
 import "./v2.css";
 import { BRAND_NAME, SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { organizationSchema, schemaScript, websiteSchema } from "@/lib/schema";
+import { WP_ORIGIN } from "@/lib/wp-origin";
 
 const siteUrl = SITE_URL;
 
-/* Warm the connection to whichever WordPress this build talks to. It named one
-   site's backend outright, so a sister site preconnected to a host it never
-   calls and paid a DNS lookup for the one it does. */
-const wpOrigin = (process.env.NEXT_PUBLIC_WP_URL || "").replace(/\/+$/, "");
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -41,10 +38,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <head>
-        {wpOrigin && (
+        {WP_ORIGIN && (
           <>
-            <link rel="dns-prefetch" href={wpOrigin} />
-            <link rel="preconnect" href={wpOrigin} crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href={WP_ORIGIN} />
+            <link rel="preconnect" href={WP_ORIGIN} crossOrigin="anonymous" />
           </>
         )}
         {/* Organization and WebSite, once site-wide. Page-level schema is

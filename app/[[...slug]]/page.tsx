@@ -321,18 +321,10 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
     return (
       <>
         <Schema />
-        <EditBar
-          targets={editTargets({
-            content,
-            extra: [
-              {
-                label: "Ways to Explore / Stay With — vì sao khác admin",
-                url: editPostUrl(content?.id),
-                hint: "Bảng để trống hoặc dưới 4 dòng thì trang tự lấy thêm điểm đến và khách sạn thật từ WordPress cho đủ. Thêm dòng vào bảng là nó dùng của bạn.",
-              },
-            ],
-          })}
-        />
+        {/* "Ways to Explore" and "Stay With" were removed when the homepage
+            was rebuilt, so this note explained two sections that no longer
+            exist. The per-section rows below cover the rest. */}
+        <EditBar targets={editTargets({ content })} />
         <HomeTemplateV2
           homeData={content}
           tours={illustratedFirst(tours)}

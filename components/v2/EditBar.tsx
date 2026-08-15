@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { EditTarget } from "@/lib/admin";
+import { WP_ORIGIN } from "@/lib/wp-origin";
 
 /**
  * A way back to the screen that edits what you are looking at.
@@ -44,7 +45,10 @@ export function EditBar({ targets }: { targets: EditTarget[] }) {
     const forced = window.sessionStorage.getItem("aat-edit-mode") === "1";
     if (forced) setCanEdit(true);
 
-    const origin = process.env.NEXT_PUBLIC_WP_URL;
+    /* WP_ORIGIN rather than the bare env var: on a deployment that never set
+       NEXT_PUBLIC_WP_URL this was undefined, so the /me call was skipped and
+       the bar could only ever appear through the manual switch. */
+    const origin = WP_ORIGIN;
     if (!origin) return;
 
     /* Asked either way: a forced bar still wants the token, so "republish"
