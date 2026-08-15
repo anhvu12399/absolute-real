@@ -13,7 +13,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-define('AAT_VERSION', '3.0.5');
+define('AAT_VERSION', '3.0.6');
 define('AAT_PATH', plugin_dir_path(__FILE__));
 define('AAT_URL', plugin_dir_url(__FILE__));
 

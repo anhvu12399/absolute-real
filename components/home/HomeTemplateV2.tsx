@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ContentRecord } from "@/lib/types";
@@ -144,66 +144,72 @@ export default function HomeTemplateV2({
      towns — a visitor picks Vietnam before they pick Hoi An. The country
      taxonomy carries them; the photograph is borrowed from that country's own
      content, so nothing is invented. */
-  const countryCards = countries.map((term) => {
-    const cleanTermSlug = term.slug.toLowerCase().replace(/-tours|-vacations/g, "");
-    const own = [...places, ...tours, ...hotels, ...cruises, ...guides].filter((item) => {
-      const itemTitle = (item.title || "").toLowerCase();
-      if (cleanTermSlug === "cambodia" && (itemTitle.includes("seoul") || itemTitle.includes("korea"))) return false;
-      if (cleanTermSlug === "bhutan" && (itemTitle.includes("seoul") || itemTitle.includes("korea") || itemTitle.includes("vietnam"))) return false;
-      return (
-        item.categories?.some((c) => c.slug === term.slug || c.slug === cleanTermSlug) ||
-        item.path?.toLowerCase().includes(`/${cleanTermSlug}/`) ||
-        item.title?.toLowerCase().includes(cleanTermSlug)
-      );
+  const countryCards = useMemo(() => {
+    return countries.map((term) => {
+      const cleanTermSlug = term.slug.toLowerCase().replace(/-tours|-vacations/g, "");
+      const own = [...places, ...tours, ...hotels, ...cruises, ...guides].filter((item) => {
+        const itemTitle = (item.title || "").toLowerCase();
+        if (cleanTermSlug === "cambodia" && (itemTitle.includes("seoul") || itemTitle.includes("korea"))) return false;
+        if (cleanTermSlug === "bhutan" && (itemTitle.includes("seoul") || itemTitle.includes("korea") || itemTitle.includes("vietnam"))) return false;
+        return (
+          item.categories?.some((c) => c.slug === term.slug || c.slug === cleanTermSlug) ||
+          item.path?.toLowerCase().includes(`/${cleanTermSlug}/`) ||
+          item.title?.toLowerCase().includes(cleanTermSlug)
+        );
+      });
+      const foundImage =
+        term.image ||
+        AUTHENTIC_COUNTRY_PHOTOS[cleanTermSlug] ||
+        AUTHENTIC_COUNTRY_PHOTOS[term.slug] ||
+        own.find((i) => i.featuredMedia?.url)?.featuredMedia?.url ||
+        "";
+      return {
+        image_url: foundImage,
+        badge: "",
+        title: term.name,
+        meta: term.count ? `${term.count} journeys & places` : "",
+        description: term.description || "",
+        link: `/${term.slug}/`,
+        link_text: "Explore",
+        ph: "",
+      };
     });
-    const foundImage =
-      term.image ||
-      AUTHENTIC_COUNTRY_PHOTOS[cleanTermSlug] ||
-      AUTHENTIC_COUNTRY_PHOTOS[term.slug] ||
-      own.find((i) => i.featuredMedia?.url)?.featuredMedia?.url ||
-      "";
-    return {
-      image_url: foundImage,
-      badge: "",
-      title: term.name,
-      meta: term.count ? `${term.count} journeys & places` : "",
-      description: term.description || "",
-      link: `/${term.slug}/`,
-      link_text: "Explore",
-      ph: "",
-    };
-  });
+  }, [countries, places, tours, hotels, cruises, guides]);
 
-  const destinations = tabCards(acf.home_tab_destinations, IS_PLACE, countryCards).map((card: any) => {
-    const slug = String(card?.link || "").replace(/\//g, "").toLowerCase().replace(/-tours|-vacations/g, "");
-    return {
-      ...card,
-      image_url: card.image_url || AUTHENTIC_COUNTRY_PHOTOS[slug] || "",
-    };
-  });
-  const journeys = tabCards(acf.home_tab_journeys, IS_TOUR, tours.map(toCard));
-  /* The homepage now runs three tabs, not five: where, what kind, what to
-     read. The "special offers" and "new this season" sets, and the separate
-     "ways to explore" carousel, folded into those three. */
+  const destinations = useMemo(() => {
+    return tabCards(acf.home_tab_destinations, IS_PLACE, countryCards).map((card: any) => {
+      const slug = String(card?.link || "").replace(/\//g, "").toLowerCase().replace(/-tours|-vacations/g, "");
+      return {
+        ...card,
+        image_url: card.image_url || AUTHENTIC_COUNTRY_PHOTOS[slug] || "",
+      };
+    });
+  }, [acf.home_tab_destinations, countryCards]);
+
+  const journeys = useMemo(() => {
+    return tabCards(acf.home_tab_journeys, IS_TOUR, tours.map(toCard));
+  }, [acf.home_tab_journeys, tours]);
 
   /* Hero: the WordPress slider drives it; live tours stand in until it is filled. */
-  const authoredSlides = safeParse(acf.home_banner_slider);
-  const fallbackSource = (tours.length ? tours : places).slice(0, 4);
-  const slides: any[] = authoredSlides.length
-    ? authoredSlides
-    : fallbackSource.map((item, idx) => ({
-        image_url: item.featuredMedia?.url,
-        // The inset frame shows the next journey in the rotation.
-        image_url_2: fallbackSource[(idx + 1) % fallbackSource.length]?.featuredMedia?.url,
-        tagline: "Travel",
-        title: "Inspiration",
-        description: item.title,
-        subtitle: clamp(blurb(item), 150),
-        meta: fallbackSource[(idx + 1) % fallbackSource.length]?.title || item.categories?.[0]?.name || "",
-        meta_plate: fallbackSource[(idx + 1) % fallbackSource.length]?.categories?.[0]?.name || "Next Journey",
-        link: item.path,
-        link_text: "Explore This Journey",
-      }));
+  const slides = useMemo(() => {
+    const authoredSlides = safeParse(acf.home_banner_slider);
+    const fallbackSource = (tours.length ? tours : places).slice(0, 4);
+    return authoredSlides.length
+      ? authoredSlides
+      : fallbackSource.map((item, idx) => ({
+          image_url: item.featuredMedia?.url,
+          // The inset frame shows the next journey in the rotation.
+          image_url_2: fallbackSource[(idx + 1) % fallbackSource.length]?.featuredMedia?.url,
+          tagline: "Travel",
+          title: "Inspiration",
+          description: item.title,
+          subtitle: clamp(blurb(item), 150),
+          meta: fallbackSource[(idx + 1) % fallbackSource.length]?.title || item.categories?.[0]?.name || "",
+          meta_plate: fallbackSource[(idx + 1) % fallbackSource.length]?.categories?.[0]?.name || "Next Journey",
+          link: item.path,
+          link_text: "Explore This Journey",
+        }));
+  }, [acf.home_banner_slider, tours, places]);
 
   const [heroIndex, setHeroIndex] = useState(0);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
@@ -464,6 +470,7 @@ export default function HomeTemplateV2({
               src={hero.image_url}
               alt=""
               fill
+              priority
               sizes="100vw"
               loading="eager"
               fetchPriority="high"
@@ -477,7 +484,7 @@ export default function HomeTemplateV2({
 
         {slides.length > 1 && (
           <nav className="spine-index" aria-label="Choose a destination">
-            {slides.map((slide, idx) => {
+            {slides.map((slide: any, idx: number) => {
               /* Place names, not full titles: "Bali" reads down a spine,
                  "Bali, Culture & Island Escapes" does not. */
               const label = placeOf(slide);

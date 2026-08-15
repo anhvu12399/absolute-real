@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import type { CardRecord, ContentRecord } from "@/lib/types";
 import type { ArchiveItem } from "@/lib/wp";
@@ -185,9 +186,22 @@ export default function SingleHotelTemplateV2({
       <header className="hotel-hero">
         <div
           className={`hotel-hero-plate ${heroImage ? "" : "is-empty"}`}
-          style={heroImage ? bg(heroImage, "hero") : undefined}
+          style={{ position: "relative", overflow: "hidden" }}
         >
-          {!heroImage && <span className="hotel-hero-monogram">{title.charAt(0)}</span>}
+          {heroImage ? (
+            <Image
+              src={heroImage}
+              alt={title}
+              fill
+              priority
+              loading="eager"
+              fetchPriority="high"
+              sizes="(max-width: 900px) 100vw, 60vw"
+              style={{ objectFit: "cover", objectPosition: "center" }}
+            />
+          ) : (
+            <span className="hotel-hero-monogram">{title.charAt(0)}</span>
+          )}
         </div>
 
         <div className="hotel-hero-card">
