@@ -623,7 +623,8 @@ export default function DestinationTemplateV2({
       <SpecialistBlock acf={acfData} />
 
       {/* ═══ CTA ═══ */}
-      <section className="section on-ink">
+      {/* Needs an id so the admin preview and the edit bar can both reach it. */}
+      <section className="section on-ink" id="plan">
         <div className="container center reveal">
           <p className="eyebrow" style={{ justifyContent: "center" }}>{text(acfData.planning_eyebrow) ? <span dangerouslySetInnerHTML={{ __html: text(acfData.planning_eyebrow) }} /> : <><em>Start</em> Planning</>}</p>
           <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{text(acfData.planning_heading) || `Ready to see ${name} on your own terms?`}</h2>

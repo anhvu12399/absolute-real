@@ -885,7 +885,7 @@ export default function HomeTemplateV2({
                 <a href={reviewLink} target="_blank" rel="noopener noreferrer" className="link-arrow" style={{ marginTop: "0.4rem", display: "inline-flex" }}>
                   {reviewLogo && (
                     /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={optimized(reviewLogo, "thumb")} alt={reviewText || "Review site"} style={{ height: "20px", marginRight: "8px" }} />
+                    <img className="review-logo" src={optimized(reviewLogo, "thumb")} alt={reviewText || "Review site"} style={{ height: "20px", marginRight: "8px" }} />
                   )}
                   {reviewText || "Read reviews"}
                 </a>

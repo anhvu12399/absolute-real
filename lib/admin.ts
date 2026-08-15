@@ -6,9 +6,10 @@
  * `{country}-tours` page, and which ACF tab a field sits under. That is
  * knowledge the site owner should not have to carry, so the page carries it.
  *
- * Link targets are prepared whenever a WordPress origin is configured. Their
- * visibility is controlled client-side by `?asledit=1` in EditBar, which lets
- * an editor enable the tools without rebuilding or changing Vercel env vars.
+ * Link targets are prepared whenever a WordPress origin is configured. Nothing
+ * here decides who sees them: EditBar asks the backend whether the visitor can
+ * edit, and renders nothing otherwise. These URLs point at wp-admin, which
+ * does its own checking regardless.
  */
 
 const ADMIN_ORIGIN = (
@@ -104,9 +105,9 @@ const SECTION_FIELDS: Record<string, Array<{ section: string; label: string; fie
   place_to_go: [
     { section: "journeys", label: "Journeys section", field: "related_title" },
     { section: "experiences", label: "Experiences", field: "experiences" },
-    { section: "stays", label: "Where to stay", field: "stays_heading" },
+    { section: "hotels", label: "Where to stay", field: "stays_heading" },
     { section: "map", label: "Map", field: "map_headline" },
-    { section: "when-to-go", label: "When to go", field: "month_guide" },
+    { section: "months", label: "When to go", field: "month_guide" },
   ],
   hotel: [
     { section: "gallery", label: "Gallery", field: "gallery" },

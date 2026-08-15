@@ -508,11 +508,11 @@ export default function SingleTourTemplateV2({
         <div className="container">
           <div className="cta-banner reveal">
             <div>
-              <h3>{text(acf.group_cta_title) || "Interested in this itinerary but want to join a small group instead?"}</h3>
-              <p>{text(acf.group_cta_desc) || "Our small group departures follow a similar route at a lower per-person cost."}</p>
+              <h3 data-preview="group_cta_title">{text(acf.group_cta_title) || "Interested in this itinerary but want to join a small group instead?"}</h3>
+              <p data-preview="group_cta_desc">{text(acf.group_cta_desc) || "Our small group departures follow a similar route at a lower per-person cost."}</p>
             </div>
             <Link href={text(acf.classic_tour_link) || country?.path || "/tours/"} className="link-arrow">
-              {text(acf.group_cta_btn) || "Learn More"}<ArrowSvg/>
+              <span data-preview="group_cta_btn">{text(acf.group_cta_btn) || "Learn More"}</span><ArrowSvg/>
             </Link>
           </div>
         </div>
@@ -613,7 +613,7 @@ export default function SingleTourTemplateV2({
 
           {inclusions.length > 0 && (
             <div className="center reveal" style={{ marginTop: "3rem" }}>
-              <Link href="#inclusions" className="btn btn-fill-ink">{text(acf.inclusions_btn_text) || "View Inclusions"}</Link>
+              <Link href="#inclusions" className="btn btn-fill-ink" data-preview="inclusions_btn_text">{text(acf.inclusions_btn_text) || "View Inclusions"}</Link>
             </div>
           )}
         </div>
@@ -647,8 +647,8 @@ export default function SingleTourTemplateV2({
 
             {accommodationOptions.length > 0 && (
               <div className="reveal" style={{ maxWidth: "900px", margin: "2.8rem auto 0" }}>
-                <h3 className="center" style={{ fontSize: "1.35rem" }}>{text(acf.options_title) || "Accommodation Options"}</h3>
-                {text(acf.options_note) && <p className="center" style={{ marginTop: ".7rem" }}>{text(acf.options_note)}</p>}
+                <h3 className="center" style={{ fontSize: "1.35rem" }} data-preview="options_title">{text(acf.options_title) || "Accommodation Options"}</h3>
+                {text(acf.options_note) && <p className="center" style={{ marginTop: ".7rem" }} data-preview="options_note">{text(acf.options_note)}</p>}
                 <div className="inclusion-list">
                   {accommodationOptions.map((option, idx) => (
                     <div className="inclusion-item" key={`${option.title}-${idx}`} style={{ alignItems: "flex-start" }}>
@@ -729,7 +729,7 @@ export default function SingleTourTemplateV2({
 
           {exclusions.length > 0 && (
             <>
-              <h3 className="center reveal" style={{ marginTop: "3rem", fontSize: "1.3rem" }}>{text(acf.exclusions_title) || "What's Not Included"}</h3>
+              <h3 className="center reveal" style={{ marginTop: "3rem", fontSize: "1.3rem" }} data-preview="exclusions_title">{text(acf.exclusions_title) || "What's Not Included"}</h3>
               <div className="inclusion-list reveal">
                 {exclusions.map((item, idx) => (
                   <div className="inclusion-item" key={idx}>
@@ -742,7 +742,7 @@ export default function SingleTourTemplateV2({
 
           {dates.length > 0 && (
             <div className="reveal" style={{ marginTop: "3rem" }}>
-              <h3 className="center" style={{ fontSize: "1.3rem", marginBottom: "1.2rem" }}>{text(acf.dates_title) || "Departure Dates"}</h3>
+              <h3 className="center" style={{ fontSize: "1.3rem", marginBottom: "1.2rem" }} data-preview="dates_title">{text(acf.dates_title) || "Departure Dates"}</h3>
               <div className="inclusion-list">
                 {dates.map((date, idx) => (
                   <div className="inclusion-item" key={idx} style={{ justifyContent: "space-between", gap: "1rem" }}>
@@ -757,7 +757,7 @@ export default function SingleTourTemplateV2({
           )}
 
           <div className="center reveal" style={{ marginTop: "2.6rem" }}>
-            <Link href={legacyCtaLink || "/#plan"} className="btn btn-fill-ink">{legacyCtaLabel || text(acf.inquiry_btn_text) || "Request This Itinerary"}</Link>
+            <Link href={legacyCtaLink || "/#plan"} className="btn btn-fill-ink" data-preview="inquiry_btn_text">{legacyCtaLabel || text(acf.inquiry_btn_text) || "Request This Itinerary"}</Link>
           </div>
         </div>
       </section>
