@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import type { ContentRecord } from "@/lib/types";
 import type { ArchiveItem, TermInfo } from "@/lib/wp";
@@ -438,11 +439,6 @@ export default function HomeTemplateV2({
 
   return (
     <>
-      {/* Preload first hero image for instant LCP performance */}
-      {slides[0]?.image_url && (
-        <link rel="preload" as="image" href={optimized(slides[0].image_url, "hero")} fetchPriority="high" />
-      )}
-
       {/* ═══ KIỂU 2: PANORAMA HORIZON & DESTINATION STRIP HERO ═══ */}
       {/* ═══ HERO — "The Spine" ═══
           The photograph carries the page; everything else is set like the
@@ -461,9 +457,20 @@ export default function HomeTemplateV2({
         <div
           key={heroIndex}
           className="spine-plate"
-          style={hero.image_url ? bg(hero.image_url, "hero") : undefined}
           aria-hidden="true"
-        />
+        >
+          {hero.image_url && (
+            <Image
+              src={hero.image_url}
+              alt=""
+              fill
+              sizes="100vw"
+              loading="eager"
+              fetchPriority="high"
+              style={{ objectFit: "cover", objectPosition: "center" }}
+            />
+          )}
+        </div>
         {/* A soft pool of shade, not a hard edge — just enough for the type
             to hold against a bright sky without a line anyone can point to. */}
         <div className="spine-veil" aria-hidden="true" />

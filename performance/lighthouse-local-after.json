@@ -1,0 +1,67 @@
+{
+  "captured_at": "2026-08-15",
+  "environment": "next start, localhost, Lighthouse mobile simulation",
+  "runs_per_url": 3,
+  "budgets": {
+    "performance": 90,
+    "lcp_ms": 2500,
+    "cls": 0.1,
+    "tbt_ms": 200,
+    "javascript_bytes": 260000,
+    "image_bytes": 1400000,
+    "request_count": 80
+  },
+  "median": {
+    "/": {
+      "performance": 83,
+      "lcp_ms": 4443,
+      "cls": 0.001,
+      "tbt_ms": 47,
+      "javascript_bytes": 194232,
+      "image_bytes": 276190,
+      "request_count": 35
+    },
+    "/tours/classic-south-korea-tour/": {
+      "performance": 90,
+      "lcp_ms": 3567,
+      "cls": 0.014,
+      "tbt_ms": 21,
+      "javascript_bytes": 194232,
+      "image_bytes": 132590,
+      "request_count": 28
+    },
+    "/vietnam/": {
+      "performance": 87,
+      "lcp_ms": 3917,
+      "cls": 0.002,
+      "tbt_ms": 28,
+      "javascript_bytes": 194232,
+      "image_bytes": 1059510,
+      "request_count": 90
+    },
+    "/collection/four-seasons-hotel-seoul/": {
+      "performance": 92,
+      "lcp_ms": 3256,
+      "cls": 0.007,
+      "tbt_ms": 22,
+      "javascript_bytes": 193737,
+      "image_bytes": 48877,
+      "request_count": 24
+    },
+    "/blogs/": {
+      "performance": 89,
+      "lcp_ms": 3605,
+      "cls": 0.001,
+      "tbt_ms": 17,
+      "javascript_bytes": 193737,
+      "image_bytes": 108715,
+      "request_count": 31
+    }
+  },
+  "passed": false,
+  "notes": [
+    "CLS, TBT, JavaScript and image budgets passed for all measured URLs.",
+    "The Vietnam request count and all LCP budgets remain failing.",
+    "A later single-run homepage check after converting the hero to next/image scored 84 with LCP 4401 ms, CLS 0.002 and TBT 79 ms."
+  ]
+}

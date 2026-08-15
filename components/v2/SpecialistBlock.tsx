@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 /**
  * "Speak to a specialist" panel.
@@ -12,14 +13,12 @@ export function SpecialistBlock({ acf }: { acf?: Record<string, unknown> | null 
     return typeof value === "string" ? value.trim() : "";
   };
 
-  const title = str("specialist_title") || "Speak to an Asia Travel Specialist";
+  const title = str("specialist_title") || "Speak to a Travel Specialist";
   const text =
     str("specialist_text") ||
-    "Every journey with Absolute Asia is private, tailor-made, and planned around your exact pace, interests, and preferred style of travel. Connect with a destination specialist to begin designing your bespoke itinerary.";
-  const photo =
-    str("specialist_photo") ||
-    "https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Village-Suite.jpg";
-  const phone = str("specialist_phone") || "+1 (800) 736-8187";
+    "Every journey is private, tailor-made, and planned around your pace, interests, and preferred style of travel. Connect with a destination specialist to begin designing your itinerary.";
+  const photo = str("specialist_photo");
+  const phone = str("specialist_phone");
   const button = str("specialist_button") || "Plan Your Trip";
   const link = str("specialist_link") || "/#plan";
 
@@ -40,11 +39,12 @@ export function SpecialistBlock({ acf }: { acf?: Record<string, unknown> | null 
           }}
         >
           {photo && (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
+            <Image
               src={photo}
               alt={title}
-              loading="lazy"
+              width={96}
+              height={96}
+              sizes="96px"
               style={{ width: "96px", height: "96px", objectFit: "cover", borderRadius: "50%", border: "2px solid var(--line-on-cream)" }}
             />
           )}
@@ -71,4 +71,3 @@ export function SpecialistBlock({ acf }: { acf?: Record<string, unknown> | null 
     </section>
   );
 }
-

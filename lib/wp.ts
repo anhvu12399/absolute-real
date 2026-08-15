@@ -226,14 +226,18 @@ export const getContentByPath = cache(async (pathname: string) => {
     return normalize(item);
   } catch {
     const slug = path === "/" ? "home" : path.split("/").filter(Boolean).at(-1)!;
-    const types = ["pages", "posts", "tour", "hotel", "travel_guide", "place_to_go", "thing_to_do", "blog"];
-    for (const type of types) {
+    const types = ["pages", "posts", "tour", "trip", "hotel", "travel_guide", "place_to_go", "thing_to_do", "blog"];
+    /* Compatibility fallback for an older bridge. These independent probes
+       run together; one missing CPT must not add a full network round-trip. */
+    const results = await Promise.all(types.map(async (type) => {
       try {
-        const items = await wpFetch<BridgeItem[]>(`/wp/v2/${type}?slug=${encodeURIComponent(slug)}&_embed=1&per_page=10`);
-        const exact = items.find((item) => localPath(item.link || "") === path);
-        if (exact) return normalize(exact);
-      } catch {}
-    }
+        return await wpFetch<BridgeItem[]>(`/wp/v2/${type}?slug=${encodeURIComponent(slug)}&_embed=1&per_page=10`);
+      } catch {
+        return [];
+      }
+    }));
+    const exact = results.flat().find((item) => localPath(item.link || "") === path);
+    if (exact) return normalize(exact);
     return null;
   }
 });
@@ -293,6 +297,29 @@ export type ArchiveResult = {
   page: number;
   perPage: number;
 };
+
+export type PathRecord = { id: number; type: string; path: string; modified: string };
+type PathResult = { items: PathRecord[]; total: number; totalPages: number; page: number; perPage: number };
+
+/** Fetches the complete public path manifest without the 100-item archive cap. */
+export async function getAllPaths(): Promise<PathRecord[]> {
+  const first = await wpFetch<PathResult>("/absolute-asia/v1/paths?per_page=250&page=1", 3600);
+  const rest = await Promise.all(
+    Array.from({ length: Math.max(0, first.totalPages - 1) }, (_, index) =>
+      wpFetch<PathResult>(`/absolute-asia/v1/paths?per_page=250&page=${index + 2}`, 3600),
+    ),
+  );
+  return [first, ...rest].flatMap((page) => page.items || []);
+}
+
+/** Older bridge versions have no /paths endpoint; keep deployments buildable. */
+export async function getAllPathsSafe(): Promise<PathRecord[]> {
+  try {
+    return await getAllPaths();
+  } catch {
+    return [];
+  }
+}
 
 /**
  * Puts illustrated entries first, keeping their order within each group.

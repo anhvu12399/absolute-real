@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { ArchiveItem } from "@/lib/wp";
 import { BRAND_SHORT } from "@/lib/site";
-import { optimized } from "@/lib/images";
 
 function ArrowSvg() {
   return <svg><use href="#i-arrow"></use></svg>;
@@ -79,7 +79,8 @@ export default function HotelDirectoryTemplateV2({
   return (
     <>
       {/* ═══ CINEMATIC FULL-WIDTH HERO ═══ */}
-      <section id="hero" style={{ position: "relative", minHeight: "75vh", display: "flex", flexDirection: "column", justifyContent: "flex-end", overflow: "hidden", backgroundColor: "var(--ink)", ...(heroImage ? { backgroundImage: `url(${optimized(heroImage, "hero")})` } : {}), backgroundSize: "cover", backgroundPosition: "center 40%" }}>
+      <section id="hero" style={{ position: "relative", minHeight: "75vh", display: "flex", flexDirection: "column", justifyContent: "flex-end", overflow: "hidden", backgroundColor: "var(--ink)" }}>
+        {heroImage && <Image src={heroImage} alt="" fill loading="eager" fetchPriority="high" sizes="100vw" style={{ objectFit: "cover", objectPosition: "center 40%" }} />}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(14,20,28,0.45) 0%, rgba(14,20,28,0.8) 60%, rgba(14,20,28,0.96) 100%)", zIndex: 1 }} />
 
         <div className="container" style={{ position: "relative", zIndex: 2, paddingBottom: "4rem", paddingTop: "8rem" }}>
@@ -158,20 +159,11 @@ export default function HotelDirectoryTemplateV2({
 
           {/* Hotel Card Grid (3 Columns) */}
           <div className="card-grid" style={{ marginTop: "3rem" }}>
-            {filteredHotels.map(h => (
+            {filteredHotels.map((h) => (
               <div key={h.slug} className="offer-card" style={{ borderLeft: "none", border: "1px solid var(--line-on-cream)", background: "var(--cream-2)", overflow: "hidden", borderRadius: "4px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                 <div>
                   <div style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden" }}>
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        backgroundImage: `url('${optimized(h.photo, "card")}')`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        transition: "transform 0.4s ease"
-                      }}
-                    />
+                    {h.photo && <Image src={h.photo} alt="" fill loading="lazy" sizes="(max-width: 760px) 100vw, 33vw" style={{ objectFit: "cover" }} />}
                     <span className="tag-badge">{h.tag}</span>
                   </div>
                   <div style={{ padding: "1.5rem 1.5rem 0.5rem" }}>

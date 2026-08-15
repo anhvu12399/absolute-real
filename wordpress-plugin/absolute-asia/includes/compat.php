@@ -36,7 +36,7 @@ function aat_compat_get($source, $path) {
  * beyond "found" or "not found".
  */
 function aat_compat_report($source) {
-    $report = ['source' => $source, 'reachable' => false, 'types' => [], 'taxonomies' => [], 'fields' => []];
+    $report = ['source' => $source, 'reachable' => false, 'types' => [], 'unhandledTypes' => [], 'taxonomies' => [], 'fields' => []];
 
     $types = aat_compat_get($source, '/wp/v2/types');
     if (is_wp_error($types)) {
@@ -49,6 +49,12 @@ function aat_compat_report($source) {
     $available = [];
     foreach ($types as $key => $meta) {
         $available[$meta['rest_base'] ?? $key] = true;
+    }
+
+    $ignored_core = ['posts', 'pages', 'media', 'menu-items', 'blocks', 'templates', 'template-parts', 'global-styles', 'navigation', 'font-families'];
+    foreach (array_keys($available) as $rest_base) {
+        if (isset(aat_import_type_map()[$rest_base]) || in_array($rest_base, $ignored_core, true)) continue;
+        $report['unhandledTypes'][] = $rest_base;
     }
 
     foreach (aat_import_type_map() as $rest_base => $new_type) {
@@ -76,26 +82,34 @@ function aat_compat_report($source) {
         ];
     }
 
-    /* ACF fields: what the source carries versus what the map knows.
-       Sampling a few posts per type is enough - an unmapped field that appears
-       on none of the first few posts is not carrying the site's content. */
+    /* ACF fields: scan every page. Rare fields are precisely the ones a four-
+       item sample used to miss, which made the old "compatible" result unsafe. */
     $map = aat_field_map();
     foreach ($report['types'] as $row) {
         if (!$row['exists'] || !$row['count']) continue;
 
-        $sample = aat_compat_get($source, "/wp/v2/{$row['from']}?per_page=4&_fields=acf");
-        if (is_wp_error($sample)) continue;
-
         $known = array_keys($map[$row['from']]['fields'] ?? []);
         $skipped = array_keys($map[$row['from']]['skip'] ?? []);
         $unmapped = [];
+        $filled = [];
+        $scanned = 0;
+        $pages = max(1, (int) ceil($row['count'] / 100));
 
-        foreach ($sample as $post) {
-            foreach (($post['acf'] ?? []) as $field => $value) {
-                $has = is_array($value) ? count($value) > 0 : (is_string($value) ? trim($value) !== '' : !empty($value));
-                if (!$has) continue;
-                if (in_array($field, $known, true) || in_array($field, $skipped, true)) continue;
-                $unmapped[$field] = true;
+        for ($page = 1; $page <= $pages; $page++) {
+            $items = aat_compat_get($source, "/wp/v2/{$row['from']}?per_page=100&page=$page&_fields=id,acf");
+            if (is_wp_error($items)) {
+                $report['fields'][] = ['type' => $row['from'], 'mapped' => count($known), 'unmapped' => array_keys($unmapped), 'filled' => $filled, 'scanned' => $scanned, 'error' => $items->get_error_message()];
+                continue 2;
+            }
+            foreach ($items as $post) {
+                $scanned++;
+                foreach (($post['acf'] ?? []) as $field => $value) {
+                    $has = is_array($value) ? count($value) > 0 : (is_string($value) ? trim($value) !== '' : !empty($value));
+                    if (!$has) continue;
+                    $filled[$field] = ($filled[$field] ?? 0) + 1;
+                    if (in_array($field, $known, true) || in_array($field, $skipped, true)) continue;
+                    $unmapped[$field] = true;
+                }
             }
         }
 
@@ -103,6 +117,8 @@ function aat_compat_report($source) {
             'type' => $row['from'],
             'mapped' => count($known),
             'unmapped' => array_keys($unmapped),
+            'filled' => $filled,
+            'scanned' => $scanned,
         ];
     }
 
@@ -173,6 +189,12 @@ function aat_compat_field() {
     </p>
     <p class="description">Taxonomy thiếu thì bài vẫn import, chỉ là không được gán nhãn đó.</p>
 
+    <?php if (!empty($report['unhandledTypes'])) : ?>
+        <p style="color:#b32d2e"><strong>CPT nguồn chưa có chiến lược import:</strong>
+            <code><?php echo esc_html(implode('</code>, <code>', $report['unhandledTypes'])); ?></code>
+        </p>
+    <?php endif; ?>
+
     <h3>Trường ACF chưa có trong bảng ánh xạ</h3>
     <?php
     $any = false;
@@ -180,8 +202,9 @@ function aat_compat_field() {
         if (!$row['unmapped']) continue;
         $any = true;
         printf(
-            '<p><code>%s</code> — đã map %d trường, <strong style="color:#b32d2e">chưa map %d</strong>: %s</p>',
+            '<p><code>%s</code> — quét %d bản ghi, đã map %d trường, <strong style="color:#b32d2e">chưa map %d</strong>: %s</p>',
             esc_html($row['type']),
+            (int) ($row['scanned'] ?? 0),
             (int) $row['mapped'],
             count($row['unmapped']),
             '<code>' . esc_html(implode('</code>, <code>', $row['unmapped'])) . '</code>'
@@ -190,8 +213,8 @@ function aat_compat_field() {
     if (!$any) {
         echo '<p style="color:#008a20">Không có trường nào bị bỏ sót — bảng ánh xạ dùng lại được nguyên vẹn.</p>';
     } else {
-        echo '<p class="description">Những trường này vẫn được import vào ' .
-             '<code>source_*</code> nên không mất dữ liệu, nhưng frontend chưa biết đọc. ' .
-             'Muốn hiện ra thì thêm chúng vào <code>includes/field-map.php</code>.</p>';
+        echo '<p class="description">Những trường này vẫn được giữ nguyên trong ' .
+             '<code>_aat_source_acf_json</code> nên có thể remap/reimport mà không mất dữ liệu, ' .
+             'nhưng frontend chưa biết đọc. Muốn hiện ra thì thêm chúng vào <code>includes/field-map.php</code>.</p>';
     }
 }

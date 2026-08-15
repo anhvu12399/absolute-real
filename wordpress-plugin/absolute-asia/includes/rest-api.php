@@ -32,6 +32,7 @@ add_action('rest_api_init', function () {
         'args' => ['q' => ['required' => true, 'sanitize_callback' => 'sanitize_text_field']],
     ]);
     register_rest_route('absolute-asia/v1', '/archive', $public + ['callback' => 'aat_rest_archive']);
+    register_rest_route('absolute-asia/v1', '/paths', $public + ['callback' => 'aat_rest_paths']);
     register_rest_route('absolute-asia/v1', '/terms', $public + ['callback' => 'aat_rest_terms']);
     register_rest_route('absolute-asia/v1', '/images', $public + [
         'callback' => 'aat_rest_images',
@@ -44,6 +45,39 @@ add_action('rest_api_init', function () {
 });
 
 /* ───────────────────────────── helpers ───────────────────────────── */
+
+function aat_rest_cache_generation() {
+    return max(1, (int) get_option('aat_rest_cache_generation', 1));
+}
+
+function aat_rest_cache_get($key) {
+    $versioned = 'v' . aat_rest_cache_generation() . '_' . md5($key);
+    $found = false;
+    $value = wp_cache_get($versioned, 'aat_rest', false, $found);
+    if ($found) return $value;
+    $value = get_transient('aat_' . $versioned);
+    return $value === false ? null : $value;
+}
+
+function aat_rest_cache_set($key, $value, $ttl = 300) {
+    $versioned = 'v' . aat_rest_cache_generation() . '_' . md5($key);
+    wp_cache_set($versioned, $value, 'aat_rest', $ttl);
+    set_transient('aat_' . $versioned, $value, $ttl);
+    return $value;
+}
+
+/** Cache invalidation is O(1): old generations expire naturally. */
+function aat_rest_cache_bump() {
+    update_option('aat_rest_cache_generation', aat_rest_cache_generation() + 1, false);
+}
+add_action('save_post', function ($post_id) {
+    if (!wp_is_post_revision($post_id)) aat_rest_cache_bump();
+});
+add_action('deleted_post', 'aat_rest_cache_bump');
+add_action('set_object_terms', 'aat_rest_cache_bump');
+add_action('created_term', 'aat_rest_cache_bump');
+add_action('edited_term', 'aat_rest_cache_bump');
+add_action('delete_term', 'aat_rest_cache_bump');
 
 /**
  * The front page lives in the private `homepage` CPT; page_on_front is the
@@ -122,6 +156,10 @@ function aat_card_payload($post) {
     $acf = function_exists('get_fields') ? (get_fields($post->ID) ?: []) : [];
     $thumb = get_post_thumbnail_id($post->ID);
     $hero = !empty($acf['hero_image']) && is_string($acf['hero_image']) ? $acf['hero_image'] : null;
+    if (!$hero && !empty($acf['gallery'])) {
+        $gallery = aat_decode_repeaters($acf['gallery']);
+        if (is_array($gallery) && !empty($gallery[0]['image_url'])) $hero = (string) $gallery[0]['image_url'];
+    }
     $media = aat_media_payload($thumb);
     if (!$media && $hero) $media = ['id' => 0, 'url' => $hero, 'width' => 0, 'height' => 0, 'alt' => get_the_title($post->ID)];
 
@@ -139,12 +177,32 @@ function aat_card_payload($post) {
     ];
 }
 
+/** Only fields cards and directory maps consume; full ACF belongs to /content. */
+function aat_archive_acf_payload($post_id, $post_type) {
+    $acf = aat_acf_payload($post_id);
+    if (!is_array($acf)) return (object) [];
+    $keys = ['hero_image', 'hero_tagline', 'hotel_highlights', 'hotel_location', 'location_map', 'latitude', 'longitude', 'read_minutes', 'duration_label'];
+    $out = [];
+    foreach ($keys as $key) {
+        $value = $acf[$key] ?? null;
+        $empty = $value === null || $value === '' || $value === [] || $value === false;
+        if (array_key_exists($key, $acf) && !$empty) $out[$key] = $value;
+    }
+    if ($post_type === 'tour' && !empty($acf['itinerary'])) {
+        $rows = aat_decode_repeaters($acf['itinerary']);
+        if (is_array($rows)) {
+            $out['itinerary'] = array_map(function ($row) {
+                if (!is_array($row)) return [];
+                return array_intersect_key($row, array_flip(['group_tag', 'title', 'latitude', 'longitude']));
+            }, $rows);
+        }
+    }
+    return $out ?: (object) [];
+}
+
 /** Turns relationship id lists into ready-to-render cards, order preserved. */
 function aat_resolve_related($acf) {
-    $keys = [
-        'featured_stays', 'featured_tours', 'related_tours', 'related_places',
-        'related_guides', 'related_hotels', 'related_things', 'city',
-    ];
+    $keys = aat_contract_relationships();
     $out = [];
     foreach ($keys as $key) {
         if (empty($acf[$key])) continue;
@@ -201,12 +259,14 @@ function aat_content_payload($post, $path_override = null) {
 function aat_rest_content(WP_REST_Request $request) {
     $path = '/' . trim($request['path'], '/') . '/';
     if ($path === '//') $path = '/';
+    $cached = aat_rest_cache_get('content:' . $path);
+    if (is_array($cached)) return rest_ensure_response($cached);
 
     if ($path === '/') {
         $front = aat_front_page_post();
         // The homepage CPT is not publicly queryable, so its permalink is a
         // query string - the frontend keys off "/" for the front page.
-        if ($front) return rest_ensure_response(aat_content_payload($front, '/'));
+        if ($front) return rest_ensure_response(aat_rest_cache_set('content:' . $path, aat_content_payload($front, '/')));
     }
 
     $id = url_to_postid(home_url($path));
@@ -227,7 +287,7 @@ function aat_rest_content(WP_REST_Request $request) {
     if (!$post || $post->post_status !== 'publish' || !in_array($post->post_type, aat_public_types(), true)) {
         return new WP_Error('aat_not_found', 'Content not found', ['status' => 404]);
     }
-    return rest_ensure_response(aat_content_payload($post));
+    return rest_ensure_response(aat_rest_cache_set('content:' . $path, aat_content_payload($post)));
 }
 
 function aat_rest_content_batch(WP_REST_Request $request) {
@@ -275,6 +335,8 @@ function aat_menu_payload($location = 'primary') {
 }
 
 function aat_rest_site() {
+    $cached = aat_rest_cache_get('site');
+    if (is_array($cached)) return rest_ensure_response($cached);
     $front = aat_front_page_post();
     $front_id = $front ? $front->ID : 0;
     $field = function ($name) use ($front_id) {
@@ -282,7 +344,7 @@ function aat_rest_site() {
         return (string) (get_field($name, $front_id) ?: '');
     };
 
-    return rest_ensure_response([
+    $payload = [
         'name' => get_bloginfo('name'),
         'description' => get_bloginfo('description'),
         'url' => home_url('/'),
@@ -297,7 +359,8 @@ function aat_rest_site() {
         'menu' => aat_menu_payload('primary'),
         'footerMenu' => aat_menu_payload('footer'),
         'frontPage' => $front ? aat_content_payload($front, '/') : null,
-    ]);
+    ];
+    return rest_ensure_response(aat_rest_cache_set('site', $payload));
 }
 
 function aat_rest_archive(WP_REST_Request $request) {
@@ -326,23 +389,63 @@ function aat_rest_archive(WP_REST_Request $request) {
     }
     if ($request['search']) $args['s'] = sanitize_text_field($request['search']);
 
+    $cache_key = 'archive:' . wp_json_encode($args);
+    $cached = aat_rest_cache_get($cache_key);
+    if (is_array($cached)) return rest_ensure_response($cached);
+
     $query = new WP_Query($args);
     $items = [];
     foreach ($query->posts as $post) {
         $card = aat_card_payload($post);
         if (!$card) continue;
         $card['date'] = get_post_time(DATE_W3C, true, $post->ID);
-        $card['acf'] = aat_acf_payload($post->ID);
+        $card['acf'] = aat_archive_acf_payload($post->ID, $post->post_type);
         $items[] = $card;
     }
 
-    return rest_ensure_response([
+    $payload = [
         'items' => $items,
         'total' => (int) $query->found_posts,
         'totalPages' => (int) $query->max_num_pages,
         'page' => (int) $args['paged'],
         'perPage' => $per_page,
+    ];
+    return rest_ensure_response(aat_rest_cache_set($cache_key, $payload));
+}
+
+/** Exhaustive lightweight path manifest for sitemap and generateStaticParams. */
+function aat_rest_paths(WP_REST_Request $request) {
+    $per_page = min(max((int) ($request['per_page'] ?: 250), 1), 250);
+    $page = max((int) ($request['page'] ?: 1), 1);
+    $cache_key = "paths:$page:$per_page";
+    $cached = aat_rest_cache_get($cache_key);
+    if (is_array($cached)) return rest_ensure_response($cached);
+    $query = new WP_Query([
+        'post_type' => aat_public_types(),
+        'post_status' => 'publish',
+        'posts_per_page' => $per_page,
+        'paged' => $page,
+        'orderby' => 'ID',
+        'order' => 'ASC',
+        'ignore_sticky_posts' => true,
+        'no_found_rows' => false,
     ]);
+    $items = array_map(function ($post) {
+        return [
+            'id' => (int) $post->ID,
+            'type' => $post->post_type,
+            'path' => wp_parse_url(get_permalink($post->ID), PHP_URL_PATH),
+            'modified' => get_post_modified_time(DATE_W3C, true, $post->ID),
+        ];
+    }, $query->posts);
+    $payload = [
+        'items' => $items,
+        'total' => (int) $query->found_posts,
+        'totalPages' => (int) $query->max_num_pages,
+        'page' => $page,
+        'perPage' => $per_page,
+    ];
+    return rest_ensure_response(aat_rest_cache_set($cache_key, $payload, 900));
 }
 
 function aat_term_payload($term) {

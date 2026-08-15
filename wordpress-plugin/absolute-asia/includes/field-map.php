@@ -57,6 +57,15 @@ function aat_field_map() {
     ];
 
     return [
+        /* Public legacy vessel records. They currently carry body content but
+           no ACF; retaining the route makes the decision explicit and keeps
+           future sibling-site fields visible to the compatibility audit. */
+        'trip' => [
+            'type' => 'trip',
+            'fields' => [],
+            'skip' => [],
+        ],
+
         /* ─────────────────────────── TOURS ─────────────────────────── */
         'posts' => [
             'type' => 'tour',

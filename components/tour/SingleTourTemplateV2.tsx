@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import Image from "next/image";
+import { createPortal } from "react-dom";
 import type { ContentRecord, DepartureRow, FaqRow, GalleryRow, ItineraryRow } from "@/lib/types";
 import type { ArchiveItem, SitePayload } from "@/lib/wp";
 import { BRAND_SHORT } from "@/lib/site";
@@ -48,18 +50,22 @@ export default function SingleTourTemplateV2({
   const stayTrackRef = useRef<HTMLDivElement>(null);
   const [openDays, setOpenDays] = useState<Record<number, boolean>>({ 1: true });
   const [activeSubnav, setActiveSubnav] = useState("overview");
-  const [activeMapCity, setActiveMapCity] = useState("hanoi");
+  const [activeMapCity, setActiveMapCity] = useState<string | null>(null);
   const [showMobileMap, setShowMobileMap] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const reveals = document.querySelectorAll(".reveal:not(.is-visible)");
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let revealObserver: IntersectionObserver | null = null;
     if (prefersReduced) { reveals.forEach((el) => el.classList.add("is-visible")); }
     else {
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add("is-visible"); io.unobserve(entry.target); } });
+      revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add("is-visible"); revealObserver?.unobserve(entry.target); } });
       }, { threshold: 0.12 });
-      reveals.forEach((el) => io.observe(el));
+      reveals.forEach((el) => revealObserver?.observe(el));
     }
 
     // Scroll spy for Itinerary map
@@ -75,7 +81,8 @@ export default function SingleTourTemplateV2({
     dayElements.forEach(el => dayIo.observe(el));
 
     return () => {
-      // Cleanup observers
+      revealObserver?.disconnect();
+      dayIo.disconnect();
     };
   }, []);
 
@@ -91,8 +98,11 @@ export default function SingleTourTemplateV2({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const toggleDay = (id: number) => {
+  const toggleDay = (id: number, mapKey: string) => {
     setOpenDays(prev => ({ ...prev, [id]: !prev[id] }));
+    /* Accordion state and map focus are one interaction. Keeping this in the
+       event handler also makes a second click refocus an already-open day. */
+    setActiveMapCity(mapKey);
   };
 
   const acf = (tourData?.acf || {}) as Record<string, unknown>;
@@ -192,9 +202,10 @@ export default function SingleTourTemplateV2({
     return body.split(/<h[23][^>]*>(?=\s*DAY\s*\d)/i)[0].trim();
   })();
   const itineraryGroups = itineraryRows.reduce<
-    Array<{ region: string; days: Array<{ id: number; title: string; desc: string; image?: string }> }>
+    Array<{ region: string; mapKey: string; days: Array<{ id: number; title: string; desc: string; image?: string }> }>
   >((groups, row, index) => {
     const region = (row.group_tag || "Itinerary").trim();
+    const mapKey = resolveCityCoords(region)?.key || region.toLowerCase().replace(/[^a-z0-9]/g, "");
     const last = groups[groups.length - 1];
     const day = {
       id: index + 1,
@@ -203,7 +214,7 @@ export default function SingleTourTemplateV2({
       image: row.image_url,
     };
     if (last && last.region === region) last.days.push(day);
-    else groups.push({ region, days: [day] });
+    else groups.push({ region, mapKey, days: [day] });
     return groups;
   }, []);
 
@@ -324,7 +335,18 @@ export default function SingleTourTemplateV2({
         </defs>
       </svg>
       {/* ═══ HERO PHOTO ═══ */}
-      <section id="hero" className={`hero-photo ph ${heroImage ? '' : 'ph-vn'}`} style={{ minHeight: "60vh", backgroundImage: heroImage ? `url(${optimized(heroImage, "hero")})` : undefined }}>
+      <section id="hero" className={`hero-photo ph ${heroImage ? '' : 'ph-vn'}`} style={{ minHeight: "60vh", position: "relative" }}>
+        {heroImage && (
+          <Image
+            src={heroImage}
+            alt=""
+            fill
+            loading="eager"
+            fetchPriority="high"
+            sizes="100vw"
+            style={{ objectFit: "cover", zIndex: 0 }}
+          />
+        )}
         <div className="overlay-bottom"></div>
         <div className="container" style={{ position: "relative", zIndex: 2, paddingBottom: "1rem" }}>
           <div style={{ marginBottom: "1rem" }}>
@@ -479,15 +501,20 @@ export default function SingleTourTemplateV2({
                   <span className="itin-group-tag">{group.region}</span>
                   {group.days.map((day) => {
                     const isOpen = !!openDays[day.id];
-                    const cityKey = group.region.toLowerCase().replace(/[^a-z0-9]/g, "");
+                    const cityKey = group.mapKey;
                     const image = "image" in day ? (day as { image?: string }).image : undefined;
                     return (
                       <div key={day.id} className={`itin-day ${isOpen ? "is-open" : ""}`} data-city={cityKey}>
-                        <button className="itin-day-head" onClick={() => toggleDay(day.id)}>
+                        <button
+                          className="itin-day-head"
+                          onClick={() => toggleDay(day.id, cityKey)}
+                          aria-expanded={isOpen}
+                          aria-controls={`itinerary-day-${day.id}`}
+                        >
                           {day.title}
                           <ChevronSvg />
                         </button>
-                        <div className="itin-day-body" style={{ maxHeight: isOpen ? "1200px" : "0" }}>
+                        <div id={`itinerary-day-${day.id}`} className="itin-day-body" aria-hidden={!isOpen} style={{ maxHeight: isOpen ? "1200px" : "0" }}>
                           {image && (
                             /* eslint-disable-next-line @next/next/no-img-element */
                             <img src={optimized(image, "card")} alt={day.title} loading="lazy" style={{ width: "100%", borderRadius: "3px", marginBottom: "1rem" }} />
@@ -506,6 +533,8 @@ export default function SingleTourTemplateV2({
           <button
             className={`mobile-map-toggle-btn ${showMobileMap ? "hidden" : ""}`}
             onClick={() => setShowMobileMap(true)}
+            aria-expanded={showMobileMap}
+            aria-controls="mobile-itinerary-map"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
@@ -514,27 +543,29 @@ export default function SingleTourTemplateV2({
             View Map
           </button>
 
-          {/* Mobile Map Full-screen Overlay */}
-          <div className={`mobile-map-overlay ${showMobileMap ? "open" : ""}`}>
-            <div className="mobile-map-overlay-head">
-              <span className="mobile-map-overlay-title">Tour Map & Route</span>
-              <button className="mobile-map-overlay-close" onClick={() => setShowMobileMap(false)} aria-label="Close Map">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-            <div className="mobile-map-overlay-body">
-              {showMobileMap && (
+          {/* Portalled to body so sticky navigation stacking contexts cannot
+              cover the close button on mobile. */}
+          {mounted && showMobileMap && createPortal(
+            <div id="mobile-itinerary-map" className="mobile-map-overlay open" aria-hidden="false">
+              <div className="mobile-map-overlay-head">
+                <span className="mobile-map-overlay-title">Tour Map & Route</span>
+                <button className="mobile-map-overlay-close" onClick={() => setShowMobileMap(false)} aria-label="Close Map">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+              <div className="mobile-map-overlay-body">
                 <RealMapComponent
                   stopsList={mapStops}
                   activeCity={activeMapCity}
                   setActiveCity={setActiveMapCity}
                 />
-              )}
-            </div>
-          </div>
+              </div>
+            </div>,
+            document.body,
+          )}
 
           {inclusions.length > 0 && (
             <div className="center reveal" style={{ marginTop: "3rem" }}>

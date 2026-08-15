@@ -15,7 +15,7 @@ import SingleTourTemplateV2 from "@/components/tour/SingleTourTemplateV2";
 import SingleArticleTemplateV2 from "@/components/article/SingleArticleTemplateV2";
 import TaxonomyArchiveTemplate from "@/components/archive/TaxonomyArchiveTemplate";
 import type { ArchiveItem } from "@/lib/wp";
-import { decodeEntities, getArchiveSafe, getContentByPath, getSeo, getTermBySlug, getTermsSafe, getSiteDataSafe, illustratedFirst, realCountries, searchContent } from "@/lib/wp";
+import { decodeEntities, getAllPathsSafe, getArchiveSafe, getContentByPath, getSeo, getTermBySlug, getTermsSafe, getSiteDataSafe, illustratedFirst, realCountries, searchContent } from "@/lib/wp";
 import { BRAND_NAME } from "@/lib/site";
 import { EditBar } from "@/components/v2/EditBar";
 import { editPostUrl, editTargets, editTermUrl } from "@/lib/admin";
@@ -23,6 +23,17 @@ import { breadcrumbSchema, collectionSchema, contentSchema, destinationSchema, r
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
 
 export const revalidate = 300;
+
+/** Pre-render every public WordPress record; unknown future paths still use ISR. */
+export async function generateStaticParams(): Promise<Array<{ slug: string[] }>> {
+  const paths = await getAllPathsSafe();
+  return [
+    { slug: [] },
+    ...paths
+      .filter((item) => item.path && item.path !== "/")
+      .map((item) => ({ slug: item.path.split("/").filter(Boolean) })),
+  ];
+}
 
 /* ── Metadata ── */
 export async function generateMetadata({
@@ -85,6 +96,7 @@ async function renderSingle(content: NonNullable<Awaited<ReturnType<typeof getCo
     case "travel_guide":
     case "thing_to_do":
     case "blog":
+    case "trip":
     case "post": return renderArticle(content);
     default: return null;
   }

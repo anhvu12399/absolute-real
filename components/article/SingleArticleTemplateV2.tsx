@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { CardRecord, ContentRecord } from "@/lib/types";
 import type { ArchiveItem } from "@/lib/wp";
 import { SpecialistBlock } from "../v2/SpecialistBlock";
@@ -190,7 +191,7 @@ export default function SingleArticleTemplateV2({
       {/* ═══ PLATE ═══ */}
       {hero && (
         <figure className="dispatch-plate">
-          <div style={bg(hero, "hero")} />
+          <div><Image src={hero} alt="" fill loading="eager" fetchPriority="high" sizes="100vw" style={{ objectFit: "cover" }} /></div>
           {data?.featuredMedia?.alt && <figcaption>{data.featuredMedia.alt}</figcaption>}
         </figure>
       )}

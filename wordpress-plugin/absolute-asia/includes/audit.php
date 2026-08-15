@@ -18,7 +18,19 @@ function aat_audit_is_empty($value) {
     return false;
 }
 
-/** How often each ACF key carries data across a sample. */
+function aat_audit_log($operation, $details) {
+    $logs = get_option('aat_migration_audit_log', []);
+    if (!is_array($logs)) $logs = [];
+    $logs[] = [
+        'time' => gmdate(DATE_ATOM),
+        'userId' => get_current_user_id(),
+        'operation' => sanitize_key($operation),
+        'details' => $details,
+    ];
+    update_option('aat_migration_audit_log', array_slice($logs, -200), false);
+}
+
+/** How often each ACF key carries data across a complete result set. */
 function aat_audit_fill($items, $getter) {
     $stats = [];
     foreach ($items as $item) {
@@ -32,37 +44,56 @@ function aat_audit_fill($items, $getter) {
     return $stats;
 }
 
-function aat_audit_run($route, $sample = 30) {
+/** Fetch every legacy payload in bounded pages. */
+function aat_audit_source_items($route, $limit = 0) {
+    if ($route === 'homepage') {
+        $home = aat_import_get('/absolute-asia/v1/content?path=/');
+        return is_wp_error($home) ? $home : [$home];
+    }
+
+    $out = [];
+    $page = 1;
+    $remaining = max(0, (int) $limit);
+    do {
+        $per_page = $remaining ? min(100, $remaining) : 100;
+        $list = aat_import_get("/wp/v2/$route?per_page=$per_page&page=$page&_fields=id");
+        if (is_wp_error($list)) return $list;
+        if (!$list) break;
+        $ids = array_map(function ($p) { return (int) $p['id']; }, $list);
+        foreach (array_chunk($ids, 100) as $chunk) {
+            $items = aat_import_get('/absolute-asia/v1/content-batch?include=' . implode(',', $chunk));
+            if (is_wp_error($items)) return $items;
+            $out = array_merge($out, $items);
+        }
+        if ($remaining) {
+            $remaining -= count($list);
+            if ($remaining <= 0) break;
+        }
+        $page++;
+    } while (count($list) === $per_page);
+    return $out;
+}
+
+function aat_audit_run($route, $limit = 0) {
     $map = aat_field_map();
     if (!isset($map[$route])) return new WP_Error('aat_audit_route', "Không có map cho $route");
     $spec = $map[$route];
-    $sample = min(max((int) $sample, 5), 60);
+    $limit = min(max((int) $limit, 0), 5000);
 
     /* ── legacy side ── */
-    $old_items = [];
-    if ($route === 'homepage') {
-        $home = aat_import_get('/absolute-asia/v1/content?path=/');
-        if (is_wp_error($home)) return $home;
-        $old_items = [$home];
-    } else {
-        $list = aat_import_get("/wp/v2/$route?per_page=$sample&_fields=id");
-        if (is_wp_error($list)) return $list;
-        if (!$list) return ['route' => $route, 'rows' => [], 'oldTotal' => 0, 'newTotal' => 0];
-        $ids = array_map(function ($p) { return (int) $p['id']; }, $list);
-        $old_items = aat_import_get('/absolute-asia/v1/content-batch?include=' . implode(',', $ids));
-        if (is_wp_error($old_items)) return $old_items;
-    }
+    $old_items = aat_audit_source_items($route, $limit);
+    if (is_wp_error($old_items)) return $old_items;
+    if (!$old_items) return ['route' => $route, 'rows' => [], 'oldTotal' => 0, 'newTotal' => 0];
 
     /* ── this install ── */
-    /* Random order: the newest N posts are not representative - a field the old
-       site fills on 10% of pages can be absent from any one date-ordered slice
-       and look like it never imported. */
     $new_posts = get_posts([
         'post_type' => $spec['type'],
         'post_status' => 'publish',
-        'posts_per_page' => $sample,
-        'orderby' => 'rand',
+        'posts_per_page' => $limit ?: -1,
+        'orderby' => 'ID',
+        'order' => 'ASC',
         'fields' => 'ids',
+        'no_found_rows' => true,
     ]);
     $new_items = [];
     foreach ($new_posts as $id) {
@@ -77,6 +108,7 @@ function aat_audit_run($route, $sample = 30) {
 
     $old_fill = aat_audit_fill($old_items, function ($item) { return $item['acf'] ?? []; });
     $new_fill = aat_audit_fill($new_items, function ($acf) { return $acf; });
+    $contract_fields = aat_contract_fields($spec['type']);
 
     $old_total = max(count($old_items), 1);
     $new_total = max(count($new_items), 1);
@@ -113,6 +145,26 @@ function aat_audit_run($route, $sample = 30) {
         ];
     }
 
+    $orphan_backend = [];
+    foreach ($new_fill as $field => $filled) {
+        if (in_array($field, $contract_fields, true)) continue;
+        if (strpos($field, 'source_') === 0) continue;
+        $orphan_backend[] = ['field' => $field, 'filled' => $filled, 'status' => 'backend_not_in_contract'];
+    }
+
+    $missing_contract = [];
+    foreach ($contract_fields as $field) {
+        if (!array_key_exists($field, $new_fill)) $missing_contract[] = $field;
+    }
+
+    $shape_errors = [];
+    foreach ($new_posts as $id) {
+        $acf = function_exists('get_fields') ? (get_fields($id) ?: []) : [];
+        foreach (aat_contract_repeater_errors($spec['type'], $acf) as $error) {
+            $shape_errors[] = ['postId' => (int) $id] + $error;
+        }
+    }
+
     // Worst first: unmapped, then mapped-but-empty, then the rest by fill rate.
     usort($rows, function ($a, $b) {
         $rank = ['unmapped' => 0, 'missing' => 1, 'ok' => 2, 'skip' => 3];
@@ -126,16 +178,140 @@ function aat_audit_run($route, $sample = 30) {
         'oldTotal' => count($old_items),
         'newTotal' => count($new_items),
         'rows' => $rows,
+        'orphanBackend' => $orphan_backend,
+        'missingContract' => $missing_contract,
+        'shapeErrors' => $shape_errors,
+        'contractVersion' => aat_contract_version(),
     ];
 }
 
+function aat_audit_export($offset = 0, $limit = 100) {
+    $query = new WP_Query([
+        'post_type' => array_merge(aat_public_types(), ['homepage']),
+        'post_status' => 'any',
+        'posts_per_page' => min(max((int) $limit, 1), 250),
+        'offset' => max(0, (int) $offset),
+        'orderby' => 'ID',
+        'order' => 'ASC',
+        'fields' => 'ids',
+        'no_found_rows' => false,
+    ]);
+    $ids = $query->posts;
+    $records = [];
+    foreach ($ids as $id) {
+        $raw = (string) get_post_meta($id, '_aat_source_acf_json', true);
+        $records[] = [
+            'id' => (int) $id,
+            'type' => get_post_type($id),
+            'slug' => get_post_field('post_name', $id),
+            'sourceId' => (int) get_post_meta($id, '_aat_source_id', true),
+            'sourceType' => (string) get_post_meta($id, '_aat_source_type', true),
+            'schemaVersion' => (int) get_post_meta($id, '_aat_source_schema_version', true),
+            'sourceAcf' => $raw !== '' ? json_decode($raw, true) : (object) [],
+            'checksum' => hash('sha256', $raw),
+        ];
+    }
+    return [
+        'contractVersion' => aat_contract_version(),
+        'offset' => max(0, (int) $offset),
+        'count' => count($records),
+        'total' => (int) $query->found_posts,
+        'manifestChecksum' => hash('sha256', wp_json_encode($records, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)),
+        'records' => $records,
+    ];
+}
+
+function aat_audit_reconcile($route, $offset, $limit, $dry_run, $run_id) {
+    $map = aat_import_type_map();
+    if (!isset($map[$route])) return new WP_Error('aat_bad_type', 'Unknown source type', ['status' => 400]);
+    $limit = min(max((int) $limit, 1), 50);
+    $offset = max(0, (int) $offset);
+    $list = aat_import_get("/wp/v2/$route?per_page=$limit&offset=$offset&_fields=id");
+    if (is_wp_error($list)) return $list;
+    $ids = array_map(function ($row) { return (int) $row['id']; }, $list);
+    $items = $ids ? aat_import_get('/absolute-asia/v1/content-batch?include=' . implode(',', $ids)) : [];
+    if (is_wp_error($items)) return $items;
+
+    $actions = [];
+    foreach ($items as $item) {
+        $source_id = (int) ($item['id'] ?? 0);
+        $existing = aat_find_by_source($source_id, $map[$route]);
+        $action = $existing ? 'update' : 'create';
+        if (!$dry_run) {
+            $result = aat_import_item($item, $map[$route]);
+            if (is_wp_error($result)) $actions[] = ['sourceId' => $source_id, 'action' => 'error', 'message' => $result->get_error_message()];
+            else $actions[] = ['sourceId' => $source_id, 'postId' => (int) $result, 'action' => $action];
+        } else {
+            $actions[] = ['sourceId' => $source_id, 'postId' => $existing, 'action' => $action];
+        }
+    }
+    $result = ['runId' => $run_id, 'dryRun' => (bool) $dry_run, 'type' => $route, 'offset' => $offset + count($list), 'done' => count($list) < $limit, 'actions' => $actions];
+    update_option('aat_reconcile_' . sanitize_key($run_id), ['updatedAt' => gmdate(DATE_ATOM), 'result' => $result], false);
+    aat_audit_log('reconcile', ['runId' => $run_id, 'dryRun' => (bool) $dry_run, 'type' => $route, 'beforeOffset' => $offset, 'afterOffset' => $result['offset'], 'actions' => count($actions)]);
+    return $result;
+}
+
 add_action('rest_api_init', function () {
+    register_rest_route('absolute-asia/v1', '/contract', [
+        'methods' => 'GET',
+        'permission_callback' => '__return_true',
+        'callback' => function () { return rest_ensure_response(aat_contract_payload()); },
+    ]);
     register_rest_route('absolute-asia/v1', '/import/audit', [
         'methods' => 'POST',
         'permission_callback' => function () { return current_user_can('manage_options'); },
         'callback' => function (WP_REST_Request $r) {
-            $result = aat_audit_run(sanitize_text_field((string) $r['route']), (int) $r['sample']);
+            $result = aat_audit_run(sanitize_text_field((string) $r['route']), (int) $r['limit']);
+            if (!is_wp_error($result)) aat_audit_log('audit', ['route' => $result['route'], 'oldTotal' => $result['oldTotal'], 'newTotal' => $result['newTotal']]);
             return is_wp_error($result) ? $result : rest_ensure_response($result);
+        },
+    ]);
+    register_rest_route('absolute-asia/v1', '/import/export', [
+        'methods' => 'GET',
+        'permission_callback' => function () { return current_user_can('manage_options'); },
+        'callback' => function (WP_REST_Request $r) { return rest_ensure_response(aat_audit_export((int) $r['offset'], (int) ($r['limit'] ?: 100))); },
+    ]);
+    register_rest_route('absolute-asia/v1', '/import/reconcile', [
+        'methods' => 'POST',
+        'permission_callback' => function () { return current_user_can('manage_options'); },
+        'callback' => function (WP_REST_Request $r) {
+            $result = aat_audit_reconcile(
+                sanitize_text_field((string) $r['type']),
+                (int) $r['offset'],
+                (int) ($r['limit'] ?: 10),
+                !isset($r['dry_run']) || rest_sanitize_boolean($r['dry_run']),
+                sanitize_key((string) ($r['run_id'] ?: wp_generate_uuid4()))
+            );
+            return is_wp_error($result) ? $result : rest_ensure_response($result);
+        },
+    ]);
+    register_rest_route('absolute-asia/v1', '/import/cleanup', [
+        'methods' => 'POST',
+        'permission_callback' => function () { return current_user_can('manage_options'); },
+        'callback' => function (WP_REST_Request $r) {
+            $contract = aat_content_contract();
+            $allowed = [];
+            foreach ((array) ($contract['types'] ?? []) as $spec) $allowed = array_merge($allowed, (array) ($spec['deprecated'] ?? []));
+            $requested = array_values(array_intersect(array_map('sanitize_key', (array) $r['fields']), array_unique($allowed)));
+            $preview = !isset($r['apply']) || !rest_sanitize_boolean($r['apply']);
+            $matches = [];
+            foreach ($requested as $field) {
+                $posts = get_posts(['post_type' => array_merge(aat_public_types(), ['homepage']), 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => $field]);
+                $matches[$field] = count($posts);
+            }
+            $token_payload = wp_json_encode(['version' => aat_contract_version(), 'fields' => $requested, 'matches' => $matches]);
+            $approval_token = hash_hmac('sha256', $token_payload, wp_salt('auth'));
+            if (!$preview && !hash_equals($approval_token, (string) $r['approval_token'])) {
+                return new WP_Error('aat_cleanup_preview_required', 'Run cleanup preview first and submit its approvalToken unchanged.', ['status' => 409]);
+            }
+            if (!$preview) {
+                foreach ($requested as $field) {
+                    $posts = get_posts(['post_type' => array_merge(aat_public_types(), ['homepage']), 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => $field]);
+                    foreach ($posts as $id) delete_post_meta($id, $field);
+                }
+                aat_audit_log('cleanup', ['fields' => $requested, 'deleted' => $matches]);
+            }
+            return rest_ensure_response(['preview' => $preview, 'eligibleFields' => array_values(array_unique($allowed)), 'requestedFields' => $requested, 'matches' => $matches, 'approvalToken' => $preview ? $approval_token : null]);
         },
     ]);
 });

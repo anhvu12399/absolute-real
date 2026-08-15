@@ -143,6 +143,8 @@ function aat_register_fields() {
             aat_text('field_aat_home_phone_label', 'Phone Label', 'text_phone'),
             aat_text('field_aat_home_phone', 'Phone Number', 'phone'),
             aat_text('field_aat_home_email', 'Email Link', 'link_email_icon'),
+            aat_text('field_aat_home_why_title', 'Why Choose Heading', 'why_title'),
+            aat_repeater_field('field_aat_home_why_reasons', 'Why Choose Reasons', 'why_reasons', 'reasons'),
         ],
         'location' => [[['param' => 'post_type', 'operator' => '==', 'value' => 'homepage']]],
         'show_in_rest' => true,
@@ -155,6 +157,7 @@ function aat_register_fields() {
         'fields' => [
             aat_tab('tab_aat_tour_facts', 'Key Facts'),
             aat_image('field_aat_tour_hero', 'Hero Image (falls back to featured image)', 'hero_image'),
+            aat_text('field_aat_tour_hero_eye', 'Hero Eyebrow (HTML)', 'hero_eyebrow'),
             ['key' => 'field_aat_tour_days', 'label' => 'Duration (Days)', 'name' => 'duration_days', 'type' => 'number'],
             ['key' => 'field_aat_tour_destcount', 'label' => 'Destinations Count', 'name' => 'destinations_count', 'type' => 'number'],
             ['key' => 'field_aat_tour_guests', 'label' => 'Minimum Guests', 'name' => 'min_guests', 'type' => 'number', 'default_value' => 2],
@@ -165,9 +168,16 @@ function aat_register_fields() {
             aat_textarea('field_aat_tour_highlights', 'Highlights (one per line)', 'highlights_list', 6),
             aat_text('field_aat_tour_lbl_high', 'Highlights Heading', 'highlights_title', ['default_value' => '<em>Trip</em> Highlights']),
             aat_text('field_aat_tour_lbl_highdesc', 'Highlights Note', 'highlights_note'),
+            aat_text('field_aat_tour_why_title', 'Why Choose Heading (HTML)', 'why_title'),
+            aat_text('field_aat_tour_group_title', 'Group CTA Heading', 'group_cta_title'),
+            aat_textarea('field_aat_tour_group_desc', 'Group CTA Description', 'group_cta_desc', 3),
+            aat_text('field_aat_tour_group_btn', 'Group CTA Button', 'group_cta_btn'),
+            aat_text('field_aat_tour_classic_link', 'Classic Tour Link', 'classic_tour_link'),
 
             aat_tab('tab_aat_tour_itinerary', 'Itinerary'),
             aat_repeater_field('field_aat_tour_itinerary', 'Day by Day', 'itinerary', 'itinerary'),
+            aat_text('field_aat_tour_itin_eye', 'Itinerary Eyebrow (HTML)', 'itinerary_eyebrow'),
+            aat_text('field_aat_tour_itin_title', 'Itinerary Heading', 'itinerary_title'),
 
             aat_tab('tab_aat_tour_stays', 'Stays & Accommodations'),
             [
@@ -185,11 +195,23 @@ function aat_register_fields() {
             aat_textarea('field_aat_tour_exclusions', 'Exclusions (one per line)', 'exclusions_list', 6),
             aat_text('field_aat_tour_offer', 'Special Offer Callout', 'special_offer_text'),
             aat_repeater_field('field_aat_tour_dates', 'Departure Dates & Pricing', 'departure_dates', 'dates'),
+            aat_text('field_aat_tour_dates_title', 'Departure Dates Heading', 'dates_title'),
+            aat_text('field_aat_tour_inc_eye', 'Inclusions Eyebrow (HTML)', 'inclusions_eyebrow'),
+            aat_text('field_aat_tour_inc_title', 'Inclusions Heading', 'inclusions_title'),
+            aat_text('field_aat_tour_inc_btn', 'Inclusions Button', 'inclusions_btn_text'),
+            aat_text('field_aat_tour_exc_title', 'Exclusions Heading', 'exclusions_title'),
+            aat_text('field_aat_tour_inquiry_btn', 'Inquiry Button', 'inquiry_btn_text'),
 
             aat_tab('tab_aat_tour_extra', 'Gallery, Experiences & FAQs'),
             aat_repeater_field('field_aat_tour_gallery', 'Gallery', 'gallery', 'gallery'),
+            aat_text('field_aat_tour_gallery_eye', 'Gallery Eyebrow (HTML)', 'gallery_eyebrow'),
+            aat_text('field_aat_tour_gallery_title', 'Gallery Heading', 'gallery_title'),
             aat_repeater_field('field_aat_tour_experiences', 'Experience Cards', 'experiences', 'experiences'),
             aat_repeater_field('field_aat_tour_faqs', 'FAQs', 'faqs', 'faqs'),
+            aat_text('field_aat_tour_faq_eye', 'FAQ Eyebrow (HTML)', 'faq_eyebrow'),
+            aat_text('field_aat_tour_faq_title', 'FAQ Heading', 'faq_title'),
+            aat_text('field_aat_tour_hotels_eye', 'Stays Eyebrow (HTML)', 'hotels_eyebrow'),
+            aat_text('field_aat_tour_hotels_title', 'Stays Heading', 'hotels_title'),
 
             [
                 'key' => 'field_aat_tour_related',
@@ -222,6 +244,17 @@ function aat_register_fields() {
             aat_text('field_aat_place_map_label', 'Map Location Label', 'location_map'),
             aat_text('field_aat_place_lat', 'Latitude', 'latitude'),
             aat_text('field_aat_place_lng', 'Longitude', 'longitude'),
+            aat_text('field_aat_place_test_eye', 'Testimonials Eyebrow (HTML)', 'testimonials_eyebrow'),
+            aat_text('field_aat_place_test_head', 'Testimonials Heading', 'testimonials_heading'),
+            aat_text('field_aat_place_exp_eye', 'Experiences Eyebrow (HTML)', 'experiences_eyebrow'),
+            aat_text('field_aat_place_exp_head', 'Experiences Heading', 'experiences_heading'),
+            aat_text('field_aat_place_stay_eye', 'Stays Eyebrow (HTML)', 'stays_eyebrow'),
+            aat_text('field_aat_place_stay_head', 'Stays Heading', 'stays_heading'),
+            aat_text('field_aat_place_route_eye', 'Route Eyebrow (HTML)', 'route_eyebrow'),
+            aat_text('field_aat_place_guides_eye', 'Guides Eyebrow (HTML)', 'guides_eyebrow'),
+            aat_text('field_aat_place_guides_head', 'Guides Heading', 'guides_heading'),
+            aat_text('field_aat_place_plan_eye', 'Planning Eyebrow (HTML)', 'planning_eyebrow'),
+            aat_text('field_aat_place_plan_head', 'Planning Heading', 'planning_heading'),
 
             aat_tab('tab_aat_place_related', 'Related & Gallery'),
             [
@@ -243,6 +276,14 @@ function aat_register_fields() {
                 'return_format' => 'id',
             ],
             aat_repeater_field('field_aat_place_gallery', 'Gallery', 'gallery', 'gallery'),
+            aat_repeater_field('field_aat_place_testimonials', 'Testimonials', 'testimonials', 'testimonials'),
+            aat_repeater_field('field_aat_place_experiences', 'Experiences', 'experiences', 'experiences'),
+            aat_text('field_aat_place_specialist_title', 'Specialist Heading', 'specialist_title'),
+            aat_textarea('field_aat_place_specialist_text', 'Specialist Copy', 'specialist_text', 3),
+            aat_image('field_aat_place_specialist_photo', 'Specialist Photo', 'specialist_photo'),
+            aat_text('field_aat_place_specialist_phone', 'Specialist Phone', 'specialist_phone'),
+            aat_text('field_aat_place_specialist_button', 'Specialist Button', 'specialist_button'),
+            aat_text('field_aat_place_specialist_link', 'Specialist Link', 'specialist_link'),
         ],
         'location' => [
             [['param' => 'post_type', 'operator' => '==', 'value' => 'place_to_go']],
@@ -298,6 +339,13 @@ function aat_register_fields() {
 
             aat_tab('tab_aat_hotel_gallery', 'Gallery'),
             aat_repeater_field('field_aat_hotel_gallery', 'Gallery', 'gallery', 'gallery'),
+            aat_text('field_aat_hotel_gallery_title', 'Gallery Heading', 'gallery_title'),
+            aat_text('field_aat_hotel_brief_title', 'In Brief Heading', 'in_brief_title'),
+            aat_text('field_aat_hotel_tours_title', 'Related Tours Heading', 'tours_title'),
+            aat_text('field_aat_hotel_things_title', 'Things To Do Heading', 'things_title'),
+            aat_text('field_aat_hotel_location_title', 'Location Heading', 'location_title'),
+            aat_textarea('field_aat_hotel_location_sub', 'Location Description', 'location_subtitle', 3),
+            aat_text('field_aat_hotel_hotels_title', 'Nearby Hotels Heading', 'hotels_title'),
 
             aat_tab('tab_aat_hotel_related', 'Related Content'),
             [
@@ -327,6 +375,13 @@ function aat_register_fields() {
                 'multiple' => 1,
                 'return_format' => 'id',
             ],
+
+            aat_text('field_aat_hotel_specialist_title', 'Specialist Heading', 'specialist_title'),
+            aat_textarea('field_aat_hotel_specialist_text', 'Specialist Copy', 'specialist_text', 3),
+            aat_image('field_aat_hotel_specialist_photo', 'Specialist Photo', 'specialist_photo'),
+            aat_text('field_aat_hotel_specialist_phone', 'Specialist Phone', 'specialist_phone'),
+            aat_text('field_aat_hotel_specialist_button', 'Specialist Button', 'specialist_button'),
+            aat_text('field_aat_hotel_specialist_link', 'Specialist Link', 'specialist_link'),
 
         ],
         'location' => [[['param' => 'post_type', 'operator' => '==', 'value' => 'hotel']]],
@@ -358,6 +413,7 @@ function aat_register_fields() {
 
             aat_tab('tab_aat_ed_gallery', 'Gallery & Related Tours'),
             aat_repeater_field('field_aat_ed_gallery', 'Gallery', 'gallery', 'gallery'),
+            aat_text('field_aat_ed_gallery_title', 'Gallery Heading', 'gallery_title'),
             [
                 'key' => 'field_aat_ed_tours',
                 'label' => 'Related Tours / Journeys',
@@ -372,11 +428,20 @@ function aat_register_fields() {
             aat_wysiwyg('field_aat_ed_plan_desc', 'Plan Description', 'plan_description'),
             aat_wysiwyg('field_aat_ed_plan_html', 'Plan Block (HTML)', 'plan_html'),
             aat_wysiwyg('field_aat_ed_plan_bottom', 'Plan Footer', 'plan_footer'),
+            aat_text('field_aat_ed_plan_title', 'Plan Heading', 'plan_title'),
+            aat_text('field_aat_ed_further_title', 'Further Reading Heading', 'further_title'),
+            aat_text('field_aat_ed_specialist_title', 'Specialist Heading', 'specialist_title'),
+            aat_textarea('field_aat_ed_specialist_text', 'Specialist Copy', 'specialist_text', 3),
+            aat_image('field_aat_ed_specialist_photo', 'Specialist Photo', 'specialist_photo'),
+            aat_text('field_aat_ed_specialist_phone', 'Specialist Phone', 'specialist_phone'),
+            aat_text('field_aat_ed_specialist_button', 'Specialist Button', 'specialist_button'),
+            aat_text('field_aat_ed_specialist_link', 'Specialist Link', 'specialist_link'),
         ],
         'location' => [
             [['param' => 'post_type', 'operator' => '==', 'value' => 'travel_guide']],
             [['param' => 'post_type', 'operator' => '==', 'value' => 'thing_to_do']],
             [['param' => 'post_type', 'operator' => '==', 'value' => 'blog']],
+            [['param' => 'post_type', 'operator' => '==', 'value' => 'trip']],
         ],
         'show_in_rest' => true,
     ]);
@@ -420,6 +485,14 @@ function aat_register_fields() {
             aat_textarea('field_aat_page_overview', 'Opening Line (large serif)', 'destination_overview', 3),
             aat_text('field_aat_page_map_head', 'Map Headline', 'map_headline'),
             aat_textarea('field_aat_page_map_desc', 'Map Description', 'map_description', 3),
+
+            aat_tab('tab_aat_page_specialist', 'Travel Specialist'),
+            aat_text('field_aat_page_specialist_title', 'Specialist Heading', 'specialist_title'),
+            aat_textarea('field_aat_page_specialist_text', 'Specialist Text', 'specialist_text', 3),
+            aat_image('field_aat_page_specialist_photo', 'Specialist Photo', 'specialist_photo'),
+            aat_text('field_aat_page_specialist_phone', 'Specialist Phone', 'specialist_phone'),
+            aat_text('field_aat_page_specialist_button', 'Specialist Button Label', 'specialist_button'),
+            aat_text('field_aat_page_specialist_link', 'Specialist Button Link', 'specialist_link'),
 
             aat_tab('tab_aat_page_hubs', 'Directory Cards'),
             aat_repeater_field('field_aat_page_journeys', 'Journeys Directory Cards', 'journeys', 'hub-journeys'),

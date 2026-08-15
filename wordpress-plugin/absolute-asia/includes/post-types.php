@@ -22,6 +22,10 @@ function aat_register_post_types() {
 
     $types = [
         'tour' => ['Tours / Journeys', 'Tour', 'tours', 'dashicons-palmtree', true],
+        /* Legacy vessel and cruise-detail records use /trip/{slug}/. Keeping a
+           dedicated type preserves those public URLs without pretending the
+           records are day-by-day tours. */
+        'trip' => ['Trips / Vessels', 'Trip / Vessel', 'trip', 'dashicons-sos', true],
         'hotel' => ['Hotels', 'Hotel', 'collection', 'dashicons-building', true],
         'travel_guide' => ['Travel Guides', 'Travel Guide', 'travel-guides', 'dashicons-megaphone', true],
         'place_to_go' => ['Places to Go', 'Place to Go', 'places-to-go', 'dashicons-airplane', true],
@@ -35,10 +39,9 @@ function aat_register_post_types() {
        `country` taxonomy rather than a post. An empty admin screen with a
        proud icon is worse than no screen.
 
-       `trip` (5 vessel records) and `cruises` (empty) were dropped: neither has
-       an indexed URL, and cruise content lives in the `asia-cruises` category
-       alongside the tours it belongs to. The rows stay in the database, so
-       re-registering the type would bring them back. */
+       The empty legacy `cruises` type remains omitted. Its five actual vessel
+       records are in `trip`, which is registered above because those records
+       have public URLs and must survive a lossless migration. */
 
     foreach ($types as $key => $spec) {
         list($plural, $singular, $slug, $icon, $has_archive) = $spec;
@@ -93,7 +96,7 @@ function aat_register_post_types() {
         'capability_type' => 'page',
     ]);
 
-    register_taxonomy('inspiration', ['tour', 'post', 'blog', 'travel_guide'], [
+    register_taxonomy('inspiration', ['tour', 'trip', 'post', 'blog', 'travel_guide'], [
         'labels' => ['name' => 'Inspirations', 'singular_name' => 'Inspiration'],
         'hierarchical' => true,
         'public' => true,
@@ -104,7 +107,7 @@ function aat_register_post_types() {
         'rewrite' => ['slug' => 'inspiration', 'with_front' => false],
     ]);
 
-    register_taxonomy('country', ['tour', 'hotel', 'place_to_go', 'thing_to_do', 'travel_guide'], [
+    register_taxonomy('country', ['tour', 'trip', 'hotel', 'place_to_go', 'thing_to_do', 'travel_guide'], [
         'labels' => ['name' => 'Countries', 'singular_name' => 'Country'],
         'hierarchical' => true,
         'public' => true,

@@ -1,0 +1,15 @@
+{
+  "pluginVersion": "3.0.0",
+  "schemaVersion": 3,
+  "profiles": ["generic", "absolute"],
+  "defaultProfile": "generic",
+  "sourceSnapshotMeta": "_aat_source_acf_json",
+  "endpoints": [
+    "GET /absolute-asia/v1/contract",
+    "GET /absolute-asia/v1/paths",
+    "POST /absolute-asia/v1/import/audit",
+    "GET /absolute-asia/v1/import/export",
+    "POST /absolute-asia/v1/import/reconcile",
+    "POST /absolute-asia/v1/import/cleanup"
+  ]
+}

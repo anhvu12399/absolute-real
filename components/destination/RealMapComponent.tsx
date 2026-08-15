@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 
 interface Stop {
@@ -8,6 +8,16 @@ interface Stop {
   label: string;
   lat: number;
   lng: number;
+}
+
+function escapeMarkerLabel(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  })[character] || character);
 }
 
 export const CITY_COORDS: Record<string, { lat: number; lng: number; name?: string }> = {
@@ -167,9 +177,53 @@ export default function RealMapComponent({
      is why clicking a country did nothing until the map happened to be ready
      first. This state re-runs it. */
   const [ready, setReady] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const stopsSignature = JSON.stringify(stopsList || []);
+  const parsedStops = useMemo<Stop[]>(() => {
+    const source = JSON.parse(stopsSignature) as unknown[];
+    return source.flatMap((item, index) => {
+      if (item && typeof item === "object") {
+        const record = item as Record<string, unknown>;
+        const lat = Number(record.lat);
+        const lng = Number(record.lng);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          return [{
+            key: String(record.key || `stop-${index}`).toLowerCase().replace(/[^a-z0-9]/g, ""),
+            label: String(record.label || record.name || `Stop ${index + 1}`),
+            lat,
+            lng,
+          }];
+        }
+      }
+      const label = typeof item === "string"
+        ? item
+        : String((item as Record<string, unknown> | null)?.label || (item as Record<string, unknown> | null)?.name || "");
+      const resolved = label ? resolveCityCoords(label) : null;
+      return resolved ? [{ key: resolved.key, label: resolved.label, lat: resolved.lat, lng: resolved.lng }] : [];
+    });
+  }, [stopsSignature]);
+
+  /* Leaflet and its tiles stay out of the critical path until the map is near
+     the viewport. The mobile overlay becomes visible as soon as it opens. */
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container || visible) return;
+    if (!("IntersectionObserver" in window)) {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setVisible(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: "350px" });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [visible]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !mapContainerRef.current) return;
+    if (typeof window === "undefined" || !visible || !mapContainerRef.current || parsedStops.length === 0) return;
 
     let isMounted = true;
     let L: any;
@@ -189,31 +243,6 @@ export default function RealMapComponent({
           delete (mapContainerRef.current as any)._leaflet_id;
         }
 
-        // Format stops to real lat/lng
-        const parsedStops: Stop[] = (stopsList || []).map((item: any, i: number) => {
-          if (typeof item === "object" && item.lat && item.lng) {
-            return {
-              key: item.key || `stop-${i}`,
-              label: item.label || item.name || `Stop ${i + 1}`,
-              lat: Number(item.lat),
-              lng: Number(item.lng)
-            };
-          }
-          const label = typeof item === "string" ? item : item?.label || item?.name || `Stop ${i + 1}`;
-          const resolved = resolveCityCoords(label);
-          if (resolved) {
-            return { key: resolved.key, label: resolved.label, lat: resolved.lat, lng: resolved.lng };
-          }
-          const key = String(label).toLowerCase().replace(/[^a-z0-9]/g, "");
-          const coords = CITY_COORDS[key] || {
-            lat: 16.0 + (i % 3) * 4.0,
-            lng: 105.0 + (i % 5) * 5.0,
-          };
-          return { key, label, lat: coords.lat, lng: coords.lng };
-        });
-
-        if (parsedStops.length === 0) return;
-
         const map = L.map(mapContainerRef.current, {
           center: [16.0544, 105.8542],
           zoom: 4,
@@ -222,6 +251,7 @@ export default function RealMapComponent({
         });
 
         mapInstanceRef.current = map;
+        markersRef.current = {};
 
         // Voyager tile layer for real maps
         L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
@@ -297,7 +327,7 @@ export default function RealMapComponent({
               <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer; transform: translate(-50%, -50%); z-index: 10;">
                 <div style="width: 14px; height: 14px; border-radius: 50%; background: #1E2A3D; border: 2.5px solid #AD8A54; box-shadow: 0 0 8px rgba(30,42,61,0.6); margin-bottom: 4px; transition: transform 0.2s ease;"></div>
                 <span style="background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(4px); color: #1E2A3D; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.12); white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,0.15);">
-                  ${stop.label}
+                  ${escapeMarkerLabel(stop.label)}
                 </span>
               </div>
             `,
@@ -305,7 +335,12 @@ export default function RealMapComponent({
             iconAnchor: [0, 0],
           });
 
-          const marker = L.marker([stop.lat, stop.lng], { icon: customIcon }).addTo(map);
+          const marker = L.marker([stop.lat, stop.lng], {
+            icon: customIcon,
+            title: stop.label,
+            alt: stop.label,
+            keyboard: true,
+          }).addTo(map);
           marker.on("click", () => {
             map.flyTo([stop.lat, stop.lng], 7, { duration: 1.2 });
             if (setActiveCity) setActiveCity(stop.key);
@@ -338,8 +373,9 @@ export default function RealMapComponent({
         } catch {}
         mapInstanceRef.current = null;
       }
+      markersRef.current = {};
     };
-  }, [stopsList]);
+  }, [parsedStops, showLines, visible]);
 
   // Camera flyTo on active city change
   useEffect(() => {
@@ -350,21 +386,28 @@ export default function RealMapComponent({
     const marker = markersRef.current[key];
     const coords = CITY_COORDS[key] || (marker ? { lat: marker.getLatLng().lat, lng: marker.getLatLng().lng } : null);
     if (!coords) return;
+    mapInstanceRef.current.invalidateSize({ pan: false });
+    Object.entries(markersRef.current).forEach(([markerKey, currentMarker]) => {
+      currentMarker.getElement()?.classList.toggle("is-active", markerKey === key);
+      currentMarker.setZIndexOffset(markerKey === key ? 1000 : 0);
+    });
 
     /* flyTo is driven entirely by requestAnimationFrame. Where frames are not
        delivered - a background tab, or a reader who has asked for less motion -
        the camera would simply never arrive, so jump instead. */
     const stillCamera = window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.hidden;
     if (stillCamera) {
-      mapInstanceRef.current.setView([coords.lat, coords.lng], 6, { animate: false });
+      mapInstanceRef.current.setView([coords.lat, coords.lng], 7, { animate: false });
     } else {
-      mapInstanceRef.current.flyTo([coords.lat, coords.lng], 6, { duration: 1.4 });
+      mapInstanceRef.current.flyTo([coords.lat, coords.lng], 7, { duration: 1.2 });
     }
   }, [activeCity, ready]);
 
   return (
     <div
       ref={mapContainerRef}
+      role="region"
+      aria-label="Interactive itinerary map"
       style={{
         width: "100%",
         height: "100%",

@@ -1,0 +1,70 @@
+{
+  "version": 3,
+  "types": {
+    "homepage": {
+      "consumer": "components/home/HomeTemplateV2.tsx",
+      "defaultFieldStatus": "optional",
+      "fields": ["home_banner_slider", "trust_items", "ticker_text", "ticker_link", "intro_headline", "statement_text", "intro_cta_label", "intro_cta_link", "tabs_headline", "tab_dest_label", "tab_journeys_label", "tab_inspiration_label", "home_tab_destinations", "home_tab_journeys", "featured_eyebrow", "featured_headline", "stay_eyebrow", "stay_headline", "home_stay_with", "inspiration_headline", "map_headline", "map_description", "quote_text", "quote_citation", "quote_image", "responsibly_headline", "responsibly_text", "responsibly_image", "home_values", "story_bar_tagline", "story_bar_headline", "story_bar_link_text", "story_bar_image", "plan_eyebrow", "plan_headline", "plan_desc", "plan_btn", "specialists_headline", "team", "testimonials", "review_summary", "review_logo", "review_link", "review_text", "text_phone", "phone", "link_email_icon", "why_title", "why_reasons"],
+      "relationships": [],
+      "repeaters": ["home_banner_slider", "trust_items", "home_tab_destinations", "home_tab_journeys", "home_stay_with", "home_values", "team", "testimonials", "why_reasons"],
+      "retained": [{"field":"home_tab_new","status":"optional","consumer":"importer/admin","reason":"Legacy editorial cards retained for future layouts"},{"field":"home_tab_offers","status":"optional","consumer":"importer/admin","reason":"Legacy offer cards retained for editors"},{"field":"home_ways_to_explore","status":"optional","consumer":"importer/admin","reason":"Legacy navigation rows retained for editors"}]
+    },
+    "tour": {
+      "consumer": "components/tour/SingleTourTemplateV2.tsx",
+      "defaultFieldStatus": "optional",
+      "fields": ["hero_image", "hero_eyebrow", "duration_days", "duration_label", "destinations_count", "min_guests", "intro_title", "highlights_list", "highlights_title", "highlights_note", "why_title", "group_cta_title", "group_cta_desc", "group_cta_btn", "classic_tour_link", "itinerary", "itinerary_eyebrow", "itinerary_title", "featured_stays", "hotels_eyebrow", "hotels_title", "inclusions_list", "exclusions_list", "inclusions_eyebrow", "inclusions_title", "inclusions_btn_text", "exclusions_title", "special_offer_text", "departure_dates", "dates_title", "inquiry_btn_text", "gallery", "gallery_eyebrow", "gallery_title", "experiences", "faqs", "faq_eyebrow", "faq_title", "related_tours"],
+      "relationships": ["featured_stays", "related_tours"],
+      "repeaters": ["itinerary", "departure_dates", "gallery", "experiences", "faqs"],
+      "retained": [{"field":"accommodation_options","status":"optional","consumer":"importer/admin","reason":"Source accommodation choices"},{"field":"booking_policy_title","status":"optional","consumer":"admin","reason":"Editorial policy heading"},{"field":"cta_label","status":"optional","consumer":"importer/admin","reason":"Legacy CTA label"},{"field":"cta_link","status":"optional","consumer":"importer/admin","reason":"Legacy CTA destination"},{"field":"hero_eyebrow_link","status":"optional","consumer":"importer/admin","reason":"Legacy eyebrow link"},{"field":"intro_description","status":"optional","consumer":"admin","reason":"Legacy introduction copy"},{"field":"is_featured","status":"optional","consumer":"listing/admin","reason":"Featured listing flag"},{"field":"options_note","status":"optional","consumer":"admin","reason":"Accommodation editor note"},{"field":"options_title","status":"optional","consumer":"admin","reason":"Accommodation editor heading"},{"field":"related_tours_title","status":"optional","consumer":"admin","reason":"Relationship section heading"},{"field":"tour_code","status":"optional","consumer":"importer/admin","reason":"Source tour identity"},{"field":"tour_level","status":"optional","consumer":"importer/admin","reason":"Source difficulty level"},{"field":"tour_route","status":"optional","consumer":"importer/admin","reason":"Source route summary"}]
+    },
+    "place_to_go": {
+      "consumer": "components/destination/DestinationTemplateV2.tsx",
+      "defaultFieldStatus": "optional",
+      "fields": ["hero_image", "hero_tagline", "destination_overview", "map_headline", "map_description", "map_stops", "location_map", "latitude", "longitude", "testimonials", "testimonials_eyebrow", "testimonials_heading", "experiences", "experiences_eyebrow", "experiences_heading", "stays_eyebrow", "stays_heading", "route_eyebrow", "guides_eyebrow", "guides_heading", "planning_eyebrow", "planning_heading", "featured_tours", "related_places", "related_guides", "gallery", "month_guide", "best_time_image", "best_time_html", "popular_places_html", "experiences_html", "trip_ideas_html", "specialist_title", "specialist_text", "specialist_photo", "specialist_phone", "specialist_button", "specialist_link"],
+      "relationships": ["featured_tours", "related_places", "related_guides"],
+      "repeaters": ["testimonials", "experiences", "gallery", "month_guide"],
+      "retained": [{"field":"related_description","status":"optional","consumer":"admin","reason":"Legacy related-content copy"},{"field":"related_title","status":"optional","consumer":"admin","reason":"Legacy related-content heading"},{"field":"source_country_category","status":"optional","consumer":"importer/relink","reason":"Relationship bookkeeping"},{"field":"source_place_category","status":"optional","consumer":"importer/relink","reason":"Relationship bookkeeping"}]
+    },
+    "hotel": {
+      "consumer": "components/hotel/SingleHotelTemplateV2.tsx",
+      "defaultFieldStatus": "optional",
+      "fields": ["hero_image", "hotel_location", "hotel_highlights", "location_map", "latitude", "longitude", "city", "nearby_places", "gallery", "gallery_title", "in_brief_title", "tours_title", "things_title", "location_title", "location_subtitle", "hotels_title", "related_tours", "related_hotels", "related_things", "specialist_title", "specialist_text", "specialist_photo", "specialist_phone", "specialist_button", "specialist_link"],
+      "relationships": ["city", "related_tours", "related_hotels", "related_things"],
+      "repeaters": ["nearby_places", "gallery"],
+      "retained": [{"field":"source_hotel_category","status":"optional","consumer":"importer/relink","reason":"Relationship bookkeeping"}]
+    },
+    "editorial": {
+      "postTypes": ["travel_guide", "thing_to_do", "blog", "post", "trip"],
+      "consumer": "components/article/SingleArticleTemplateV2.tsx",
+      "defaultFieldStatus": "optional",
+      "fields": ["hero_image", "read_minutes", "intro_html", "content_left", "content_right_image", "further_title", "related_guides", "gallery", "gallery_title", "related_tours", "plan_title", "plan_description", "plan_html", "plan_footer", "specialist_title", "specialist_text", "specialist_photo", "specialist_phone", "specialist_button", "specialist_link"],
+      "relationships": ["related_guides", "related_tours"],
+      "repeaters": ["gallery"],
+      "retained": [{"field":"month_guide_title","status":"optional","consumer":"admin","reason":"Legacy planning heading"},{"field":"sidebar_popular_title","status":"optional","consumer":"admin","reason":"Legacy sidebar heading"},{"field":"sidebar_search_title","status":"optional","consumer":"admin","reason":"Legacy sidebar heading"},{"field":"sidebar_social_title","status":"optional","consumer":"admin","reason":"Legacy sidebar heading"},{"field":"source_thing_category","status":"optional","consumer":"importer/relink","reason":"Relationship bookkeeping"},{"field":"source_trave_guide_category","status":"optional","consumer":"importer/relink","reason":"Relationship bookkeeping"},{"field":"trip_ideas_title","status":"optional","consumer":"admin","reason":"Legacy trip ideas heading"},{"field":"view_more_label","status":"optional","consumer":"admin","reason":"Legacy link label"},{"field":"view_more_link","status":"optional","consumer":"admin","reason":"Legacy link destination"}]
+    },
+    "page": {
+      "consumer": "app/[[...slug]]/page.tsx",
+      "defaultFieldStatus": "optional",
+      "fields": ["hero_image", "eyebrow", "hero_tagline", "page_description", "pillars_title", "pillars", "story_eyebrow", "story_headline", "story_lede", "story_milestones", "story_now_title", "story_now_text", "story_founder_name", "story_founder_role", "story_founder_photo", "story_founder_quote", "team_title", "team", "destination_overview", "map_headline", "map_description", "month_guide", "best_time_image", "best_time_html", "popular_places_html", "experiences_html", "trip_ideas_html", "journeys", "cruises", "articles", "specialist_title", "specialist_text", "specialist_photo", "specialist_phone", "specialist_button", "specialist_link"],
+      "relationships": [],
+      "repeaters": ["pillars", "story_milestones", "team", "month_guide", "journeys", "cruises", "articles"]
+    },
+    "trip": {
+      "postTypes": ["trip"],
+      "consumer": "components/article/SingleArticleTemplateV2.tsx",
+      "defaultFieldStatus": "optional",
+      "fields": [],
+      "relationships": [],
+      "repeaters": []
+    }
+  },
+  "repeaterSchemas": {
+    "itinerary": ["day_num", "group_tag", "title", "description", "image_url", "latitude", "longitude"],
+    "departure_dates": ["date_range", "price_info", "availability_status"],
+    "gallery": ["image_url", "caption"],
+    "faqs": ["question", "answer"],
+    "experiences": ["image_url", "title", "description", "link"],
+    "nearby_places": ["name", "location_map", "latitude", "longitude"],
+    "month_guide": ["month", "image_url", "description", "places_title"]
+  }
+}

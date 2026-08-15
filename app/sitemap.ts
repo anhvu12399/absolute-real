@@ -1,34 +1,31 @@
 import type { MetadataRoute } from "next";
-import { getArchiveSafe } from "@/lib/wp";
+import { getAllPathsSafe } from "@/lib/wp";
 import { SITE_URL } from "@/lib/site";
 
 const BASE = SITE_URL;
 
-/** Types worth indexing, with the priority each gets in the sitemap. */
-const INDEXED = [
-  { type: "tour", priority: 0.9 },
-  { type: "place_to_go", priority: 0.8 },
-  { type: "hotel", priority: 0.7 },
-  { type: "travel_guide,thing_to_do,blog", priority: 0.6 },
-  { type: "page", priority: 0.6 },
-];
+const PRIORITY: Record<string, number> = {
+  tour: 0.9,
+  trip: 0.75,
+  place_to_go: 0.8,
+  hotel: 0.7,
+  travel_guide: 0.6,
+  thing_to_do: 0.6,
+  blog: 0.6,
+  post: 0.6,
+  page: 0.6,
+};
 
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const batches = await Promise.all(
-    INDEXED.map(async ({ type, priority }) => {
-      const items = await getArchiveSafe({ type, perPage: 100 });
-      return items.map((item) => ({
-        url: `${BASE}${item.path}`,
-        lastModified: item.date ? new Date(item.date) : new Date(),
-        changeFrequency: "weekly" as const,
-        priority,
-      }));
-    }),
-  );
-
-  const entries = batches.flat();
+  const paths = await getAllPathsSafe();
+  const entries = paths.map((item) => ({
+    url: `${BASE}${item.path}`,
+    lastModified: item.modified ? new Date(item.modified) : new Date(),
+    changeFrequency: "weekly" as const,
+    priority: PRIORITY[item.type] ?? 0.5,
+  }));
   const seen = new Set<string>();
   const unique = entries.filter((entry) => {
     if (seen.has(entry.url)) return false;

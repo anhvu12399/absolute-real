@@ -61,6 +61,7 @@ function aat_country_regions() {
 function aat_import_type_map() {
     return [
         'posts' => 'tour',
+        'trip' => 'trip',
         'places-to-go' => 'place_to_go',
         'hotels' => 'hotel',
         'travel-guides' => 'travel_guide',
@@ -217,7 +218,16 @@ function aat_local_href($url) {
 
     $host = wp_parse_url($url, PHP_URL_HOST);
     if (!$host) return $url;
-    if (!preg_match('/(^|\.)absoluteasiatours\.com$/i', $host)) return $url;
+    $source_host = wp_parse_url(aat_source_url(), PHP_URL_HOST);
+    $extra_hosts = array_filter(array_map('trim', explode(',', (string) get_option('aat_legacy_hosts', ''))));
+    $allowed = array_values(array_unique(array_filter(array_merge([$source_host], $extra_hosts))));
+    $internal = false;
+    foreach ($allowed as $allowed_host) {
+        $allowed_host = preg_replace('/^www\./i', '', strtolower($allowed_host));
+        $candidate = preg_replace('/^www\./i', '', strtolower($host));
+        if ($candidate === $allowed_host) { $internal = true; break; }
+    }
+    if (!$internal) return $url;
 
     $path = (string) wp_parse_url($url, PHP_URL_PATH);
     $query = wp_parse_url($url, PHP_URL_QUERY);
@@ -849,6 +859,22 @@ function aat_find_by_source($source_id, $post_type) {
     return $found ? (int) $found[0] : 0;
 }
 
+function aat_import_values_equal($left, $right) {
+    return wp_json_encode($left, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        === wp_json_encode($right, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+}
+
+function aat_import_is_empty($value) {
+    if ($value === false || $value === null || $value === '') return true;
+    return is_array($value) && count($value) === 0;
+}
+
+/** Only source-managed or empty values may be refreshed on a re-run. */
+function aat_import_can_write($existing, $current, $managed_before, $field) {
+    if (!$existing || aat_import_is_empty($current)) return true;
+    return array_key_exists($field, $managed_before) && aat_import_values_equal($current, $managed_before[$field]);
+}
+
 function aat_import_item($old, $new_type, $legacy_terms = null) {
     $source_id = (int) ($old['id'] ?? 0);
     if (!$source_id) return new WP_Error('aat_no_id', 'Legacy payload has no id');
@@ -871,15 +897,28 @@ function aat_import_item($old, $new_type, $legacy_terms = null) {
         $existing = $by_slug ? (int) $by_slug[0] : 0;
     }
 
+    $managed_post_before = $existing
+        ? (json_decode((string) get_post_meta($existing, '_aat_imported_post_json', true), true) ?: [])
+        : [];
+    $current_post = $existing ? get_post($existing) : null;
+    $next_title = aat_rebrand_text(wp_strip_all_tags((string) ($old['title'] ?? 'Untitled')));
+    $next_content = (string) ($old['content'] ?? '');
+    $next_excerpt = aat_rebrand_text(wp_strip_all_tags((string) ($old['excerpt'] ?? '')));
     $postarr = [
         'post_type' => $new_type,
         'post_status' => 'publish',
-        'post_title' => aat_rebrand_text(wp_strip_all_tags((string) ($old['title'] ?? 'Untitled'))),
-        'post_name' => sanitize_title((string) ($old['slug'] ?? '')),
     ];
+    if (!$existing) $postarr['post_name'] = sanitize_title((string) ($old['slug'] ?? ''));
+    if (aat_import_can_write($existing, $current_post ? $current_post->post_title : '', $managed_post_before, 'post_title')) {
+        $postarr['post_title'] = $next_title;
+    }
     if (!$is_home) {
-        $postarr['post_content'] = (string) ($old['content'] ?? '');
-        $postarr['post_excerpt'] = aat_rebrand_text(wp_strip_all_tags((string) ($old['excerpt'] ?? '')));
+        if (aat_import_can_write($existing, $current_post ? $current_post->post_content : '', $managed_post_before, 'post_content')) {
+            $postarr['post_content'] = $next_content;
+        }
+        if (aat_import_can_write($existing, $current_post ? $current_post->post_excerpt : '', $managed_post_before, 'post_excerpt')) {
+            $postarr['post_excerpt'] = $next_excerpt;
+        }
         if (!empty($old['date'])) $postarr['post_date_gmt'] = get_gmt_from_date($old['date']);
     }
     if ($existing) $postarr['ID'] = $existing;
@@ -891,9 +930,18 @@ function aat_import_item($old, $new_type, $legacy_terms = null) {
 
     update_post_meta($post_id, '_aat_source_id', $source_id);
     update_post_meta($post_id, '_aat_source_type', (string) ($old['type'] ?? ''));
+    update_post_meta($post_id, '_aat_source_schema_version', aat_contract_version());
+    /* Lossless source snapshot: a future contract can remap fields that this
+       version did not yet understand. This fixes the previous behaviour where
+       compatibility reported unknown fields but the importer discarded them. */
+    update_post_meta(
+        $post_id,
+        '_aat_source_acf_json',
+        wp_slash(wp_json_encode(is_array($old['acf'] ?? null) ? $old['acf'] : [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE))
+    );
     if (!empty($old['path'])) update_post_meta($post_id, '_aat_source_path', esc_url_raw($old['path']));
 
-    if (!$is_home && !empty($old['content'])) {
+    if (!$is_home && !empty($old['content']) && array_key_exists('post_content', $postarr)) {
         $rewritten = aat_import_rewrite_content((string) $old['content'], $post_id);
         if ($rewritten !== $old['content']) {
             wp_update_post(wp_slash(['ID' => $post_id, 'post_content' => $rewritten]));
@@ -906,6 +954,8 @@ function aat_import_item($old, $new_type, $legacy_terms = null) {
     }
 
     $mapped = $is_home ? aat_map_homepage($old, $post_id) : aat_map_fields($old, $new_type, $post_id);
+    $managed_acf_before = json_decode((string) get_post_meta($post_id, '_aat_imported_acf_json', true), true) ?: [];
+    $managed_acf_after = $managed_acf_before;
 
     if (!get_post_thumbnail_id($post_id) && !empty($mapped['acf']['hero_image'])) {
         $thumb = aat_find_imported_attachment(strtok($mapped['acf']['hero_image'], '?'));
@@ -922,8 +972,20 @@ function aat_import_item($old, $new_type, $legacy_terms = null) {
             $stored = $attachment ?: '';
         }
 
+        $current = function_exists('get_field') ? get_field($name, $post_id, false) : get_post_meta($post_id, $name, true);
+        if (!aat_import_can_write($existing, $current, $managed_acf_before, $name)) continue;
+
         aat_store_field($name, $stored, $post_id);
+        $managed_acf_after[$name] = function_exists('get_field') ? get_field($name, $post_id, false) : get_post_meta($post_id, $name, true);
     }
+    update_post_meta($post_id, '_aat_imported_acf_json', wp_slash(wp_json_encode($managed_acf_after, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)));
+
+    $saved_post = get_post($post_id);
+    $managed_post_after = $managed_post_before;
+    foreach (['post_title', 'post_content', 'post_excerpt'] as $field) {
+        if (array_key_exists($field, $postarr) && $saved_post) $managed_post_after[$field] = $saved_post->{$field};
+    }
+    update_post_meta($post_id, '_aat_imported_post_json', wp_slash(wp_json_encode($managed_post_after, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)));
 
     if ($mapped['relations']) {
         update_post_meta($post_id, '_aat_pending_relations', wp_json_encode($mapped['relations']));
@@ -1123,10 +1185,16 @@ add_action('rest_api_init', function () {
     ];
     register_rest_route('absolute-asia/v1', '/import/run', $admin + ['callback' => function (WP_REST_Request $r) {
         $type = sanitize_text_field((string) $r['type']);
+        if (in_array($type, ['seed-copy', 'hotel-copy', 'story', 'hub-pages'], true)) {
+            $allowed = aat_require_absolute_profile();
+            if (is_wp_error($allowed)) return $allowed;
+        }
         if ($type === 'homepage') return rest_ensure_response(aat_import_homepage());
         if ($type === 'relink') return rest_ensure_response(aat_import_relink());
         if ($type === 'menu') return rest_ensure_response(aat_import_menu());
         if ($type === 'seed-copy') return rest_ensure_response(aat_seed_homepage_copy());
+        if ($type === 'hotel-copy') return rest_ensure_response(aat_seed_hotel_copy());
+        if ($type === 'fill-itineraries') return rest_ensure_response(aat_backfill_itineraries(25));
         if ($type === 'fill-images') return rest_ensure_response(aat_backfill_images(20));
         if ($type === 'fill-excerpts') return rest_ensure_response(aat_backfill_excerpts(30));
         if ($type === 'enrich-tours') {
@@ -1180,6 +1248,11 @@ function aat_import_screen() {
     if (!current_user_can('manage_options')) return;
     if (isset($_POST['aat_source_url']) && check_admin_referer('aat_source')) {
         update_option('aat_source_url', esc_url_raw(wp_unslash($_POST['aat_source_url'])));
+        update_option('aat_content_profile', sanitize_key((string) ($_POST['aat_content_profile'] ?? 'generic')));
+        $legacy_hosts = array_filter(array_map(function ($host) {
+            return sanitize_text_field(trim($host));
+        }, explode(',', (string) wp_unslash($_POST['aat_legacy_hosts'] ?? ''))));
+        update_option('aat_legacy_hosts', implode(',', $legacy_hosts));
     }
     $types = aat_import_type_map();
     ?>
@@ -1190,6 +1263,15 @@ function aat_import_screen() {
             <?php wp_nonce_field('aat_source'); ?>
             <label><strong>Source site</strong>
                 <input type="url" name="aat_source_url" value="<?php echo esc_attr(aat_source_url()); ?>" class="regular-text">
+            </label>
+            <br><label><strong>Content profile</strong>
+                <select name="aat_content_profile">
+                    <option value="generic" <?php selected(aat_content_profile(), 'generic'); ?>>Generic / Vietnam / Thailand</option>
+                    <option value="absolute" <?php selected(aat_content_profile(), 'absolute'); ?>>Absolute Asia (enables branded seeds)</option>
+                </select>
+            </label>
+            <br><label><strong>Legacy hosts</strong>
+                <input type="text" name="aat_legacy_hosts" value="<?php echo esc_attr((string) get_option('aat_legacy_hosts', '')); ?>" class="regular-text" placeholder="old.example.com,www.old.example.com">
             </label>
             <button class="button">Save</button>
             <p class="description">The legacy site must have this plugin (or the old bridge) active so <code>/absolute-asia/v1/content-batch</code> answers.</p>
@@ -1419,7 +1501,7 @@ function aat_import_screen() {
             var $out = $('#aat-audit-out');
             $out.html('<p>Đang đối chiếu <strong>' + route + '</strong>…</p>');
 
-            post('import/audit', { route: route, sample: 30 })
+            post('import/audit', { route: route, limit: 0 })
                 .then(function(res) {
                     var badge = {
                         unmapped: '<span style="color:#b32d2e;font-weight:700">CHƯA MAP</span>',
@@ -1428,7 +1510,7 @@ function aat_import_screen() {
                         skip: '<span style="color:#8c8f94">bỏ qua</span>'
                     };
                     var html = '<p><strong>' + res.route + ' → ' + res.type + '</strong>' +
-                        ' &nbsp;(mẫu ' + res.oldTotal + ' bài cũ / ' + res.newTotal + ' bài mới)</p>';
+                        ' &nbsp;(đã quét toàn bộ ' + res.oldTotal + ' bài cũ / ' + res.newTotal + ' bài mới; contract v' + res.contractVersion + ')</p>';
                     html += '<table class="widefat striped"><thead><tr>' +
                         '<th>Trường bên WP cũ</th><th style="width:70px">Có</th>' +
                         '<th>Vào trường nào bên mới</th><th style="width:80px">Đã vào</th>' +

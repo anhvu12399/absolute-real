@@ -12,6 +12,7 @@ out/
 *.log
 *.tsbuildinfo
 .DS_Store
+.lighthouseci/
 
 # Audit downloads, captured production HTML, and local deliverables
 work/

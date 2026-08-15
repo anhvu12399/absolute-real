@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { ArchiveItem } from "@/lib/wp";
 import { BRAND_SHORT } from "@/lib/site";
-import { bg, optimized } from "@/lib/images";
+import { optimized } from "@/lib/images";
 
 /* ============================================================
    V2 Tour Listing Template
@@ -63,13 +64,16 @@ export default function TourListingTemplateV2({
       <section className="section on-white">
         <div className="container">
 
-          {visible.map((tour) => (
+          {visible.map((tour, index) => (
             <div className="journey-row reveal" key={tour.id}>
               <div
                 className={`journey-photo ph ${tour.featuredMedia?.url ? "" : "ph-vn"}`}
-                style={tour.featuredMedia?.url ? bg(tour.featuredMedia.url, "card") : undefined}
+                style={{ position: "relative", overflow: "hidden" }}
               >
-                <span className="journey-tag">{tour.categories?.[0]?.name || "Tailor-Made"}</span>
+                {tour.featuredMedia?.url && (
+                  <Image src={tour.featuredMedia.url} alt="" fill loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} sizes="(max-width: 760px) 100vw, 45vw" style={{ objectFit: "cover" }} />
+                )}
+                <span className="journey-tag" style={{ position: "relative", zIndex: 1 }}>{tour.categories?.[0]?.name || "Tailor-Made"}</span>
               </div>
               <div className="journey-panel">
                 <h3>{tour.title}</h3>

@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { SitePayload } from "@/lib/wp";
 import { resolveSections } from "./navigation";
 import { BRAND_NAME } from "@/lib/site";
 import type { NavSection } from "./navigation";
-import { optimized } from "@/lib/images";
 
 /** A section with no links of its own has no panel worth opening. */
 function hasPanel(section: NavSection) {
@@ -79,8 +79,7 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
         <div className="container nav-inner">
           <Link href="/" className="brand-mark" onClick={closeAll}>
             {site?.logo ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img className="brand-logo" src={optimized(site.logo, 240)} alt={site?.name || BRAND_NAME} />
+              <Image className="brand-logo" src={site.logo} width={240} height={80} sizes="(max-width: 760px) 108px, 132px" alt={site?.name || BRAND_NAME} />
             ) : (
               <span className="seal">A</span>
             )}
@@ -194,8 +193,7 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
         <div className="mobile-menu-head">
           <Link href="/" className="mobile-menu-brand" onClick={closeAll}>
             {site?.logo ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={optimized(site.logo, 120)} alt={site?.name || BRAND_NAME} />
+              <Image src={site.logo} width={120} height={40} sizes="120px" alt={site?.name || BRAND_NAME} />
             ) : (
               <span className="seal" style={{ fontSize: "1.2rem", width: 32, height: 32 }}>A</span>
             )}

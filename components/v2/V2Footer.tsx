@@ -1,8 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { MenuItem, SitePayload } from "@/lib/wp";
 import { toLocalHref } from "@/lib/links";
 import { BRAND_NAME, BRAND_SHORT, SOCIAL_LINKS } from "@/lib/site";
-import { optimized } from "@/lib/images";
 
 /** Footer columns come from the WordPress "footer" menu; these ship until it exists. */
 const FALLBACK_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string }> }> = [
@@ -61,8 +61,7 @@ export function V2Footer({ site }: { site?: SitePayload | null }) {
         <div className="footer-brand">
           <Link href="/" className="brand-mark footer-brand-mark" style={{ marginBottom: "1.2rem", display: "inline-flex", textDecoration: "none" }}>
             {site?.logo ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img className="brand-logo" src={optimized(site.logo, 240)} alt={site?.name || BRAND_NAME} />
+              <Image className="brand-logo" src={site.logo} width={240} height={80} sizes="132px" alt={site?.name || BRAND_NAME} />
             ) : (
               <span className="seal">A</span>
             )}

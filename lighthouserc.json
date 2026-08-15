@@ -1,0 +1,36 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "npm run start -- -p 3000",
+      "startServerReadyPattern": "Ready in|Local:",
+      "url": [
+        "http://localhost:3000/",
+        "http://localhost:3000/tours/classic-south-korea-tour/",
+        "http://localhost:3000/vietnam/",
+        "http://localhost:3000/collection/four-seasons-hotel-seoul/",
+        "http://localhost:3000/blogs/"
+      ],
+      "numberOfRuns": 3,
+      "settings": {
+        "formFactor": "mobile",
+        "screenEmulation": { "mobile": true, "width": 390, "height": 844, "deviceScaleFactor": 2, "disabled": false }
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.9 }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
+        "total-blocking-time": ["error", { "maxNumericValue": 200 }],
+        "resource-summary:script:size": ["error", { "maxNumericValue": 260000 }],
+        "resource-summary:document:size": ["error", { "maxNumericValue": 180000 }],
+        "resource-summary:image:size": ["error", { "maxNumericValue": 1400000 }],
+        "resource-summary:total:count": ["error", { "maxNumericValue": 80 }]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": ".lighthouseci"
+    }
+  }
+}
