@@ -1179,7 +1179,15 @@ function aat_seed_hotel_images() {
         $post = $found ? $found[0] : null;
 
         if (!$post) { $skipped[] = $slug . ': không tìm thấy bài'; continue; }
-        if (get_post_meta($post->ID, 'hero_image', true)) { $skipped[] = $slug . ': đã có ảnh'; continue; }
+
+        /* Ask the same way the site asks. get_post_meta() reports a raw value
+           that ACF cannot resolve - every hotel here holds one, and get_field()
+           returns false for it - so testing the raw meta declared all 56 "đã
+           có ảnh" while the field was empty everywhere it is actually read. */
+        $current = function_exists('get_field') ? get_field('hero_image', $post->ID) : get_post_meta($post->ID, 'hero_image', true);
+        if (is_array($current)) $current = $current['url'] ?? '';
+        if (is_string($current) && $current !== '') { $skipped[] = $slug . ': đã có ảnh'; continue; }
+
         if (!aat_url_exists($url)) { $skipped[] = $slug . ': ảnh không tồn tại'; continue; }
 
         /* Through the shared writer, not update_post_meta: ACF needs the
