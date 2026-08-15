@@ -69,6 +69,36 @@ function aat_tab($key, $label) {
     return ['key' => $key, 'label' => $label, 'type' => 'tab'];
 }
 
+/**
+ * Index local field keys by the post types in a group's location rules.
+ * ACF cannot resolve a selector by name when old raw meta has no companion
+ * `_field_name` reference, so the importer uses this deterministic registry.
+ */
+function aat_index_local_fields($fields, $post_types) {
+    foreach ((array) $fields as $field) {
+        if (!is_array($field)) continue;
+        if (!empty($field['name']) && !empty($field['key'])) {
+            foreach ($post_types as $post_type) {
+                $GLOBALS['aat_field_key_registry'][$post_type][$field['name']] = $field['key'];
+            }
+        }
+        if (!empty($field['sub_fields'])) aat_index_local_fields($field['sub_fields'], $post_types);
+    }
+}
+
+function aat_add_local_field_group($group) {
+    $post_types = [];
+    foreach ((array) ($group['location'] ?? []) as $rules) {
+        foreach ((array) $rules as $rule) {
+            if (($rule['param'] ?? '') === 'post_type' && ($rule['operator'] ?? '') === '==' && !empty($rule['value'])) {
+                $post_types[] = (string) $rule['value'];
+            }
+        }
+    }
+    aat_index_local_fields($group['fields'] ?? [], array_values(array_unique($post_types)));
+    acf_add_local_field_group($group);
+}
+
 
 
 add_action('acf/init', 'aat_register_fields');
@@ -77,7 +107,7 @@ function aat_register_fields() {
     if (!function_exists('acf_add_local_field_group')) return;
 
     /* ─────────────────────────── HOMEPAGE ─────────────────────────── */
-    acf_add_local_field_group([
+    aat_add_local_field_group([
         'key' => 'group_aat_homepage',
         'title' => 'Homepage Content',
         'fields' => [
@@ -100,6 +130,9 @@ function aat_register_fields() {
             aat_text('field_aat_home_tab_insp_label', 'Tab 3 Label (Inspiration)', 'tab_inspiration_label', ['default_value' => 'Travel inspiration']),
             aat_repeater_field('field_aat_home_tab_dest_cards', 'Destinations Tab Cards (Auto-filled if empty)', 'home_tab_destinations', 'home-cards', aat_fills_itself('destination')),
             aat_repeater_field('field_aat_home_tab_jour_cards', 'Journeys Tab Cards (Auto-filled if empty)', 'home_tab_journeys', 'home-cards', aat_fills_itself('tour')),
+            aat_repeater_field('field_aat_home_tab_offer_cards', 'Legacy Offer Cards', 'home_tab_offers', 'home-cards'),
+            aat_repeater_field('field_aat_home_tab_new_cards', 'Legacy New Cards', 'home_tab_new', 'home-cards'),
+            aat_repeater_field('field_aat_home_explore_cards', 'Legacy Ways to Explore', 'home_ways_to_explore', 'home-cards'),
 
             aat_tab('tab_aat_home_featured', 'Featured Journeys & Stays'),
             aat_text('field_aat_home_feat_eye', 'Featured Journeys Eyebrow (HTML)', 'featured_eyebrow', ['default_value' => '<em>Private</em> Journeys']),
@@ -151,7 +184,7 @@ function aat_register_fields() {
     ]);
 
     /* ───────────────────────────── TOUR ───────────────────────────── */
-    acf_add_local_field_group([
+    aat_add_local_field_group([
         'key' => 'group_aat_tour',
         'title' => 'Tour Details',
         'fields' => [
@@ -162,9 +195,15 @@ function aat_register_fields() {
             ['key' => 'field_aat_tour_destcount', 'label' => 'Destinations Count', 'name' => 'destinations_count', 'type' => 'number'],
             ['key' => 'field_aat_tour_guests', 'label' => 'Minimum Guests', 'name' => 'min_guests', 'type' => 'number', 'default_value' => 2],
             aat_text('field_aat_tour_duration_label', 'Duration Label (e.g. "12 Days / 11 Nights")', 'duration_label'),
+            aat_text('field_aat_tour_route', 'Route Summary', 'tour_route'),
+            aat_text('field_aat_tour_level', 'Tour Level', 'tour_level'),
+            aat_text('field_aat_tour_code', 'Tour Code', 'tour_code'),
+            ['key' => 'field_aat_tour_featured', 'label' => 'Featured Tour', 'name' => 'is_featured', 'type' => 'true_false'],
+            aat_text('field_aat_tour_hero_eye_link', 'Hero Eyebrow Link', 'hero_eyebrow_link'),
 
             aat_tab('tab_aat_tour_overview', 'Overview'),
             aat_text('field_aat_tour_intro_title', 'Intro Title', 'intro_title'),
+            aat_textarea('field_aat_tour_intro_desc', 'Intro Description', 'intro_description', 3),
             aat_textarea('field_aat_tour_highlights', 'Highlights (one per line)', 'highlights_list', 6),
             aat_text('field_aat_tour_lbl_high', 'Highlights Heading', 'highlights_title', ['default_value' => '<em>Trip</em> Highlights']),
             aat_text('field_aat_tour_lbl_highdesc', 'Highlights Note', 'highlights_note'),
@@ -173,6 +212,11 @@ function aat_register_fields() {
             aat_textarea('field_aat_tour_group_desc', 'Group CTA Description', 'group_cta_desc', 3),
             aat_text('field_aat_tour_group_btn', 'Group CTA Button', 'group_cta_btn'),
             aat_text('field_aat_tour_classic_link', 'Classic Tour Link', 'classic_tour_link'),
+            aat_text('field_aat_tour_options_title', 'Accommodation Options Heading', 'options_title'),
+            aat_textarea('field_aat_tour_options_note', 'Accommodation Options Note', 'options_note', 3),
+            aat_text('field_aat_tour_booking_title', 'Booking Policy Heading', 'booking_policy_title'),
+            aat_text('field_aat_tour_cta_label', 'Legacy CTA Label', 'cta_label'),
+            aat_text('field_aat_tour_cta_link', 'Legacy CTA Link', 'cta_link'),
 
             aat_tab('tab_aat_tour_itinerary', 'Itinerary'),
             aat_repeater_field('field_aat_tour_itinerary', 'Day by Day', 'itinerary', 'itinerary'),
@@ -212,6 +256,7 @@ function aat_register_fields() {
             aat_text('field_aat_tour_faq_title', 'FAQ Heading', 'faq_title'),
             aat_text('field_aat_tour_hotels_eye', 'Stays Eyebrow (HTML)', 'hotels_eyebrow'),
             aat_text('field_aat_tour_hotels_title', 'Stays Heading', 'hotels_title'),
+            aat_text('field_aat_tour_related_title', 'Other Tours Heading', 'related_tours_title'),
 
             [
                 'key' => 'field_aat_tour_related',
@@ -228,7 +273,7 @@ function aat_register_fields() {
     ]);
 
     /* ──────────────────── DESTINATION / PLACE TO GO ──────────────────── */
-    acf_add_local_field_group([
+    aat_add_local_field_group([
         'key' => 'group_aat_place',
         'title' => 'Destination Details',
         'fields' => [
@@ -255,6 +300,8 @@ function aat_register_fields() {
             aat_text('field_aat_place_guides_head', 'Guides Heading', 'guides_heading'),
             aat_text('field_aat_place_plan_eye', 'Planning Eyebrow (HTML)', 'planning_eyebrow'),
             aat_text('field_aat_place_plan_head', 'Planning Heading', 'planning_heading'),
+            aat_text('field_aat_place_related_title', 'Related Content Heading', 'related_title'),
+            aat_textarea('field_aat_place_related_desc', 'Related Content Description', 'related_description', 3),
 
             aat_tab('tab_aat_place_related', 'Related & Gallery'),
             [
@@ -294,16 +341,18 @@ function aat_register_fields() {
     /* ───────────── DESTINATION GUIDE SECTIONS ─────────────
        The legacy country pages (/vietnam/, /south-korea/…) are plain pages that
        carry a full guide, so these apply to pages as well as destinations. */
-    acf_add_local_field_group([
+    aat_add_local_field_group([
         'key' => 'group_aat_guide',
         'title' => 'Destination Guide Sections',
         'fields' => array_merge([
+            aat_text('field_aat_guide_month_title', 'Month-by-Month Heading', 'month_guide_title'),
             aat_repeater_field('field_aat_guide_month', 'Month-by-Month Guide', 'month_guide', 'months'),
             aat_image('field_aat_guide_best_img', 'Best Time Image', 'best_time_image'),
             aat_wysiwyg('field_aat_guide_best_html', 'Best Time Copy', 'best_time_html'),
             aat_wysiwyg('field_aat_guide_popular', 'Popular Places Copy', 'popular_places_html'),
             aat_wysiwyg('field_aat_guide_ideas', 'Experiences Copy', 'experiences_html'),
             aat_wysiwyg('field_aat_guide_trip_html', 'Trip Ideas Copy', 'trip_ideas_html'),
+            aat_text('field_aat_guide_trip_title', 'Trip Ideas Heading', 'trip_ideas_title'),
         ]),
         'location' => [
             [['param' => 'post_type', 'operator' => '==', 'value' => 'place_to_go']],
@@ -314,7 +363,7 @@ function aat_register_fields() {
     ]);
 
     /* ───────────────────────────── HOTEL ───────────────────────────── */
-    acf_add_local_field_group([
+    aat_add_local_field_group([
         'key' => 'group_aat_hotel',
         'title' => 'Hotel Details',
         'fields' => [
@@ -389,7 +438,7 @@ function aat_register_fields() {
     ]);
 
     /* ───────────────── GUIDES / THINGS TO DO / BLOG ───────────────── */
-    acf_add_local_field_group([
+    aat_add_local_field_group([
         'key' => 'group_aat_editorial',
         'title' => 'Article Details',
         'fields' => [
@@ -430,6 +479,11 @@ function aat_register_fields() {
             aat_wysiwyg('field_aat_ed_plan_bottom', 'Plan Footer', 'plan_footer'),
             aat_text('field_aat_ed_plan_title', 'Plan Heading', 'plan_title'),
             aat_text('field_aat_ed_further_title', 'Further Reading Heading', 'further_title'),
+            aat_text('field_aat_ed_sidebar_popular', 'Popular Posts Heading', 'sidebar_popular_title'),
+            aat_text('field_aat_ed_sidebar_search', 'Search Heading', 'sidebar_search_title'),
+            aat_text('field_aat_ed_sidebar_social', 'Social Heading', 'sidebar_social_title'),
+            aat_text('field_aat_ed_view_more_label', 'View More Label', 'view_more_label'),
+            aat_text('field_aat_ed_view_more_link', 'View More Link', 'view_more_link'),
             aat_text('field_aat_ed_specialist_title', 'Specialist Heading', 'specialist_title'),
             aat_textarea('field_aat_ed_specialist_text', 'Specialist Copy', 'specialist_text', 3),
             aat_image('field_aat_ed_specialist_photo', 'Specialist Photo', 'specialist_photo'),
@@ -447,7 +501,7 @@ function aat_register_fields() {
     ]);
 
     /* ───────────────────────────── PAGES ───────────────────────────── */
-    acf_add_local_field_group([
+    aat_add_local_field_group([
         'key' => 'group_aat_page',
         'title' => 'Page Hero & Directory',
         'fields' => [
@@ -495,6 +549,25 @@ function aat_register_fields() {
             aat_text('field_aat_page_specialist_link', 'Specialist Button Link', 'specialist_link'),
 
             aat_tab('tab_aat_page_hubs', 'Directory Cards'),
+            aat_repeater_field('field_aat_page_gallery', 'Page Gallery', 'gallery', 'gallery'),
+            [
+                'key' => 'field_aat_page_featured_tours',
+                'label' => 'Featured Tours',
+                'name' => 'featured_tours',
+                'type' => 'post_object',
+                'post_type' => ['tour'],
+                'multiple' => 1,
+                'return_format' => 'id',
+            ],
+            [
+                'key' => 'field_aat_page_related_guides',
+                'label' => 'Related Guides',
+                'name' => 'related_guides',
+                'type' => 'post_object',
+                'post_type' => ['travel_guide', 'thing_to_do', 'blog'],
+                'multiple' => 1,
+                'return_format' => 'id',
+            ],
             aat_repeater_field('field_aat_page_journeys', 'Journeys Directory Cards', 'journeys', 'hub-journeys'),
             aat_repeater_field('field_aat_page_cruises', 'Cruises Directory Cards', 'cruises', 'hub-cruises'),
             aat_repeater_field('field_aat_page_articles', 'Travel Inspiration Cards', 'articles', 'hub-articles'),
@@ -510,7 +583,7 @@ function aat_register_fields() {
        them. These two fields are how an editor takes that page over: the
        country's own photograph and its own opening line, with no page to
        create first. The REST payload exposes both. */
-    acf_add_local_field_group([
+    aat_add_local_field_group([
         'key' => 'group_aat_country',
         'title' => 'Country Landing Page',
         'fields' => [

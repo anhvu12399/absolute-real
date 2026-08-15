@@ -223,22 +223,36 @@ function aat_audit_export($offset = 0, $limit = 100) {
 
 function aat_audit_reconcile($route, $offset, $limit, $dry_run, $run_id) {
     $map = aat_import_type_map();
-    if (!isset($map[$route])) return new WP_Error('aat_bad_type', 'Unknown source type', ['status' => 400]);
+    $is_home = $route === 'homepage';
+    if (!$is_home && !isset($map[$route])) return new WP_Error('aat_bad_type', 'Unknown source type', ['status' => 400]);
+    $target_type = $is_home ? 'homepage' : $map[$route];
     $limit = min(max((int) $limit, 1), 50);
     $offset = max(0, (int) $offset);
-    $list = aat_import_get("/wp/v2/$route?per_page=$limit&offset=$offset&_fields=id");
-    if (is_wp_error($list)) return $list;
-    $ids = array_map(function ($row) { return (int) $row['id']; }, $list);
-    $items = $ids ? aat_import_get('/absolute-asia/v1/content-batch?include=' . implode(',', $ids)) : [];
+    if ($is_home) {
+        $home = $offset === 0 ? aat_import_get('/absolute-asia/v1/content?path=/') : null;
+        if (is_wp_error($home)) return $home;
+        $list = $home ? [['id' => (int) ($home['id'] ?? 0)]] : [];
+        $items = $home ? [$home] : [];
+    } else {
+        $list = aat_import_get("/wp/v2/$route?per_page=$limit&offset=$offset&_fields=id");
+        if (is_wp_error($list)) return $list;
+        $ids = array_map(function ($row) { return (int) $row['id']; }, $list);
+        $items = $ids ? aat_import_get('/absolute-asia/v1/content-batch?include=' . implode(',', $ids)) : [];
+    }
     if (is_wp_error($items)) return $items;
 
     $actions = [];
     foreach ($items as $item) {
         $source_id = (int) ($item['id'] ?? 0);
-        $existing = aat_find_by_source($source_id, $map[$route]);
+        if ($is_home) {
+            $homes = get_posts(['post_type' => 'homepage', 'posts_per_page' => 1, 'post_status' => 'any', 'fields' => 'ids']);
+            $existing = $homes ? (int) $homes[0] : 0;
+        } else {
+            $existing = aat_find_by_source($source_id, $target_type);
+        }
         $action = $existing ? 'update' : 'create';
         if (!$dry_run) {
-            $result = aat_import_item($item, $map[$route]);
+            $result = aat_import_item($item, $target_type);
             if (is_wp_error($result)) $actions[] = ['sourceId' => $source_id, 'action' => 'error', 'message' => $result->get_error_message()];
             else $actions[] = ['sourceId' => $source_id, 'postId' => (int) $result, 'action' => $action];
         } else {

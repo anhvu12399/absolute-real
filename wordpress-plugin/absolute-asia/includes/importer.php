@@ -160,7 +160,21 @@ function aat_import_gallery($ids, $post_id = 0) {
     if (!is_array($ids)) return [];
     $rows = [];
     foreach (array_slice($ids, 0, 30) as $old_id) {
-        $new_id = is_numeric($old_id) ? aat_import_media_id($old_id, $post_id) : aat_import_media_url($old_id, $post_id);
+        if (is_array($old_id)) {
+            $url = aat_str($old_id['url'] ?? $old_id['image_url'] ?? '');
+            $legacy_id = $old_id['ID'] ?? $old_id['id'] ?? 0;
+            if (!$url && is_array($old_id['image'] ?? null)) {
+                $url = aat_str($old_id['image']['url'] ?? '');
+                $legacy_id = $legacy_id ?: ($old_id['image']['ID'] ?? $old_id['image']['id'] ?? 0);
+            }
+            $new_id = $url
+                ? aat_import_media_url($url, $post_id)
+                : ($legacy_id ? aat_import_media_id($legacy_id, $post_id) : 0);
+        } else {
+            $new_id = is_numeric($old_id)
+                ? aat_import_media_id($old_id, $post_id)
+                : aat_import_media_url($old_id, $post_id);
+        }
         if (!$new_id) continue;
         $rows[] = [
             'image_url' => wp_get_attachment_url($new_id),
@@ -460,9 +474,9 @@ function aat_map_fields($old, $new_type, $post_id) {
             break;
 
         case 'page':
-            // Cleared explicitly: an earlier mapping wrote the specialist
-            // heading here, and a skipped field would leave that stale value.
-            $out['hero_tagline'] = '';
+            // Keep a mapped legacy introduction when present; otherwise clear
+            // the stale value written by the pre-contract importer.
+            if (empty($out['hero_tagline'])) $out['hero_tagline'] = '';
 
             $best = is_array($acf['best_time'] ?? null) ? $acf['best_time'] : [];
             if (!empty($best['image_left'])) {
@@ -495,6 +509,29 @@ function aat_map_fields($old, $new_type, $post_id) {
                 if ($phone) $out['specialist_phone'] = $phone;
                 if (!empty($guide['link_button'])) $out['specialist_link'] = aat_link_url($guide['link_button']);
             }
+
+            $plan_button = $acf['button_plan_trip'] ?? [];
+            if (is_array($plan_button) && $plan_button) {
+                $out['specialist_button'] = aat_link_title($plan_button) ?: 'Start planning';
+                $out['specialist_link'] = aat_link_url($plan_button);
+            }
+
+            $team = [];
+            foreach ((array) ($acf['member'] ?? []) as $member) {
+                if (!is_array($member)) continue;
+                $bio = trim(wp_strip_all_tags(aat_str($member['mem_desc'] ?? '')));
+                $name = '';
+                if (preg_match('/^([A-Z][A-Za-z\x{2019}\x{27}-]+)/u', $bio, $match)) {
+                    $name = (string) preg_replace('/[\x{2019}\x{27}]s$/u', '', $match[1]);
+                }
+                $team[] = [
+                    'photo' => aat_import_media_url_only(aat_str($member['mem_thumb'] ?? ''), $post_id),
+                    'name' => $name,
+                    'role' => '',
+                    'bio' => $bio,
+                ];
+            }
+            if ($team) $out['team'] = $team;
             break;
     }
 
@@ -835,12 +872,54 @@ function aat_import_menu() {
  * came back as broken JSON and the frontend saw a string instead of an array.
  * Slashing on the way in survives that unslash.
  */
+function aat_find_field_key_in_rows($name, $fields) {
+    foreach ((array) $fields as $field) {
+        if (!is_array($field)) continue;
+        if (($field['name'] ?? '') === $name && !empty($field['key'])) return (string) $field['key'];
+        if (!empty($field['sub_fields'])) {
+            $nested = aat_find_field_key_in_rows($name, $field['sub_fields']);
+            if ($nested) return $nested;
+        }
+    }
+    return '';
+}
+
+/** Resolve a local ACF field even when the post has no `_field_name` reference yet. */
+function aat_field_key_for_post($name, $post_id) {
+    if (!function_exists('get_field_object')) return '';
+    $post_type = get_post_type($post_id);
+    $registered = $GLOBALS['aat_field_key_registry'][$post_type][$name] ?? '';
+    if ($registered) return (string) $registered;
+
+    $direct = get_field_object($name, $post_id, false, false);
+    if (is_array($direct) && !empty($direct['key'])) return (string) $direct['key'];
+
+    if (!function_exists('acf_get_field_groups') || !function_exists('acf_get_fields')) return '';
+    foreach ((array) acf_get_field_groups(['post_id' => $post_id]) as $group) {
+        $key = aat_find_field_key_in_rows($name, acf_get_fields($group));
+        if ($key) return $key;
+    }
+    return '';
+}
+
 function aat_store_field($name, $value, $post_id) {
     // Field values carry the old trading name too, not just post bodies.
     if (is_string($value) && strpos($name, 'source_') !== 0) $value = aat_rebrand_text($value);
     $value = is_string($value) ? wp_slash($value) : $value;
     // source_* keys are bookkeeping, not ACF fields - update_field would drop them.
     if (strpos($name, 'source_') === 0 || !function_exists('update_field')) {
+        update_post_meta($post_id, $name, $value);
+        return;
+    }
+    // Use the field key when possible. Existing sites can contain the raw meta
+    // value without ACF's companion `_field_name` reference; updating by key
+    // repairs that reference so get_fields() and the REST API expose it.
+    $field_key = aat_field_key_for_post($name, $post_id);
+    if ($field_key) {
+        // ACF stores the value plus a private reference containing the field
+        // key. update_field() can refuse to create that pair when legacy raw
+        // meta already exists, so write the canonical pair explicitly.
+        update_post_meta($post_id, '_' . $name, $field_key);
         update_post_meta($post_id, $name, $value);
         return;
     }
@@ -973,7 +1052,18 @@ function aat_import_item($old, $new_type, $legacy_terms = null) {
         }
 
         $current = function_exists('get_field') ? get_field($name, $post_id, false) : get_post_meta($post_id, $name, true);
-        if (!aat_import_can_write($existing, $current, $managed_acf_before, $name)) continue;
+        if (!aat_import_can_write($existing, $current, $managed_acf_before, $name)) {
+            // A legacy/imported value may already exist as plain post meta but
+            // have no ACF reference. Preserve its value while attaching the
+            // reference; this is exposure repair, not an editorial overwrite.
+            $reference = (string) get_post_meta($post_id, '_' . $name, true);
+            $field_key = aat_field_key_for_post($name, $post_id);
+            if ($reference === '' && $field_key !== '') {
+                aat_store_field($name, $current, $post_id);
+                $managed_acf_after[$name] = function_exists('get_field') ? get_field($name, $post_id, false) : get_post_meta($post_id, $name, true);
+            }
+            continue;
+        }
 
         aat_store_field($name, $stored, $post_id);
         $managed_acf_after[$name] = function_exists('get_field') ? get_field($name, $post_id, false) : get_post_meta($post_id, $name, true);

@@ -204,6 +204,14 @@ function aat_field_map() {
                 'tour-in-month' => ['to' => 'month_guide', 'as' => 'custom'],
                 'tour_guide' => ['to' => ['specialist_title', 'specialist_text', 'specialist_photo', 'specialist_phone', 'specialist_link'], 'as' => 'custom'],
                 'title_make' => ['to' => 'specialist_title'],
+                'desc_intro' => ['to' => 'page_description', 'as' => 'strip'],
+                'title_intro' => ['to' => 'hero_tagline', 'as' => 'strip'],
+                'content_contact' => ['to' => 'specialist_text', 'as' => 'strip'],
+                'title_plan_trip' => ['to' => 'specialist_title'],
+                'cnt_plan_trip' => ['to' => 'specialist_text', 'as' => 'strip'],
+                'button_plan_trip' => ['to' => ['specialist_button', 'specialist_link'], 'as' => 'custom'],
+                'member' => ['to' => 'team', 'as' => 'custom'],
+                'slider' => ['to' => 'gallery', 'as' => 'gallery'],
                 'travel_guides' => ['to' => 'related_guides', 'as' => 'rel'],
                 'post_top_cycling' => ['to' => 'featured_tours', 'as' => 'rel'],
                 'country_category' => ['to' => 'source_country_category', 'as' => 'term'],
@@ -217,6 +225,63 @@ function aat_field_map() {
                 'button' => 'rỗng 100% bên cũ',
                 'link_button' => 'rỗng 100% bên cũ',
                 'post_more_ideas' => 'rỗng 100% bên cũ',
+                'sec01' => 'khối layout linh hoạt cũ; nội dung được giữ trong source snapshot và post_content/template mới',
+                'sec02' => 'khối layout linh hoạt cũ; nội dung được giữ trong source snapshot và post_content/template mới',
+                'sec03' => 'khối layout linh hoạt cũ; nội dung được giữ trong source snapshot và post_content/template mới',
+                'slider_home' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'slide_review' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'images_list' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'content_02' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'post_03' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'post_04' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'post_05' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'phone' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'text_phone' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'link_email_icon' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'logo_web_review' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'name_web_review' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'link_web_review' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'text_review' => 'trang home trong pages được xử lý bởi importer homepage riêng',
+                'book_tour' => 'CTA home cũ được xử lý bởi importer homepage riêng',
+                'classic_tour' => 'CTA home cũ được xử lý bởi importer homepage riêng',
+                'categories' => 'taxonomy home cũ được xử lý bởi importer homepage riêng',
+                'sec03_title' => 'heading layout home cũ được thay bằng nội dung biên tập mới',
+                'sec04_title' => 'heading layout home cũ được thay bằng nội dung biên tập mới',
+                'sec05_title' => 'heading layout home cũ được thay bằng nội dung biên tập mới',
+                'sec11_title' => 'heading hub cũ được thay bằng directory động',
+                'sec01_links' => 'menu phụ home cũ được thay bằng menu WordPress',
+                'links_sec03' => 'link phụ home cũ được thay bằng điều hướng mới',
+                'links_sec11' => 'link phụ hub cũ được thay bằng directory động',
+                'button_text_sec04' => 'CTA home cũ được thay bằng CTA mới',
+                'button_link_sec04' => 'CTA home cũ được thay bằng CTA mới',
+                'text_at_single' => 'nhãn layout cũ, không phải nội dung bài',
+                'bg_my_way' => 'ảnh nền layout home cũ, giao diện mới không dùng',
+                'post11' => 'danh sách hub cũ được thay bằng truy vấn directory động',
+                'list_button' => 'CTA danh sách cũ được thay bằng điều hướng directory',
+                'taxonomy_suggest' => 'taxonomy gợi ý được frontend truy vấn động',
+                'title_suggest' => 'heading gợi ý cũ được frontend directory thay thế',
+                'thumbnail_around_the_world' => 'ảnh trang hub cũ được thay bằng ảnh nội dung động',
+                'desc_around_the_world' => 'copy trang hub cũ được thay bằng page description/directory',
+                'title_around_the_world' => 'heading trang hub cũ được thay bằng title trang',
+                'title_tab' => 'nhãn tab layout cũ được thay bằng directory',
+                'choose_post_sec01' => 'quan hệ holiday hub được frontend archive truy vấn động',
+                'choose_post_sec02' => 'quan hệ holiday hub được frontend archive truy vấn động',
+                'choose_sub_post_sec01' => 'quan hệ holiday hub được frontend archive truy vấn động',
+                'offer' => 'offer hub cũ được frontend archive truy vấn động',
+                'ins_title' => 'heading inspiration cũ được template directory thay thế',
+                'holidays_title' => 'heading directory cũ được template mới thay thế',
+                'holidays_title_sec02' => 'heading directory cũ được template mới thay thế',
+                'holidays_title_sec03' => 'heading directory cũ được template mới thay thế',
+                'holidays_title_sec04' => 'heading directory cũ được template mới thay thế',
+                'main_post_ins' => 'quan hệ inspiration cũ được frontend archive truy vấn động',
+                'ins_title_sec02' => 'heading inspiration cũ được template directory thay thế',
+                'choose_post_ins_sec02' => 'quan hệ inspiration cũ được frontend archive truy vấn động',
+                'ins_title_sec03' => 'heading inspiration cũ được template directory thay thế',
+                'offer_ins' => 'offer inspiration cũ được frontend archive truy vấn động',
+                'ins_title_sec04' => 'heading inspiration cũ được template directory thay thế',
+                'latest_stories_title' => 'heading blog cũ được template article directory thay thế',
+                'popular_posts_title' => 'heading blog cũ được template article directory thay thế',
+                'post_array' => 'danh sách bài cũ được destination/article directory truy vấn động',
             ],
         ],
 
@@ -287,6 +352,24 @@ function aat_transform_value($value, $as, $post_id) {
         case 'lines':
             return aat_html_to_lines($value);
         case 'image':
+            if (is_array($value)) {
+                $url = aat_str($value['url'] ?? $value['image_url'] ?? '');
+                $legacy_id = $value['ID'] ?? $value['id'] ?? 0;
+                if (!$url && is_array($value['image'] ?? null)) {
+                    $url = aat_str($value['image']['url'] ?? '');
+                    $legacy_id = $legacy_id ?: ($value['image']['ID'] ?? $value['image']['id'] ?? 0);
+                }
+                if ($url !== '') return aat_import_media_url_only($url, $post_id);
+                if ($legacy_id) {
+                    $new_id = aat_import_media_id($legacy_id, $post_id);
+                    return $new_id ? (string) wp_get_attachment_url($new_id) : null;
+                }
+                return null;
+            }
+            if (is_numeric($value)) {
+                $new_id = aat_import_media_id($value, $post_id);
+                return $new_id ? (string) wp_get_attachment_url($new_id) : null;
+            }
             $url = aat_str($value);
             return $url === '' ? null : aat_import_media_url_only($url, $post_id);
         case 'link':

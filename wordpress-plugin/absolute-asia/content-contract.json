@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 8,
   "types": {
     "homepage": {
       "consumer": "components/home/HomeTemplateV2.tsx",
@@ -45,9 +45,9 @@
     "page": {
       "consumer": "app/[[...slug]]/page.tsx",
       "defaultFieldStatus": "optional",
-      "fields": ["hero_image", "eyebrow", "hero_tagline", "page_description", "pillars_title", "pillars", "story_eyebrow", "story_headline", "story_lede", "story_milestones", "story_now_title", "story_now_text", "story_founder_name", "story_founder_role", "story_founder_photo", "story_founder_quote", "team_title", "team", "destination_overview", "map_headline", "map_description", "month_guide", "best_time_image", "best_time_html", "popular_places_html", "experiences_html", "trip_ideas_html", "journeys", "cruises", "articles", "specialist_title", "specialist_text", "specialist_photo", "specialist_phone", "specialist_button", "specialist_link"],
-      "relationships": [],
-      "repeaters": ["pillars", "story_milestones", "team", "month_guide", "journeys", "cruises", "articles"]
+      "fields": ["hero_image", "eyebrow", "hero_tagline", "page_description", "pillars_title", "pillars", "story_eyebrow", "story_headline", "story_lede", "story_milestones", "story_now_title", "story_now_text", "story_founder_name", "story_founder_role", "story_founder_photo", "story_founder_quote", "team_title", "team", "destination_overview", "map_headline", "map_description", "month_guide_title", "month_guide", "best_time_image", "best_time_html", "popular_places_html", "experiences_html", "trip_ideas_title", "trip_ideas_html", "featured_tours", "related_guides", "gallery", "journeys", "cruises", "articles", "specialist_title", "specialist_text", "specialist_photo", "specialist_phone", "specialist_button", "specialist_link"],
+      "relationships": ["featured_tours", "related_guides"],
+      "repeaters": ["pillars", "story_milestones", "team", "month_guide", "gallery", "journeys", "cruises", "articles"]
     },
     "trip": {
       "postTypes": ["trip"],
@@ -63,8 +63,22 @@
     "departure_dates": ["date_range", "price_info", "availability_status"],
     "gallery": ["image_url", "caption"],
     "faqs": ["question", "answer"],
-    "experiences": ["image_url", "title", "description", "link"],
+    "experiences": ["image_url", "image", "title", "description", "link"],
     "nearby_places": ["name", "location_map", "latitude", "longitude"],
-    "month_guide": ["month", "image_url", "description", "places_title"]
+    "month_guide": ["month", "image_url", "description", "places_title"],
+    "home_banner_slider": ["image_url", "image_url_2", "tagline", "title", "description", "subtitle", "meta", "link", "link_text"],
+    "trust_items": ["icon", "text"],
+    "home_tab_destinations": ["id", "type", "slug", "path", "image_url", "badge", "title", "meta", "description", "link", "link_text"],
+    "home_tab_journeys": ["id", "type", "slug", "path", "image_url", "badge", "title", "meta", "description", "link", "link_text"],
+    "home_stay_with": ["id", "type", "slug", "path", "image_url", "badge", "title", "meta", "description", "link", "link_text"],
+    "home_values": ["title", "description"],
+    "team": ["photo", "name", "role", "bio"],
+    "testimonials": ["avatar", "user_name", "date", "vote", "content"],
+    "why_reasons": ["icon", "text"],
+    "pillars": ["kicker", "title", "text"],
+    "story_milestones": ["year", "title", "text"],
+    "journeys": ["id", "type", "slug", "path", "image_url", "title", "description", "link"],
+    "cruises": ["id", "type", "slug", "path", "image_url", "title", "description", "link"],
+    "articles": ["id", "type", "slug", "path", "image_url", "title", "description", "link"]
   }
 }

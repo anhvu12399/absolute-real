@@ -1,15 +1,30 @@
-import { readFileSync } from "node:fs";
-import { execFileSync } from "node:child_process";
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 
 const contract = JSON.parse(readFileSync("wordpress-plugin/absolute-asia/content-contract.json", "utf8"));
 const known = new Set(Object.values(contract.types).flatMap((type) => [
   ...type.fields,
   ...(type.retained || []).map((entry) => entry.field),
 ]));
-const files = execFileSync("rg", ["--files", "components", "app", "lib", "-g", "*.tsx", "-g", "*.ts"], { encoding: "utf8" })
-  .trim()
-  .split("\n")
-  .filter(Boolean);
+
+function getFiles(dir) {
+  const results = [];
+  try {
+    const list = readdirSync(dir);
+    for (const file of list) {
+      const fullPath = join(dir, file);
+      const stat = statSync(fullPath);
+      if (stat && stat.isDirectory()) {
+        results.push(...getFiles(fullPath));
+      } else if (file.endsWith(".tsx") || file.endsWith(".ts")) {
+        results.push(fullPath);
+      }
+    }
+  } catch {}
+  return results;
+}
+
+const files = ["components", "app", "lib"].flatMap(getFiles);
 
 const used = new Map();
 for (const file of files) {
