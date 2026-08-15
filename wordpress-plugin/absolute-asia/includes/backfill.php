@@ -1182,7 +1182,10 @@ function aat_seed_hotel_images() {
         if (get_post_meta($post->ID, 'hero_image', true)) { $skipped[] = $slug . ': đã có ảnh'; continue; }
         if (!aat_url_exists($url)) { $skipped[] = $slug . ': ảnh không tồn tại'; continue; }
 
-        update_post_meta($post->ID, 'hero_image', wp_slash($url));
+        /* Through the shared writer, not update_post_meta: ACF needs the
+           companion `_hero_image` key alongside the value, or get_field()
+           reads nothing back and the edit screen shows an empty box. */
+        aat_store_field('hero_image', $url, $post->ID);
         update_post_meta($post->ID, '_aat_seeded', 'hero_image');
         $filled[] = $post->post_title;
     }

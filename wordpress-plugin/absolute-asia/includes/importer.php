@@ -1527,6 +1527,19 @@ function aat_import_screen() {
                     log('  ' + type + ': +' + (res.imported || 0) + ' (offset ' + offset + ')');
                     (res.errors || []).forEach(function(e) { log('    ! ' + e); });
 
+                    /* Several steps return a line per record explaining what
+                       they did or why they skipped it. Nothing printed them,
+                       so a step that found nothing to do looked exactly like
+                       one that was silently failing. */
+                    var detail = res.details;
+                    if (detail && !Array.isArray(detail) && typeof detail === 'object') {
+                        detail = Object.keys(detail).reduce(function(all, key) {
+                            return all.concat((detail[key] || []).map(function(line) { return key + ': ' + line; }));
+                        }, []);
+                    }
+                    (detail || []).slice(0, 80).forEach(function(d) { log('    · ' + d); });
+                    if ((detail || []).length > 80) log('    · … còn ' + (detail.length - 80) + ' dòng nữa');
+
                     if (res.done) { log('  ' + type + ': done'); return; }
                     // Stop rather than spin when a step reports no progress.
                     if (!moved && !res.imported) { log('  ' + type + ': done (no further work)'); return; }
@@ -1536,7 +1549,7 @@ function aat_import_screen() {
                     log('  ' + type + ': ERROR ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.status));
                 });
             }
-            log('▶ ' + type);
+            log('▶ ' + type + '  (plugin ' + <?php echo wp_json_encode(AAT_VERSION); ?> + ')');
             return step();
         }
 
