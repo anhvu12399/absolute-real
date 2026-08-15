@@ -30,6 +30,24 @@ export function EditBar({ targets }: { targets: EditTarget[] }) {
   const [canEdit, setCanEdit] = useState(false);
   const [token, setToken] = useState("");
   const [publishing, setPublishing] = useState<"idle" | "sending" | "done" | "failed">("idle");
+  /** Section ids actually rendered on this page — see the effect below. */
+  const [present, setPresent] = useState<string[] | null>(null);
+
+  /**
+   * List only what is on the page in front of you.
+   *
+   * The section rows are worked out from the post type, so the homepage
+   * offered all thirteen of its possible sections whether or not they
+   * rendered — Specialists appeared while WordPress held no team, and the
+   * "view" button scrolled to an element that was not there. Checking the
+   * anchors after mount is enough: a section that hid itself has no id.
+   */
+  useEffect(() => {
+    const ids = targets
+      .map((target) => target.section)
+      .filter((section): section is string => Boolean(section) && Boolean(document.getElementById(section!)));
+    setPresent(ids);
+  }, [targets]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -88,11 +106,18 @@ export function EditBar({ targets }: { targets: EditTarget[] }) {
 
   if (!canEdit || !targets.length) return null;
 
+  /* Rows without a section — "Edit this page", "Import & settings" — always
+     apply. Rows naming a section only appear if that section is on screen.
+     Until the check has run, show everything rather than flicker. */
+  const shown = present === null
+    ? targets
+    : targets.filter((target) => !target.section || present.includes(target.section));
+
   /* Group targets by their `group` field for visual clustering. */
   const groups: { label: string; items: EditTarget[] }[] = [];
   const seen = new Map<string, EditTarget[]>();
 
-  for (const t of targets) {
+  for (const t of shown) {
     const g = t.group || "";
     if (!seen.has(g)) {
       const items: EditTarget[] = [];
