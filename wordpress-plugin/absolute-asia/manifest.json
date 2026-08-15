@@ -1,5 +1,5 @@
 {
-  "pluginVersion": "3.0.5",
+  "pluginVersion": "3.0.6",
   "schemaVersion": 8,
   "profiles": ["generic", "absolute"],
   "defaultProfile": "generic",

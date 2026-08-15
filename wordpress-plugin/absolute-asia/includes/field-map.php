@@ -29,14 +29,23 @@
 if (!defined('ABSPATH')) exit;
 
 function aat_field_map() {
-    /* Repeated on several post types under different names; the legacy site
-       said the same thing four ways. */
-    $specialist = [
-        'thumb_meet' => ['to' => 'specialist_photo', 'as' => 'image'],
-        'name_meet' => ['to' => 'specialist_title'],
-        'desc_meet' => ['to' => 'specialist_text', 'as' => 'strip'],
-        'button' => ['to' => 'specialist_button'],
-        'phone_meet' => ['to' => 'specialist_phone'],
+    /* Specialist fields: on V2, specialist consultation is handled globally
+       by SpecialistBlock and centralized luxury concierge contact info. */
+    $specialist_skip = [
+        'thumb_meet' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'name_meet' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'desc_meet' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'button' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'phone_meet' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'title' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'content_contact' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'img_contact' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'btn_contact' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'number_contact' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'button_plan_txt' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'phone_number' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'plan' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'link_make_an_inquiry' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
     ];
 
     $editorial = [
@@ -44,16 +53,19 @@ function aat_field_map() {
         'min' => ['to' => 'read_minutes'],
         'cont_left' => ['to' => 'content_left', 'as' => 'html'],
         'cont_right' => ['to' => 'content_right_image', 'as' => 'image'],
-        'title_further' => ['to' => 'further_title'],
         'guides' => ['to' => 'related_guides', 'as' => 'rel'],
         'more_tour' => ['to' => 'related_tours', 'as' => 'rel'],
-        'plan' => ['to' => 'specialist_text', 'as' => 'strip'],
         'desc_plan' => ['to' => 'plan_description', 'as' => 'html'],
         'bottom_plan' => ['to' => 'plan_footer', 'as' => 'html'],
-        'view_more' => ['to' => 'view_more_label', 'as' => 'link_text'],
-        'button_plan_txt' => ['to' => 'specialist_button'],
-        'phone_number' => ['to' => 'specialist_phone'],
-        'link_make_an_inquiry' => ['to' => 'specialist_link', 'as' => 'link'],
+    ];
+
+    $editorial_skip = [
+        'title_further' => 'Tiêu đề Further Reading được chuẩn hóa trong SingleArticleTemplateV2',
+        'view_more' => 'Nhãn nút View More được chuẩn hóa trong SingleArticleTemplateV2',
+        'button_plan_txt' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'phone_number' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'plan' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+        'link_make_an_inquiry' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
     ];
 
     return [
@@ -74,27 +86,27 @@ function aat_field_map() {
                 'tour_price' => ['to' => ['duration_label', 'duration_days', 'tour_route', 'tour_level', 'tour_code'], 'as' => 'custom'],
                 'travel_&_map' => ['to' => ['itinerary', 'destinations_count'], 'as' => 'custom'],
                 'list_hightlight' => ['to' => 'experiences', 'as' => 'custom'],
-                'list_option' => ['to' => 'accommodation_options', 'as' => 'custom'],
                 'faqs' => ['to' => 'faqs', 'as' => 'custom'],
                 'button_hightlight' => ['to' => ['cta_label', 'cta_link'], 'as' => 'custom'],
                 'slider' => ['to' => 'gallery', 'as' => 'gallery'],
                 'content_left' => ['to' => 'inclusions_list', 'as' => 'lines'],
                 'content_right' => ['to' => 'exclusions_list', 'as' => 'lines'],
-                'content_right_title' => ['to' => 'exclusions_title'],
                 'title_intro' => ['to' => 'intro_title'],
                 'desc_intro' => ['to' => 'intro_description'],
                 'highlights_title' => ['to' => 'highlights_title'],
                 'title_list' => ['to' => 'highlights_note'],
-                'title_options' => ['to' => 'options_title'],
-                'desc_options' => ['to' => 'options_note', 'as' => 'strip'],
-                'booking_policy_title' => ['to' => 'booking_policy_title'],
-                'other_tours_tittle' => ['to' => 'related_tours_title'],
                 'is_feature' => ['to' => 'is_featured', 'as' => 'bool'],
-                'where_is' => ['to' => ['hero_eyebrow', 'hero_eyebrow_link'], 'as' => 'custom'],
-                'titlle_slide' => ['to' => 'gallery_title'],
-                'link_classic_tour' => ['to' => 'classic_tour_link', 'as' => 'link'],
             ],
             'skip' => [
+                'other_tours_tittle' => 'Tiêu đề Related Tours được chuẩn hóa trong SingleTourTemplateV2',
+                'title_options' => 'Tiêu đề Accommodation Options được chuẩn hóa trong SingleTourTemplateV2',
+                'content_right_title' => 'Tiêu đề Exclusions được chuẩn hóa trong SingleTourTemplateV2',
+                'where_is' => 'Eyebrow vị trí tour được sinh tự động từ Country / Route taxonomy',
+                'booking_policy_title' => 'Tiêu đề Booking Policy được chuẩn hóa trong SingleTourTemplateV2',
+                'list_option' => 'Tùy chọn khách sạn tour được quản lý qua featured_stays / accommodation component',
+                'desc_options' => 'Ghi chú tùy chọn phòng được chuẩn hóa trong SingleTourTemplateV2',
+                'titlle_slide' => 'Tiêu đề Gallery được chuẩn hóa trong SingleTourTemplateV2',
+                'link_classic_tour' => 'Liên kết tour cổ điển được tích hợp trong Related Journeys',
                 'title_commit' => 'rỗng 100% bên cũ',
                 'start_trip_booking' => 'rỗng 100% bên cũ',
                 'end_trip_booking' => 'rỗng 100% bên cũ',
@@ -107,62 +119,59 @@ function aat_field_map() {
         /* ────────────────────────── PLACES ────────────────────────── */
         'places-to-go' => [
             'type' => 'place_to_go',
-            'fields' => array_merge($specialist, [
+            'fields' => [
                 'banner' => ['to' => 'hero_image', 'as' => 'image'],
                 'location' => ['to' => ['location_map', 'latitude', 'longitude'], 'as' => 'custom'],
                 'gallery' => ['to' => 'gallery', 'as' => 'gallery'],
                 'places_on_the_map' => ['to' => 'map_headline'],
-                'title_related' => ['to' => 'related_title'],
-                'desc_related' => ['to' => 'related_description'],
                 'travel-guide-title' => ['to' => 'destination_overview', 'as' => 'strip'],
                 'choose_posts' => ['to' => 'featured_tours', 'as' => 'rel'],
                 'choose_posts_place' => ['to' => 'related_places', 'as' => 'rel'],
+            ],
+            'skip' => array_merge($specialist_skip, [
+                'title_related' => 'Tiêu đề phần liên quan được chuẩn hóa trong DestinationTemplateV2',
+                'desc_related' => 'Mô tả phần liên quan được chuẩn hóa trong DestinationTemplateV2',
             ]),
-            'skip' => [],
         ],
 
         /* ────────────────────────── HOTELS ────────────────────────── */
         'hotels' => [
             'type' => 'hotel',
             'fields' => [
-                'banner' => ['to' => 'hero_image', 'as' => 'image'],
-                'places_img' => ['to' => 'hero_image', 'as' => 'image'],
                 // The legacy field name is misspelled "locaition".
                 'locaition' => ['to' => ['location_map', 'latitude', 'longitude'], 'as' => 'custom'],
                 'list_img' => ['to' => 'gallery', 'as' => 'gallery'],
                 'list_location_distance' => ['to' => 'nearby_places', 'as' => 'custom'],
                 'places_title' => ['to' => 'hotel_location'],
-                'title_img' => ['to' => 'gallery_title'],
-                'title_tours' => ['to' => 'tours_title', 'as' => 'strip'],
-                'title_hotel' => ['to' => 'hotels_title', 'as' => 'strip'],
-                'title_things_to_do' => ['to' => 'things_title', 'as' => 'strip'],
-                'location_title' => ['to' => 'location_title'],
-                'location_content' => ['to' => 'location_subtitle'],
                 'list_tours' => ['to' => 'related_tours', 'as' => 'rel'],
                 'list_hotels' => ['to' => 'related_hotels', 'as' => 'rel'],
                 'list_things_to_do' => ['to' => 'related_things', 'as' => 'rel'],
                 'city' => ['to' => 'city', 'as' => 'rel_one'],
-                // On hotels the specialist block uses yet another set of names.
-                'title' => ['to' => 'specialist_title'],
-                'content_contact' => ['to' => 'specialist_text', 'as' => 'strip'],
-                'img_contact' => ['to' => 'specialist_photo', 'as' => 'image'],
-                'btn_contact' => ['to' => 'specialist_button'],
-                'number_contact' => ['to' => 'specialist_phone'],
             ],
-            'skip' => ['min' => 'số phút đọc, không áp dụng cho khách sạn'],
+            'skip' => array_merge($specialist_skip, [
+                'banner' => 'Ảnh đại diện khách sạn được đồng bộ qua featured_media',
+                'places_img' => 'Ảnh bổ sung khách sạn được đồng bộ qua featured_media / gallery',
+                'location_title' => 'Tiêu đề Location được chuẩn hóa trong SingleHotelTemplateV2',
+                'location_content' => 'Mô tả vị trí được hiển thị qua hotel_highlights và location_map',
+                'title_things_to_do' => 'Tiêu đề Things to do nearby được chuẩn hóa trong SingleHotelTemplateV2',
+                'title_hotel' => 'Tiêu đề Related Hotels được chuẩn hóa trong SingleHotelTemplateV2',
+                'title_tours' => 'Tiêu đề Related Tours được chuẩn hóa trong SingleHotelTemplateV2',
+                'title_img' => 'Tiêu đề Gallery được chuẩn hóa trong SingleHotelTemplateV2',
+                'min' => 'số phút đọc, không áp dụng cho khách sạn',
+            ]),
         ],
 
         /* ───────────────────── GUIDES / THINGS TO DO ───────────────────── */
         'travel-guides' => [
             'type' => 'travel_guide',
             'fields' => array_merge($editorial, [
-                'title_planning' => ['to' => ['plan_title', 'specialist_title'], 'as' => 'custom'],
+                'title_planning' => ['to' => 'plan_title'],
                 'link' => ['to' => 'view_more_link', 'as' => 'link'],
             ]),
-            'skip' => [
+            'skip' => array_merge($editorial_skip, [
                 'find_something' => 'chỉ 1 ký tự, không mang nghĩa',
                 'title_planing' => 'trùng title_planning (lỗi chính tả bên cũ)',
-            ],
+            ]),
         ],
         'things-to-do' => [
             'type' => 'thing_to_do',
@@ -170,7 +179,9 @@ function aat_field_map() {
                 'title_planing' => ['to' => 'plan_title'],
                 'explore_now_link' => ['to' => 'view_more_link', 'as' => 'link'],
             ]),
-            'skip' => ['find_something' => 'chỉ 1 ký tự, không mang nghĩa'],
+            'skip' => array_merge($editorial_skip, [
+                'find_something' => 'chỉ 1 ký tự, không mang nghĩa',
+            ]),
         ],
 
         /* ─────────────────────────── BLOGS ─────────────────────────── */
@@ -180,12 +191,13 @@ function aat_field_map() {
                 'banner' => ['to' => 'hero_image', 'as' => 'image'],
                 'minute_read' => ['to' => 'read_minutes'],
                 'intro_ex' => ['to' => 'intro_html', 'as' => 'html'],
-                'title_futher_reading' => ['to' => 'further_title'],
-                'popular_posts_title' => ['to' => 'sidebar_popular_title'],
-                'search_post_title' => ['to' => 'sidebar_search_title'],
-                'text_like' => ['to' => 'sidebar_social_title'],
             ],
-            'skip' => [],
+            'skip' => [
+                'title_futher_reading' => 'Tiêu đề Further Reading được chuẩn hóa trong SingleArticleTemplateV2',
+                'popular_posts_title' => 'Tiêu đề Popular Posts sidebar được chuẩn hóa trong SingleArticleTemplateV2',
+                'search_post_title' => 'Tiêu đề Search bài viết được chuẩn hóa trong SingleArticleTemplateV2',
+                'text_like' => 'Tiêu đề chia sẻ mạng xã hội được chuẩn hóa trong SingleArticleTemplateV2',
+            ],
         ],
 
         /* ─────────────────── COUNTRY / GUIDE PAGES ─────────────────── */
@@ -202,16 +214,9 @@ function aat_field_map() {
                 'title_the_month_by_month' => ['to' => 'month_guide_title'],
                 'best_time' => ['to' => ['best_time_image', 'best_time_html'], 'as' => 'custom'],
                 'tour-in-month' => ['to' => 'month_guide', 'as' => 'custom'],
-                'tour_guide' => ['to' => ['specialist_title', 'specialist_text', 'specialist_photo', 'specialist_phone', 'specialist_link'], 'as' => 'custom'],
-                'title_make' => ['to' => 'specialist_title'],
                 'desc_intro' => ['to' => 'page_description', 'as' => 'strip'],
                 'title_intro' => ['to' => 'hero_tagline', 'as' => 'strip'],
-                'content_contact' => ['to' => 'specialist_text', 'as' => 'strip'],
-                'title_plan_trip' => ['to' => 'specialist_title'],
-                'cnt_plan_trip' => ['to' => 'specialist_text', 'as' => 'strip'],
-                'button_plan_trip' => ['to' => ['specialist_button', 'specialist_link'], 'as' => 'custom'],
                 'member' => ['to' => 'team', 'as' => 'custom'],
-                'slider' => ['to' => 'gallery', 'as' => 'gallery'],
                 'travel_guides' => ['to' => 'related_guides', 'as' => 'rel'],
                 'post_top_cycling' => ['to' => 'featured_tours', 'as' => 'rel'],
                 'country_category' => ['to' => 'source_country_category', 'as' => 'term'],
@@ -220,7 +225,13 @@ function aat_field_map() {
                 'thing_category' => ['to' => 'source_thing_category', 'as' => 'term'],
                 'trave_guide_category' => ['to' => 'source_trave_guide_category', 'as' => 'term'],
             ],
-            'skip' => [
+            'skip' => array_merge($specialist_skip, [
+                'slider' => 'Gallery/slider trang đơn lẻ được xử lý qua featured_media và khối nội dung chuẩn',
+                'tour_guide' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+                'title_make' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+                'title_plan_trip' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+                'cnt_plan_trip' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
+                'button_plan_trip' => 'Khối chuyên viên được quản lý tập trung qua SpecialistBlock / Luxury Concierge global',
                 'list_hot' => 'rỗng 100% bên cũ',
                 'button' => 'rỗng 100% bên cũ',
                 'link_button' => 'rỗng 100% bên cũ',
@@ -282,15 +293,14 @@ function aat_field_map() {
                 'latest_stories_title' => 'heading blog cũ được template article directory thay thế',
                 'popular_posts_title' => 'heading blog cũ được template article directory thay thế',
                 'post_array' => 'danh sách bài cũ được destination/article directory truy vấn động',
-            ],
+            ]),
         ],
 
-        /* ───────────────────────── HOMEPAGE ───────────────────────── */
+        /* ────────────────────────── HOMEPAGE ────────────────────────── */
         'homepage' => [
             'type' => 'homepage',
             'fields' => [
                 'slider_home' => ['to' => 'home_banner_slider', 'as' => 'custom'],
-                'images_list' => ['to' => 'home_ways_to_explore', 'as' => 'custom'],
                 'slide_review' => ['to' => 'testimonials', 'as' => 'custom'],
                 'content_02' => ['to' => 'statement_text', 'as' => 'html'],
                 'name_web_review' => ['to' => 'review_summary', 'as' => 'html'],
@@ -303,10 +313,10 @@ function aat_field_map() {
                 'post_03' => ['to' => 'home_tab_journeys', 'as' => 'rel_cards'],
                 'post_05' => ['to' => 'home_tab_offers', 'as' => 'rel_cards'],
                 'post11' => ['to' => 'home_tab_new', 'as' => 'rel_cards'],
-                // Terms, not posts - handled by a callback, not the relink pass.
-                'post_04' => ['to' => 'home_tab_destinations', 'as' => 'custom'],
             ],
             'skip' => [
+                'images_list' => 'Carousel Ways to Explore cũ đã được gộp vào 3 tabs chính (Destinations, Journeys, Inspiration)',
+                'post_04' => 'Tab Destinations được tự động tổng hợp từ Country Taxonomy và Destination directory',
                 'bg_my_way' => 'ảnh nền của layout cũ, giao diện mới không dùng',
                 'sec01_links' => 'menu phụ, đã thay bằng menu WordPress',
                 'sec03_title' => 'tiêu đề section cũ, giao diện mới viết lại',
