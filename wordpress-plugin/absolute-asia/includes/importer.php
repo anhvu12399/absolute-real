@@ -567,19 +567,6 @@ function aat_map_homepage($old, $post_id) {
     }
     if ($slides) $out['home_banner_slider'] = $slides;
 
-    $explore = [];
-    foreach ((array) ($acf['images_list'] ?? []) as $row) {
-        if (!is_array($row)) continue;
-        $explore[] = [
-            'image_url' => aat_import_media_url_only(aat_str($row['image_sec02'] ?? ''), $post_id),
-            'title' => aat_str($row['text_img_sec02'] ?? ''),
-            'description' => '',
-            'link' => aat_link_url($row['link_sec02'] ?? ''),
-            'link_text' => '',
-        ];
-    }
-    if ($explore) $out['home_ways_to_explore'] = $explore;
-
     $reviews = [];
     foreach ((array) ($acf['slide_review'] ?? []) as $row) {
         if (!is_array($row)) continue;
@@ -600,12 +587,9 @@ function aat_map_homepage($old, $post_id) {
     $out['review_text'] = aat_str($acf['text_review'] ?? '');
     $out['text_phone'] = aat_str($acf['text_phone'] ?? '');
     $out['phone'] = aat_str($acf['phone'] ?? '');
-    $out['link_email_icon'] = aat_str($acf['link_email_icon'] ?? '');
 
     // Legacy tour id lists become the card tabs; resolved once tours exist.
     $relations['home_tab_journeys'] = aat_old_ids($acf['post_03'] ?? []);
-    $relations['home_tab_offers'] = aat_old_ids($acf['post_05'] ?? []);
-    $relations['home_tab_new'] = aat_old_ids($acf['post11'] ?? []);
 
     /* post_04 is a list of taxonomy terms, not posts, so it becomes one card per
        term - each illustrated by the newest post filed under it. */

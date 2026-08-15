@@ -351,7 +351,6 @@ function aat_rest_site() {
         'logo' => aat_site_logo(),
         'phoneLabel' => $field('text_phone'),
         'phone' => $field('phone'),
-        'email' => $field('link_email_icon'),
         /* Promises the whole site makes, held once on the homepage rather than
            repeated as fixed text in every template that shows them. */
         'whyTitle' => $field('why_title'),

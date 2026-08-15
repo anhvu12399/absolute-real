@@ -56,7 +56,6 @@ export type SitePayload = {
   logo: string;
   phoneLabel: string;
   phone: string;
-  email?: string;
   /** Promises the whole site makes, held once on the homepage. */
   whyTitle?: string;
   whyReasons?: Array<{ icon?: string; text?: string }>;

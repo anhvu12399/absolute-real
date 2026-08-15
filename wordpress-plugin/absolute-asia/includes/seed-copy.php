@@ -79,9 +79,6 @@ function aat_seed_homepage_copy() {
         'stat_3_num' => '24',
         'stat_3_label' => 'Hour support on the road',
 
-        'ticker_text' => 'Bhutan: a private audience with the Himalaya',
-        'ticker_link' => '/bhutan/',
-
         'map_headline' => 'Your journey, <em>charted</em> by hand',
         'map_description' => 'Cross a border without feeling the seam. Our specialists route each leg together — flights, drivers and guides handed off quietly between countries — so a journey through the Mekong, the Himalaya or the Indonesian archipelago reads as one continuous story rather than several trips stitched end to end.',
 
@@ -158,45 +155,6 @@ function aat_seed_homepage_copy() {
         ]),
 
         'home_values' => $values,
-
-        'home_ways_to_explore' => wp_json_encode([
-            [
-                'title' => 'Cultural Immersion & Sacred Heritage',
-                'description' => 'Private access to ancient temples, monastic blessings, and centuries of living traditions.',
-                'link' => '/tours/',
-                'image_url' => '',
-            ],
-            [
-                'title' => 'Luxury Rail & River Expeditions',
-                'description' => 'Slow travel aboard handcrafted teak junks, Mekong riverboats, and iconic luxury heritage trains.',
-                'link' => '/cruises/',
-                'image_url' => '',
-            ],
-            [
-                'title' => 'Wellness Sanctuaries & Cliffside Villas',
-                'description' => 'Rejuvenating holistic retreats, thermal onsens, and secluded oceanfront pavilions.',
-                'link' => '/where-to-stay/',
-                'image_url' => '',
-            ],
-            [
-                'title' => 'Culinary & Street Gastronomy Journeys',
-                'description' => 'Private market walkthroughs with celebrated local chefs and Michelin-starred dining in historic quarters.',
-                'link' => '/inspiration/',
-                'image_url' => '',
-            ],
-            [
-                'title' => 'Himalayan Kingdoms & Cloud Forests',
-                'description' => 'Untouched valleys, cliff-hanging dzongs, and dramatic alpine passes in Bhutan and Nepal.',
-                'link' => '/bhutan/',
-                'image_url' => '',
-            ],
-            [
-                'title' => 'Archipelago & Tropical Marine Escapes',
-                'description' => 'Private yacht charters across Komodo, Raja Ampat, and secluded Southeast Asian islands.',
-                'link' => '/tours/',
-                'image_url' => '',
-            ],
-        ]),
     ];
 
     $written = [];
@@ -206,11 +164,6 @@ function aat_seed_homepage_copy() {
             (is_array($current) && !$current) ||
             (is_string($current) && trim($current) === '');
         
-        // Clean out legacy visa/when is blog posts from ways to explore
-        if ($field === 'home_ways_to_explore' && is_string($current) && (stripos($current, 'visa') !== false || stripos($current, 'when is') !== false || stripos($current, '""') !== false)) {
-            $empty = true;
-        }
-
         if (!$empty) continue;
 
         $stored = in_array($field, aat_repeater_fields(), true) && is_array($value)
