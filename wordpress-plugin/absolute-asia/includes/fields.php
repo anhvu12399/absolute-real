@@ -13,16 +13,20 @@ if (!defined('ABSPATH')) exit;
 /** Names of every JSON-backed repeater, used by the REST decoder and the admin UI. */
 function aat_repeater_fields() {
     return [
+        /* Seven names were dropped here when the homepage was rebuilt around
+           three tabs: home_tab_offers, home_tab_new, home_ways_to_explore,
+           home_stay_with, home_ways_to_travel, plus milestones and
+           related_links. No field declares them any more, so listing them only
+           told the decoder to look for meta nothing writes. */
         // homepage
-        'home_banner_slider', 'trust_items', 'home_tab_destinations', 'home_tab_journeys', 'home_tab_offers',
-        'home_tab_new', 'home_ways_to_explore', 'home_stay_with', 'home_ways_to_travel',
+        'home_banner_slider', 'trust_items', 'home_tab_destinations', 'home_tab_journeys',
         'home_values', 'testimonials', 'team',
         // tour
         'itinerary', 'departure_dates', 'faqs', 'gallery', 'accommodation_options', 'experiences',
         // destination / hotel
-        'nearby_places', 'related_links', 'month_guide',
+        'nearby_places', 'month_guide',
         // page hubs
-        'journeys', 'cruises', 'articles', 'story_milestones', 'milestones', 'pillars', 'why_reasons',
+        'journeys', 'cruises', 'articles', 'story_milestones', 'pillars', 'why_reasons',
     ];
 }
 
@@ -209,7 +213,10 @@ function aat_register_fields() {
             aat_text('field_aat_tour_classic_link', 'Classic Tour Link', 'classic_tour_link'),
             aat_text('field_aat_tour_options_title', 'Accommodation Options Heading', 'options_title'),
             aat_textarea('field_aat_tour_options_note', 'Accommodation Options Note', 'options_note', 3),
-            aat_text('field_aat_tour_booking_title', 'Booking Policy Heading', 'booking_policy_title'),
+            /* "Booking Policy Heading" stood here with nothing under it: no
+               policy body field on this post type, no such section in the tour
+               template, and field-map.php skips it on import. A heading for a
+               section that does not exist only invites copy nothing prints. */
             aat_text('field_aat_tour_cta_label', 'Legacy CTA Label', 'cta_label'),
             aat_text('field_aat_tour_cta_link', 'Legacy CTA Link', 'cta_link'),
 
@@ -302,8 +309,10 @@ function aat_register_fields() {
             aat_text('field_aat_place_guides_head', 'Guides Heading', 'guides_heading'),
             aat_text('field_aat_place_plan_eye', 'Planning Eyebrow (HTML)', 'planning_eyebrow'),
             aat_text('field_aat_place_plan_head', 'Planning Heading', 'planning_heading'),
-            aat_text('field_aat_place_related_title', 'Related Content Heading', 'related_title'),
-            aat_textarea('field_aat_place_related_desc', 'Related Content Description', 'related_description', 3),
+            /* Drives the Journeys section heading. "Related Content" named
+               nothing an editor could point at on the page. */
+            aat_text('field_aat_place_related_title', 'Journeys Section Heading', 'related_title'),
+            aat_textarea('field_aat_place_related_desc', 'Journeys Section Description', 'related_description', 3),
 
             aat_tab('tab_aat_place_related', 'Related & Gallery'),
             [
@@ -323,6 +332,30 @@ function aat_register_fields() {
                 'post_type' => ['place_to_go', 'thing_to_do', 'destination'],
                 'multiple' => 1,
                 'return_format' => 'id',
+            ],
+            /* The template already reads both of these and has since it was
+               written - they were simply never declared, so the branches that
+               use them could not run and the page always fell back to a list
+               it worked out for itself. Left empty they still do. */
+            [
+                'key' => 'field_aat_place_related_tours',
+                'label' => 'Related Journeys',
+                'name' => 'related_tours',
+                'type' => 'post_object',
+                'post_type' => ['tour'],
+                'multiple' => 1,
+                'return_format' => 'id',
+                'instructions' => 'Để trống thì trang tự lấy các hành trình cùng quốc gia.',
+            ],
+            [
+                'key' => 'field_aat_place_related_hotels',
+                'label' => 'Related Stays',
+                'name' => 'related_hotels',
+                'type' => 'post_object',
+                'post_type' => ['hotel'],
+                'multiple' => 1,
+                'return_format' => 'id',
+                'instructions' => 'Để trống thì trang tự lấy các khách sạn cùng quốc gia.',
             ],
             aat_repeater_field('field_aat_place_gallery', 'Gallery', 'gallery', 'gallery'),
             aat_repeater_field('field_aat_place_testimonials', 'Testimonials', 'testimonials', 'testimonials'),
@@ -481,9 +514,10 @@ function aat_register_fields() {
             aat_wysiwyg('field_aat_ed_plan_bottom', 'Plan Footer', 'plan_footer'),
             aat_text('field_aat_ed_plan_title', 'Plan Heading', 'plan_title'),
             aat_text('field_aat_ed_further_title', 'Further Reading Heading', 'further_title'),
-            aat_text('field_aat_ed_sidebar_popular', 'Popular Posts Heading', 'sidebar_popular_title'),
-            aat_text('field_aat_ed_sidebar_search', 'Search Heading', 'sidebar_search_title'),
-            aat_text('field_aat_ed_sidebar_social', 'Social Heading', 'sidebar_social_title'),
+            /* The three sidebar headings that stood here - Popular Posts,
+               Search, Social - belonged to a sidebar the article template no
+               longer has. It carries a table of contents instead, so those
+               three boxes asked an editor to write copy nothing would print. */
             aat_text('field_aat_ed_view_more_label', 'View More Label', 'view_more_label'),
             aat_text('field_aat_ed_view_more_link', 'View More Link', 'view_more_link'),
             aat_text('field_aat_ed_specialist_title', 'Specialist Heading', 'specialist_title'),

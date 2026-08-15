@@ -11,6 +11,7 @@
  *   /absolute-asia/v1/terms?taxonomy=…
  *   /absolute-asia/v1/images?urls=…       url -> attachment metadata
  *   /absolute-asia/v1/posts?include=…     ordered cards for relationship fields
+ *   /absolute-asia/v1/me                  is this visitor an editor? (credentialed)
  */
 
 if (!defined('ABSPATH')) exit;
@@ -42,7 +43,111 @@ add_action('rest_api_init', function () {
         'callback' => 'aat_rest_posts',
         'args' => ['include' => ['required' => true, 'sanitize_callback' => 'sanitize_text_field']],
     ]);
+    /* Open to everyone on purpose: it answers "can you edit?", and for a
+       visitor who is not signed in the honest answer is no. Gating the route
+       itself with a permission_callback would return 401 to every reader and
+       fill their console with errors. */
+    register_rest_route('absolute-asia/v1', '/me', $public + ['callback' => 'aat_rest_me']);
 });
+
+/**
+ * The frontend origin allowed to make credentialed requests.
+ *
+ * Reuses the Frontend URL already set for Live Preview rather than asking for
+ * the same address twice - one wrong copy of it would silently break either
+ * the preview button or the edit controls. Only the origin is kept; a path
+ * would never match what a browser sends in `Origin`.
+ */
+function aat_frontend_origin() {
+    $url = trim((string) get_option('aat_frontend_url', ''));
+    if ($url === '') $url = (string) home_url();
+
+    $parts = wp_parse_url($url);
+    if (empty($parts['host'])) return untrailingslashit($url);
+
+    $scheme = $parts['scheme'] ?? 'https';
+    $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+    return $scheme . '://' . $parts['host'] . $port;
+}
+
+/**
+ * Allow the frontend to send its WordPress login cookie.
+ *
+ * The frontend and this backend are different origins but the same site
+ * (`absoluteasiatours.com`), so the auth cookie is sent on a same-site fetch -
+ * but only if CORS names the origin exactly and allows credentials. A wildcard
+ * is invalid with credentials, which is why the origin is echoed back rather
+ * than starred.
+ */
+add_action('rest_api_init', function () {
+    remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
+    add_filter('rest_pre_serve_request', function ($served) {
+        $sent = isset($_SERVER['HTTP_ORIGIN']) ? untrailingslashit(esc_url_raw((string) $_SERVER['HTTP_ORIGIN'])) : '';
+        $allowed = aat_frontend_origin();
+
+        if ($sent !== '' && $sent === $allowed) {
+            header('Access-Control-Allow-Origin: ' . $allowed);
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+            header('Access-Control-Allow-Headers: Authorization, Content-Type, X-WP-Nonce');
+        } else {
+            /* Everything here is public read-only content, so other origins
+               keep the open access they had - just without credentials. */
+            header('Access-Control-Allow-Origin: *');
+        }
+        header('Vary: Origin');
+
+        return $served;
+    }, 15);
+}, 15);
+
+/** Preflight has to answer before WordPress routes anything. */
+add_action('rest_api_init', function () {
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'OPTIONS') return;
+    $sent = isset($_SERVER['HTTP_ORIGIN']) ? untrailingslashit(esc_url_raw((string) $_SERVER['HTTP_ORIGIN'])) : '';
+    if ($sent !== '' && $sent === aat_frontend_origin()) {
+        header('Access-Control-Allow-Origin: ' . $sent);
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Authorization, Content-Type, X-WP-Nonce');
+        header('Access-Control-Max-Age: 600');
+        header('Vary: Origin');
+        status_header(204);
+        exit;
+    }
+}, 5);
+
+/**
+ * Who is asking, and may they edit?
+ *
+ * The edit controls on the front end used to appear for anyone who added
+ * `?asledit=1` to the URL. Nothing was exposed by that - the links point at
+ * wp-admin, which does its own checking - but it put an editing UI in front of
+ * readers. This is the real answer.
+ */
+function aat_rest_me() {
+    $user = wp_get_current_user();
+    $can = $user && $user->exists() && user_can($user, 'edit_posts');
+
+    return [
+        'canEdit' => (bool) $can,
+        'name' => $can ? $user->display_name : '',
+        'adminUrl' => $can ? admin_url() : '',
+        /* Lets the "republish this page" button prove it was pressed by an
+           editor. The frontend cannot check the WordPress cookie itself - that
+           cookie belongs to this host, not to the public site - so it forwards
+           this instead, and the Next.js route verifies it with the shared
+           revalidate secret. Ten minutes is long enough for one visit. */
+        'token' => $can ? aat_issue_edit_token(10 * MINUTE_IN_SECONDS) : '',
+    ];
+}
+
+/** `<expiry>.<hmac>`, verifiable by anything holding AAT_REVALIDATE_SECRET. */
+function aat_issue_edit_token($ttl) {
+    if (!defined('AAT_REVALIDATE_SECRET')) return '';
+    $expires = time() + (int) $ttl;
+    return $expires . '.' . hash_hmac('sha256', 'aat-edit:' . $expires, AAT_REVALIDATE_SECRET);
+}
 
 /* ───────────────────────────── helpers ───────────────────────────── */
 

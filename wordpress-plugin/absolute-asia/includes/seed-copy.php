@@ -14,16 +14,15 @@
 
 if (!defined('ABSPATH')) exit;
 
-/** Counts what the site really holds, so the stat row cannot overstate it. */
+/**
+ * Facts the seeded copy is allowed to assert, so it cannot overstate the site.
+ *
+ * Counted country / tour / hotel totals used to live here for a three-number
+ * stat row on the homepage. That row is gone, and nothing else read them, so
+ * three count queries ran on every seed to fill values no one printed.
+ */
 function aat_seed_facts() {
-    $countries = wp_count_terms(['taxonomy' => 'country', 'hide_empty' => true]);
-    $tours = wp_count_posts('tour');
-    $hotels = wp_count_posts('hotel');
-
     return [
-        'countries' => is_wp_error($countries) ? 0 : (int) $countries,
-        'tours' => isset($tours->publish) ? (int) $tours->publish : 0,
-        'hotels' => isset($hotels->publish) ? (int) $hotels->publish : 0,
         /* The About page states 1989 - Ken Fish founded the company that year.
            This was computing from 2005 and publishing "21 years" beside a story
            that says thirty-six. Settable, because the next site will not have
@@ -72,13 +71,6 @@ function aat_seed_homepage_copy() {
             )
             : 'We turn a single idea for a trip into an itinerary that could belong to no one else. A journey through Asia should never feel arranged — it should feel <em>composed, not booked.</em>',
 
-        'stat_1_num' => $f['years'] ? (string) $f['years'] : (string) $f['tours'],
-        'stat_1_label' => $f['years'] ? 'Years planning Asia' : 'Private journeys',
-        'stat_2_num' => $f['countries'] ? (string) $f['countries'] : '20',
-        'stat_2_label' => 'Countries we cover',
-        'stat_3_num' => '24',
-        'stat_3_label' => 'Hour support on the road',
-
         'map_headline' => 'Your journey, <em>charted</em> by hand',
         'map_description' => 'Cross a border without feeling the seam. Our specialists route each leg together — flights, drivers and guides handed off quietly between countries — so a journey through the Mekong, the Himalaya or the Indonesian archipelago reads as one continuous story rather than several trips stitched end to end.',
 
@@ -96,12 +88,8 @@ function aat_seed_homepage_copy() {
 
         /* --- New Fields --- */
         'tabs_headline' => 'Where do you want to <em>go</em>?',
-        'explore_eyebrow' => '<em>Ways</em> to Explore',
-        'explore_headline' => 'What kind of <em>trip</em> are you looking for?',
         'stay_eyebrow' => sprintf('<em>Stay</em> With %s', $brand),
         'stay_headline' => 'Addresses chosen for <em>character</em>, not chain',
-        'travel_eyebrow' => sprintf('<em>Ways</em> to Explore With %s', $brand),
-        'travel_headline' => 'How do you want to <em>travel</em>?',
         /* The founding year is a setting, not a constant - this line used to
            publish "Since 2005" beside an About page that says 1989. With no
            year set, the sentence simply drops the clause. */

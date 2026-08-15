@@ -28,9 +28,28 @@ npm run site tenmoi
 | Nhận diện | `NEXT_PUBLIC_BRAND_NAME`, `_SHORT`, `_TAGLINE`, `SITE_TITLE`, `SITE_DESCRIPTION` |
 | Tên miền | `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_LEGACY_HOSTS` |
 | WordPress | `NEXT_PUBLIC_WP_URL`, `WORDPRESS_API_URL`, `WORDPRESS_ORIGIN` |
-| Khác | `NEXT_PUBLIC_SOCIALS`, `NEXT_PUBLIC_SHOW_EDIT_LINKS` |
+| Khác | `NEXT_PUBLIC_SOCIALS`, `WORDPRESS_REVALIDATE_SECRET` |
 
-`NEXT_PUBLIC_SHOW_EDIT_LINKS=1` bật nút Edit góc phải. **Để trống khi chạy thật.**
+## Nút Edit và đăng phát lên ngay
+
+Nút Edit ở góc phải **chỉ hiện với người đã đăng nhập WordPress** có quyền sửa bài —
+không còn cờ bật/tắt nào trong env. Trang hỏi backend qua `/absolute-asia/v1/me`,
+gửi kèm cookie đăng nhập.
+
+Điều kiện để nó hoạt động: ô **Frontend URL** trong `admin.php?page=aat-import` phải
+khớp *chính xác* `NEXT_PUBLIC_SITE_URL` — kể cả `www` và `https`. Trình duyệt chỉ gửi
+cookie khi CORS gọi đúng tên địa chỉ, nên sai một ký tự là nút không bao giờ hiện.
+
+Để lưu bài xong web cập nhật ngay (không cần build lại), đặt ba giá trị khớp nhau:
+
+| Nơi đặt | Biến |
+|---|---|
+| `sites/<site>.env` + Vercel | `WORDPRESS_REVALIDATE_SECRET` |
+| `wp-config.php` | `AAT_REVALIDATE_SECRET` — cùng giá trị |
+| `wp-config.php` | `AAT_REVALIDATE_URL` = `<NEXT_PUBLIC_SITE_URL>/api/revalidate` |
+
+Màn hình Import hiện trạng thái: đã cấu hình chưa, và lần đẩy gần nhất thành công hay
+thất bại. Bỏ trống thì mọi thứ vẫn chạy, chỉ là nội dung mới lên chậm theo cache.
 
 ## Lưu ý
 

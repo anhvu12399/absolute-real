@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 import type { ContentRecord, DepartureRow, FaqRow, GalleryRow, ItineraryRow } from "@/lib/types";
 import type { ArchiveItem, SitePayload } from "@/lib/wp";
 import { BRAND_SHORT } from "@/lib/site";
+import { toLocalHref } from "@/lib/links";
 import { bg, optimized } from "@/lib/images";
 import { CITY_COORDS, resolveCityCoords } from "../destination/RealMapComponent";
 import { SpecialistBlock } from "../v2/SpecialistBlock";
@@ -370,7 +371,17 @@ export default function SingleTourTemplateV2({
         <div className="container" style={{ position: "relative", zIndex: 2, paddingBottom: "1rem" }}>
           <div style={{ marginBottom: "1rem" }}>
             {text(acf.hero_eyebrow) ? (
-              <span className="hero-tag hero-eyebrow" dangerouslySetInnerHTML={{ __html: text(acf.hero_eyebrow) }} />
+              /* The eyebrow can point somewhere - a collection, a country hub.
+                 WordPress held that link all along and nothing ever read it. */
+              text(acf.hero_eyebrow_link) ? (
+                <Link
+                  href={toLocalHref(text(acf.hero_eyebrow_link), "/tours/")}
+                  className="hero-tag hero-eyebrow"
+                  dangerouslySetInnerHTML={{ __html: text(acf.hero_eyebrow) }}
+                />
+              ) : (
+                <span className="hero-tag hero-eyebrow" dangerouslySetInnerHTML={{ __html: text(acf.hero_eyebrow) }} />
+              )
             ) : (
               <>
                 <span className="hero-tag">{isFeatured ? "Featured Journey" : "Tailor-Made"}</span>

@@ -417,9 +417,19 @@ export default function DestinationTemplateV2({
       {/* ═══ JOURNEYS ═══ */}
       <section className="section on-white" id="journeys">
         <div className="container">
+          {/* The heading and the line under it are WordPress's - they were
+              fixed English, which meant every country page announced the same
+              sentence and no editor could change one of them. */}
           <div className="center reveal">
             <p className="eyebrow"><em>Our</em> Favorite Journeys</p>
-            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.4rem)" }}>{name}, at Its Best Right Now</h2>
+            <h2 style={{ fontSize: "clamp(1.8rem,3.2vw,2.4rem)" }}>
+              {text(acfData.related_title) || `${name}, at Its Best Right Now`}
+            </h2>
+            {text(acfData.related_description) && (
+              <p style={{ marginTop: "0.9rem", maxWidth: "58ch", marginInline: "auto" }}>
+                {text(acfData.related_description)}
+              </p>
+            )}
           </div>
 
           {relatedTours.length > 0 ? (

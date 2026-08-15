@@ -184,7 +184,6 @@ function aat_admin_preview_panel() {
             /* ── Homepage ── */
             'home_banner_slider': { sel: '#hero', section: 'hero' },
             'trust_items':        { sel: '.trustbar', section: 'hero' },
-            'ticker_text':        { sel: '.hero-ticker-text a', type: 'text', section: 'hero' },
             'intro_headline':     { sel: '#statement .intro-headline', type: 'text', section: 'statement' },
             'statement_text':     { sel: '#statement .intro-copy', type: 'html', section: 'statement' },
             'intro_cta_label':    { sel: '#statement .intro-cta', type: 'text', section: 'statement' },
@@ -198,7 +197,6 @@ function aat_admin_preview_panel() {
             'featured_headline':  { sel: '#featured h2', type: 'html', section: 'featured' },
             'stay_eyebrow':       { sel: '#stay .eyebrow', type: 'html', section: 'stay' },
             'stay_headline':      { sel: '#stay h2', type: 'html', section: 'stay' },
-            'home_stay_with':     { sel: '#stay', section: 'stay' },
             'inspiration_headline': { sel: '#inspiration h2', type: 'html', section: 'inspiration' },
             'map_headline':       { sel: '#map h2', type: 'html', section: 'map' },
             'map_description':    { sel: '#map p:last-of-type', type: 'text', section: 'map' },
@@ -229,7 +227,6 @@ function aat_admin_preview_panel() {
             'duration_label':     { sel: '[data-preview="duration_label"] .num', type: 'text', section: 'hero' },
             'destinations_count': { sel: '[data-preview="destinations_count"] .num', type: 'text', section: 'hero' },
             'min_guests':         { sel: '[data-preview="min_guests"] .num', type: 'text', section: 'hero' },
-            'starting_price':     { sel: '[data-preview="starting_price"]', type: 'text', section: 'hero' },
             'tour_route':         { sel: '.tour-route, .breadcrumb-route', type: 'text', section: 'hero' },
             'tour_level':         { sel: '.tour-level, .activity-level', type: 'text', section: 'overview' },
             'tour_code':          { sel: '.tour-code', type: 'text', section: 'overview' },
@@ -329,9 +326,6 @@ function aat_admin_preview_panel() {
         var FIELD_SECTION = {
             'home_banner_slider': 'hero',
             'home_tab_destinations': 'journeys', 'home_tab_journeys': 'journeys',
-            'home_tab_offers': 'journeys', 'home_tab_new': 'journeys',
-            'home_ways_to_explore': 'explore', 'home_stay_with': 'explore',
-            'home_ways_to_travel': 'explore',
             'home_values': 'values',
             'testimonials': 'reviews', 'review_summary': 'reviews',
             'review_logo': 'reviews', 'review_link': 'reviews', 'review_text': 'reviews',
@@ -609,6 +603,67 @@ function aat_admin_preview_panel() {
                 scrollToTarget(TAB_SECTIONS[label], null, label);
             }
         });
+    });
+    </script>
+    <?php
+}
+
+/**
+ * Open the field the front end asked for.
+ *
+ * The edit bar on the public site links to `post.php?…&aat_field=<name>`. A
+ * plain `#anchor` is not enough here: ACF puts most fields inside tabs, and a
+ * field in a closed tab is display:none, so the browser scrolls to nothing.
+ * This opens the containing tab first, then scrolls, then marks the field for
+ * a few seconds so the editor can see which one was meant.
+ *
+ * `data-name` is ACF's own attribute on every field wrapper, so no map between
+ * field names and keys has to be kept in sync.
+ */
+add_action('admin_footer', 'aat_admin_focus_field');
+
+function aat_admin_focus_field() {
+    $screen = get_current_screen();
+    if (!$screen || !in_array($screen->base, ['post', 'term'], true)) return;
+
+    $field = isset($_GET['aat_field']) ? sanitize_key(wp_unslash($_GET['aat_field'])) : '';
+    if ($field === '') return;
+    ?>
+    <style>
+        .aat-focus-field {
+            box-shadow: 0 0 0 2px #2271b1, 0 0 0 6px rgba(34,113,177,.18) !important;
+            border-radius: 3px;
+            transition: box-shadow .4s ease;
+        }
+    </style>
+    <script>
+    jQuery(function ($) {
+        var name = <?php echo wp_json_encode($field); ?>;
+
+        function reveal() {
+            var $field = $('.acf-field[data-name="' + name + '"]').first();
+            if (!$field.length) return false;
+
+            /* Fields live inside a tab panel; ACF marks the open one. Clicking
+               the matching tab button is what actually switches panels. */
+            var $tab = $field.prevAll('.acf-field-tab').first();
+            if ($tab.length) {
+                var key = $tab.data('key');
+                $('.acf-tab-button[data-key="' + key + '"], .acf-tab-group li a').each(function () {
+                    if ($(this).data('key') === key || $(this).attr('data-key') === key) $(this).trigger('click');
+                });
+            }
+
+            var top = $field.offset().top - 120;
+            $('html, body').animate({ scrollTop: top < 0 ? 0 : top }, 300);
+            $field.addClass('aat-focus-field');
+            window.setTimeout(function () { $field.removeClass('aat-focus-field'); }, 5000);
+            return true;
+        }
+
+        /* ACF renders tabs after its own ready pass, so one retry covers the
+           case where this runs first. */
+        if (!reveal()) window.setTimeout(reveal, 600);
     });
     </script>
     <?php

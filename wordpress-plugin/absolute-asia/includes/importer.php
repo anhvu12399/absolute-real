@@ -1395,6 +1395,35 @@ function aat_import_screen() {
         <h2>🌐 Frontend URL (cho Live Preview)</h2>
         <p>URL của trang Next.js frontend — dùng cho nút <strong>👁 Live Preview</strong> khi sửa bài.
            Nếu để trống, preview sẽ trỏ về WordPress (không đúng cho headless site).</p>
+        <p><strong>Ô này còn quyết định nút Sửa hiện trên web.</strong> Trình duyệt chỉ gửi
+           cookie đăng nhập WordPress sang đây khi địa chỉ khớp <em>chính xác</em> (kể cả
+           <code>www</code> và <code>https</code>). Sai một ký tự thì nút Sửa sẽ không bao giờ
+           hiện, dù bạn đã đăng nhập.</p>
+
+        <?php
+        $rv = function_exists('aat_revalidate_status') ? aat_revalidate_status() : ['configured' => false, 'last' => null];
+        if (!$rv['configured']) : ?>
+            <p style="padding:10px 12px;background:#fcf9e8;border-left:4px solid #dba617">
+                <strong>Đăng bài xong web chưa tự cập nhật.</strong> Thêm hai dòng này vào
+                <code>wp-config.php</code> thì mỗi lần Lưu sẽ đẩy thẳng lên web:<br>
+                <code>define('AAT_REVALIDATE_URL', '<?php echo esc_html(rtrim((string) get_option('aat_frontend_url', 'https://vi-du.com'), '/')); ?>/api/revalidate');</code><br>
+                <code>define('AAT_REVALIDATE_SECRET', 'một-chuỗi-bí-mật');</code><br>
+                Chuỗi bí mật phải trùng biến <code>WORDPRESS_REVALIDATE_SECRET</code> bên frontend.
+            </p>
+        <?php else :
+            $last = is_array($rv['last']) ? $rv['last'] : null; ?>
+            <p style="padding:10px 12px;background:#edfaef;border-left:4px solid #00a32a">
+                <strong>Đăng phát lên ngay: đang bật.</strong>
+                <?php if ($last) : ?>
+                    Lần gần nhất <?php echo esc_html(human_time_diff((int) $last['at'])); ?> trước
+                    — <?php echo $last['ok'] ? 'thành công' : 'THẤT BẠI'; ?>
+                    (<code><?php echo esc_html($last['path'] ?: '/'); ?></code>,
+                    <?php echo esc_html((string) $last['detail']); ?>)
+                <?php else : ?>
+                    Chưa có lần đẩy nào — lưu thử một bài để kiểm tra.
+                <?php endif; ?>
+            </p>
+        <?php endif; ?>
         <p>
             <input type="url" id="aat-frontend-url"
                    value="<?php echo esc_attr(get_option('aat_frontend_url', '')); ?>"
