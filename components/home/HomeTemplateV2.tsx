@@ -453,82 +453,58 @@ export default function HomeTemplateV2({
           anything — so "01 02 03 04" would assert an order that does not
           exist. Reading the place names down the spine is both the honest
           label and the navigation. */}
-      <section id="hero" className="spine-hero">
-        {/* The photograph and the type that must sit on it. */}
-        <div className={`spine-stage ph ${hero.image_url ? "" : "ph-hero"}`}>
-          {/* A separate layer so the photograph can drift without moving the
-              type sitting on top of it. */}
-          <div
-            key={heroIndex}
-            className="spine-plate"
-            style={hero.image_url ? bg(hero.image_url, "hero") : undefined}
-            aria-hidden="true"
-          />
-          <div className="spine-veil" aria-hidden="true" />
+      <section id="hero" className={`spine-hero ph ${hero.image_url ? "" : "ph-hero"}`}>
+        {/* A separate layer so the photograph can drift without moving the
+            type sitting on top of it. Full-bleed, untouched by any overlay
+            band — the plaque below is the only thing that sits on it. */}
+        <div
+          key={heroIndex}
+          className="spine-plate"
+          style={hero.image_url ? bg(hero.image_url, "hero") : undefined}
+          aria-hidden="true"
+        />
 
-          {slides.length > 1 && (
-            <nav className="spine-index" aria-label="Choose a destination">
-              {slides.map((slide, idx) => {
-                /* Place names, not full titles: "Bali" reads down a spine,
-                   "Bali, Culture & Island Escapes" does not. */
-                const label = placeOf(slide);
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    className={`spine-index-item${idx === heroIndex ? " is-active" : ""}`}
-                    onClick={() => selectHeroSlide(idx)}
-                    aria-current={idx === heroIndex ? "true" : undefined}
-                  >
-                    <span className="spine-index-tick" aria-hidden="true" />
-                    <span className="spine-index-label">{label || `Slide ${idx + 1}`}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          )}
+        {slides.length > 1 && (
+          <nav className="spine-index" aria-label="Choose a destination">
+            {slides.map((slide, idx) => {
+              /* Place names, not full titles: "Bali" reads down a spine,
+                 "Bali, Culture & Island Escapes" does not. */
+              const label = placeOf(slide);
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`spine-index-item${idx === heroIndex ? " is-active" : ""}`}
+                  onClick={() => selectHeroSlide(idx)}
+                  aria-current={idx === heroIndex ? "true" : undefined}
+                >
+                  <span className="spine-index-tick" aria-hidden="true" />
+                  <span className="spine-index-label">{label || `Slide ${idx + 1}`}</span>
+                </button>
+              );
+            })}
+          </nav>
+        )}
 
-          <div className="container spine-inner">
-            <div className="spine-copy" key={`copy-${heroIndex}`}>
-              {heroPlace && (
-                <p className="spine-place">
-                  <span className="spine-rule" aria-hidden="true" />
-                  {heroPlace}
-                </p>
-              )}
-              <h1 className="spine-headline">{heroHeadline}</h1>
-            </div>
+        {/* The plaque — a brass nameplate on a boutique hotel door, not a
+            band across the picture. Its own ink ground carries the text, so
+            legibility never depends on how bright that one corner of the
+            photograph happens to be, and the photograph itself stays whole. */}
+        <div className="container">
+          <div className="spine-plaque" key={`copy-${heroIndex}`}>
+            {heroPlace && (
+              <p className="spine-place">
+                <span className="spine-rule" aria-hidden="true" />
+                {heroPlace}
+              </p>
+            )}
+            <h1 className="spine-headline">{heroHeadline}</h1>
+            {hero.subtitle && <p className="spine-note">{clamp(hero.subtitle, 118)}</p>}
+            <Link href={toLocalHref(hero.link, "/plan-my-trip/")} className="spine-link">
+              {String(hero.link_text || "See this journey")}
+              <ArrowSvg />
+            </Link>
           </div>
-
-          {/* The deckle edge — the torn edge of a sheet of hand-made paper.
-              It is cream painted over the photograph, so the boundary is a
-              real edge rather than a gradient, and the sentence below it sits
-              on solid paper instead of on a picture. */}
-          <svg
-            className="spine-deckle"
-            viewBox="0 0 1440 60"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            {/* Straight runs broken by short notches — a sheet torn against a
-                ruler. A smooth sine wave would read as a section divider, not
-                as paper. */}
-            <path
-              fill="var(--cream)"
-              d="M0 60V33l38-2c24-1 36 5 58 4l36-3c18-1 26-7 46-6l36 3 24-2c22-1 30 6 54 5l48-3c16-1 22-7 44-5l34 4 34-3c22-1 32 6 56 5l48-4c16-1 22-7 44-5l40 5 36-3c22-1 30 6 54 5l48-4c16-1 22-7 44-5l40 6 36-3c22-1 30 6 54 5l48-4c16-1 22-7 44-5l40 6 36-3c22-1 32 6 56 5L1440 32v28Z"
-            />
-          </svg>
-        </div>
-
-        {/* Below the tear: the sentence a reader actually has to read, in ink
-            on paper. No overlay is needed to make it legible, so the
-            photograph above keeps its own light. */}
-        <div className="container spine-foot">
-          {hero.subtitle && <p className="spine-note">{clamp(hero.subtitle, 132)}</p>}
-          <Link href={toLocalHref(hero.link, "/plan-my-trip/")} className="spine-link">
-            {String(hero.link_text || "See this journey")}
-            <ArrowSvg />
-          </Link>
         </div>
       </section>
 

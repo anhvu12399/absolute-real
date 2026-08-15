@@ -1936,15 +1936,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
    Palette is the site's own, taken from the logo's gold disc.
    Both faces are already loaded; no new webfont cost.
    ══════════════════════════════════════════════════════════════ */
+/* "Bảng đồng khắc" - a brass nameplate on a boutique hotel door, not a band
+   across the picture. The photograph runs completely full-bleed, untouched
+   by any overlay; only the plaque itself carries a ground, so legibility
+   never depends on how bright that corner of the photograph happens to be. */
 .spine-hero{
-  position:relative; background:var(--cream);
-  display:grid; grid-template-rows:minmax(0,1fr) auto;
-  min-height:min(94svh,940px);
+  position:relative; overflow:hidden; background:var(--ink);
+  min-height:min(88svh,860px);
+  display:flex; align-items:flex-end;
 }
-
-/* Everything that sits on the photograph lives in here, so the tear at the
-   bottom clips it rather than the section. */
-.spine-stage{position:relative; overflow:hidden; display:flex; align-items:flex-end; background:var(--ink);}
 
 /* The photograph drifts; the type above it does not. */
 .spine-plate{
@@ -1954,82 +1954,58 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 @keyframes spine-drift{ from{transform:scale(1.005);} to{transform:scale(1.055);} }
 
-/* Only the corner the headline occupies is shaded now - the note and the link
-   moved onto paper, so nothing else needs holding down. */
-.spine-veil{
-  position:absolute; inset:0; pointer-events:none;
-  background:
-    radial-gradient(58% 62% at 24% 82%, rgba(9,12,18,0.78) 0%, rgba(9,12,18,0.6) 34%, rgba(9,12,18,0.26) 62%, rgba(9,12,18,0) 86%),
-    linear-gradient(180deg, rgba(9,12,18,0.26) 0%, rgba(9,12,18,0) 34%);
-}
+.spine-hero > .container{position:relative; z-index:2; width:100%; padding-bottom:clamp(2.4rem,5vw,4rem);}
 
-/* The torn edge. Cream painted over the photograph: a real boundary, not a
-   fade. `preserveAspectRatio:none` lets one path stretch to any width. */
-.spine-deckle{
-  position:absolute; left:0; right:0; bottom:-1px; z-index:4;
-  width:100%; height:clamp(34px,4.6vw,74px); display:block; pointer-events:none;
+/* The plaque itself: a solid ground, a thin gold hairline, the size of a
+   real nameplate rather than a band spanning the picture. */
+.spine-plaque{
+  max-width:min(30rem,92%); background:var(--chrome);
+  border:1px solid var(--chrome-gold); padding:clamp(1.5rem,3vw,2.2rem) clamp(1.6rem,3.4vw,2.4rem);
+  box-shadow:0 18px 50px rgba(0,0,0,0.35);
+  animation:spine-rise .8s cubic-bezier(.2,.7,.2,1) both;
 }
-
-.spine-inner{position:relative; z-index:2; width:100%; padding-bottom:clamp(4.5rem,8vw,8rem);}
-.spine-copy{max-width:min(46rem,88%);}
+@keyframes spine-rise{ from{opacity:0; transform:translateY(1rem);} to{opacity:1; transform:none;} }
 
 /* Place label: a rule that draws itself, then the name. */
 .spine-place{
   display:flex; align-items:center; gap:0.9rem;
-  font-size:0.74rem; letter-spacing:0.28em; text-transform:uppercase;
+  font-size:0.7rem; letter-spacing:0.26em; text-transform:uppercase;
   font-weight:600; color:var(--chrome-gold);
-  text-shadow:0 1px 3px rgba(9,12,18,0.7);
 }
 .spine-rule{
   display:block; width:0; height:1px; background:var(--chrome-gold); flex:none;
   animation:spine-draw .9s cubic-bezier(.2,.7,.2,1) .15s forwards;
 }
-@keyframes spine-draw{ to{ width:3.4rem; } }
+@keyframes spine-draw{ to{ width:2rem; } }
 
-/* The headline hangs: the first line sits proud of the rest, the way a
-   drop-line does in a printed title page. */
 .spine-headline{
-  margin:1.1rem 0 0;
+  margin:0.85rem 0 0;
   font-family:'Playfair Display',serif; font-weight:400;
-  font-size:clamp(2.4rem,6.4vw,5.2rem); line-height:0.98;
-  letter-spacing:-0.028em; color:#fff; text-wrap:balance;
-  padding-left:0.62em; text-indent:-0.62em;
-  text-shadow:0 1px 1px rgba(9,12,18,0.5), 0 2px 10px rgba(9,12,18,0.72), 0 10px 44px rgba(9,12,18,0.6);
-  animation:spine-rise 1s cubic-bezier(.2,.7,.2,1) both;
+  font-size:clamp(1.9rem,3.6vw,2.9rem); line-height:1.06;
+  letter-spacing:-0.01em; color:var(--chrome-text); text-wrap:balance;
 }
 
-/* ---------- below the tear ---------- */
-.spine-foot{
-  position:relative; z-index:5;
-  display:flex; flex-wrap:wrap; align-items:baseline; gap:1rem clamp(1.5rem,4vw,3.5rem);
-  padding-top:clamp(1.1rem,2vw,1.9rem); padding-bottom:clamp(1.8rem,3vw,2.8rem);
-}
-/* Ink on paper: this is the sentence an older reader has to get through, and
-   it no longer depends on how bright the photograph happens to be. */
 .spine-note{
-  margin:0; max-width:46ch; flex:1 1 22rem;
-  font-size:clamp(1.02rem,1.35vw,1.18rem); line-height:1.62; font-weight:500;
-  color:var(--ink);
-  animation:spine-rise 1s cubic-bezier(.2,.7,.2,1) .09s both;
+  margin:0.9rem 0 0; max-width:38ch;
+  font-size:0.96rem; line-height:1.6; font-weight:400;
+  color:var(--chrome-dim);
 }
-@keyframes spine-rise{ from{opacity:0; transform:translateY(1.1rem);} to{opacity:1; transform:none;} }
 
 /* A text link, not a button: nothing here is a checkout. */
 .spine-link{
-  display:inline-flex; align-items:center; gap:0.7rem; flex:none;
-  font-size:0.78rem; letter-spacing:0.2em; text-transform:uppercase; font-weight:700;
-  color:var(--ink); text-decoration:none; padding-bottom:0.5rem; position:relative;
-  animation:spine-rise 1s cubic-bezier(.2,.7,.2,1) .18s both;
+  display:inline-flex; align-items:center; gap:0.7rem; margin-top:1.4rem;
+  font-size:0.75rem; letter-spacing:0.18em; text-transform:uppercase; font-weight:700;
+  color:var(--chrome-gold); text-decoration:none; padding-bottom:0.4rem; position:relative;
 }
 .spine-link::after{
   content:""; position:absolute; left:0; right:0; bottom:0; height:1px;
-  background:var(--line-on-cream); transform-origin:left;
+  background:rgba(var(--chrome-gold-rgb),0.4); transform-origin:left;
   transition:background .35s ease, transform .5s cubic-bezier(.2,.7,.2,1);
 }
-.spine-link:hover::after{background:var(--gold-deep); transform:scaleX(1.06);}
-.spine-link svg{width:15px; height:15px; transition:transform .45s cubic-bezier(.2,.7,.2,1);}
+.spine-link:hover::after{background:var(--chrome-gold); transform:scaleX(1.06);}
+.spine-link svg{width:14px; height:14px; transition:transform .45s cubic-bezier(.2,.7,.2,1);}
 .spine-link:hover svg{transform:translateX(6px);}
-.spine-link:focus-visible{outline:2px solid var(--gold-deep); outline-offset:4px;}
+.spine-link:focus-visible{outline:2px solid var(--chrome-gold); outline-offset:4px;}
 
 /* ---------- the spine index ---------- */
 .spine-index{
@@ -2057,31 +2033,29 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .spine-index-item:focus-visible{outline:2px solid var(--chrome-gold); outline-offset:4px; border-radius:2px;}
 
 @media (max-width:900px){
-  .spine-hero{min-height:auto;}
-  .spine-stage{min-height:62svh;}
-  /* Vertical type is unreadable at this width: the index lies down and keeps
-     only the active name. */
+  .spine-hero{min-height:78svh; flex-direction:column; justify-content:flex-end; align-items:stretch;}
+  /* Vertical type is unreadable at this width: the index lies down, becomes
+     a normal flow item stacked directly above the plaque (rather than an
+     absolutely-positioned guess at the plaque's height), and keeps only the
+     active name. */
   .spine-index{
-    top:auto; bottom:calc(clamp(34px,4.6vw,74px) + 0.9rem); right:auto; left:0; width:100%;
+    position:static; order:1; margin-bottom:1rem;
     transform:none; flex-direction:row; justify-content:center; gap:0.9rem;
     padding:0 var(--pad);
   }
+  .spine-hero > .container{order:2;}
   .spine-index-item{writing-mode:horizontal-tb; gap:0.5rem;}
   .spine-index-label{display:none;}
   .spine-index-item.is-active .spine-index-label{display:block; font-size:0.6rem;}
   .spine-index-tick{width:1.6rem; height:1px;}
   .spine-index-item.is-active .spine-index-tick{width:2.6rem; height:1px;}
-  .spine-inner{padding-bottom:clamp(5rem,16vw,7rem);}
-  /* `flex:1 1 22rem` is a width while the row is horizontal and a *height*
-     once it stacks, which stretched a two-line sentence to 352px. */
-  .spine-foot{flex-direction:column; align-items:flex-start; gap:1rem;}
-  .spine-note{flex:0 0 auto; max-width:none;}
+  .spine-plaque{max-width:none;}
 }
 
 @media (prefers-reduced-motion: reduce){
   .spine-plate{animation:none;}
-  .spine-headline,.spine-note,.spine-link{animation:none;}
-  .spine-rule{width:3.4rem; animation:none;}
+  .spine-plaque{animation:none;}
+  .spine-rule{width:2rem; animation:none;}
   .spine-index-tick,.spine-link::after,.spine-link svg{transition:none;}
 }
 
