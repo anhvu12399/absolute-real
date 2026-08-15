@@ -1954,52 +1954,62 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 @keyframes spine-drift{ from{transform:scale(1.005);} to{transform:scale(1.055);} }
 
-.spine-hero > .container{position:relative; z-index:2; width:100%; padding-bottom:clamp(2.4rem,5vw,4rem);}
-
-/* The plaque itself: a solid ground, a thin gold hairline, the size of a
-   real nameplate rather than a band spanning the picture. */
-.spine-plaque{
-  max-width:min(30rem,92%); background:var(--chrome);
-  border:1px solid var(--chrome-gold); padding:clamp(1.5rem,3vw,2.2rem) clamp(1.6rem,3.4vw,2.4rem);
-  box-shadow:0 18px 50px rgba(0,0,0,0.35);
-  animation:spine-rise .8s cubic-bezier(.2,.7,.2,1) both;
+/* No box, no band - a pool of shade under the type and nowhere else, so nine
+   tenths of the photograph stays untouched. Two layers: a tight pool right
+   behind the words, and a shallow floor-wide wash just strong enough that
+   the pool doesn't look like a stray shadow on a bright frame. */
+.spine-veil{
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(46% 62% at 22% 88%, rgba(6,9,14,0.72) 0%, rgba(6,9,14,0.5) 40%, rgba(6,9,14,0.22) 66%, rgba(6,9,14,0) 84%),
+    linear-gradient(0deg, rgba(6,9,14,0.32) 0%, rgba(6,9,14,0) 26%);
 }
+
+.spine-inner{position:relative; z-index:2; width:100%; padding-bottom:clamp(3rem,6vw,5rem);}
+.spine-copy{max-width:min(38rem,90%); animation:spine-rise .8s cubic-bezier(.2,.7,.2,1) both;}
 @keyframes spine-rise{ from{opacity:0; transform:translateY(1rem);} to{opacity:1; transform:none;} }
 
 /* Place label: a rule that draws itself, then the name. */
 .spine-place{
   display:flex; align-items:center; gap:0.9rem;
-  font-size:0.7rem; letter-spacing:0.26em; text-transform:uppercase;
+  font-size:0.72rem; letter-spacing:0.26em; text-transform:uppercase;
   font-weight:600; color:var(--chrome-gold);
+  text-shadow:0 1px 3px rgba(6,9,14,0.85), 0 2px 12px rgba(6,9,14,0.6);
 }
 .spine-rule{
   display:block; width:0; height:1px; background:var(--chrome-gold); flex:none;
   animation:spine-draw .9s cubic-bezier(.2,.7,.2,1) .15s forwards;
 }
-@keyframes spine-draw{ to{ width:2rem; } }
+@keyframes spine-draw{ to{ width:2.4rem; } }
 
+/* Text sits straight on the photograph now, so the shadow is doing the job
+   the plaque's ink ground used to do: two tight layers for edge contrast on
+   a bright sky, one wide soft layer so it never looks like a hard outline. */
 .spine-headline{
-  margin:0.85rem 0 0;
+  margin:1rem 0 0;
   font-family:'Playfair Display',serif; font-weight:400;
-  font-size:clamp(1.9rem,3.6vw,2.9rem); line-height:1.06;
-  letter-spacing:-0.01em; color:var(--chrome-text); text-wrap:balance;
+  font-size:clamp(2.3rem,5.6vw,4.4rem); line-height:1.02;
+  letter-spacing:-0.02em; color:#fff; text-wrap:balance;
+  text-shadow:0 1px 2px rgba(6,9,14,0.7), 0 4px 18px rgba(6,9,14,0.55), 0 14px 44px rgba(6,9,14,0.4);
 }
 
 .spine-note{
-  margin:0.9rem 0 0; max-width:38ch;
-  font-size:0.96rem; line-height:1.6; font-weight:400;
-  color:var(--chrome-dim);
+  margin:1.1rem 0 0; max-width:42ch;
+  font-size:clamp(1rem,1.3vw,1.14rem); line-height:1.62; font-weight:500;
+  color:rgba(255,255,255,0.94);
+  text-shadow:0 1px 2px rgba(6,9,14,0.75), 0 3px 14px rgba(6,9,14,0.55);
 }
 
 /* A text link, not a button: nothing here is a checkout. */
 .spine-link{
-  display:inline-flex; align-items:center; gap:0.7rem; margin-top:1.4rem;
-  font-size:0.75rem; letter-spacing:0.18em; text-transform:uppercase; font-weight:700;
-  color:var(--chrome-gold); text-decoration:none; padding-bottom:0.4rem; position:relative;
+  display:inline-flex; align-items:center; gap:0.7rem; margin-top:1.6rem;
+  font-size:0.78rem; letter-spacing:0.18em; text-transform:uppercase; font-weight:700;
+  color:#fff; text-decoration:none; padding-bottom:0.4rem; position:relative;
+  text-shadow:0 1px 3px rgba(6,9,14,0.7);
 }
 .spine-link::after{
   content:""; position:absolute; left:0; right:0; bottom:0; height:1px;
-  background:rgba(var(--chrome-gold-rgb),0.4); transform-origin:left;
+  background:rgba(255,255,255,0.5); transform-origin:left;
   transition:background .35s ease, transform .5s cubic-bezier(.2,.7,.2,1);
 }
 .spine-link:hover::after{background:var(--chrome-gold); transform:scaleX(1.06);}
@@ -2033,29 +2043,26 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .spine-index-item:focus-visible{outline:2px solid var(--chrome-gold); outline-offset:4px; border-radius:2px;}
 
 @media (max-width:900px){
-  .spine-hero{min-height:78svh; flex-direction:column; justify-content:flex-end; align-items:stretch;}
-  /* Vertical type is unreadable at this width: the index lies down, becomes
-     a normal flow item stacked directly above the plaque (rather than an
-     absolutely-positioned guess at the plaque's height), and keeps only the
-     active name. */
+  .spine-hero{min-height:78svh;}
+  /* Vertical type is unreadable at this width: the index lies down and keeps
+     only the active name. */
   .spine-index{
-    position:static; order:1; margin-bottom:1rem;
+    top:auto; bottom:1.1rem; right:auto; left:0; width:100%;
     transform:none; flex-direction:row; justify-content:center; gap:0.9rem;
     padding:0 var(--pad);
   }
-  .spine-hero > .container{order:2;}
   .spine-index-item{writing-mode:horizontal-tb; gap:0.5rem;}
   .spine-index-label{display:none;}
   .spine-index-item.is-active .spine-index-label{display:block; font-size:0.6rem;}
   .spine-index-tick{width:1.6rem; height:1px;}
   .spine-index-item.is-active .spine-index-tick{width:2.6rem; height:1px;}
-  .spine-plaque{max-width:none;}
+  .spine-inner{padding-bottom:4.6rem;}
 }
 
 @media (prefers-reduced-motion: reduce){
   .spine-plate{animation:none;}
-  .spine-plaque{animation:none;}
-  .spine-rule{width:2rem; animation:none;}
+  .spine-copy{animation:none;}
+  .spine-rule{width:2.4rem; animation:none;}
   .spine-index-tick,.spine-link::after,.spine-link svg{transition:none;}
 }
 

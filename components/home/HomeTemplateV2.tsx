@@ -455,14 +455,18 @@ export default function HomeTemplateV2({
           label and the navigation. */}
       <section id="hero" className={`spine-hero ph ${hero.image_url ? "" : "ph-hero"}`}>
         {/* A separate layer so the photograph can drift without moving the
-            type sitting on top of it. Full-bleed, untouched by any overlay
-            band — the plaque below is the only thing that sits on it. */}
+            type sitting on top of it. Full-bleed, untouched by any box or
+            band — the plaque covered part of the picture, so the text now
+            sits directly on the photograph. */}
         <div
           key={heroIndex}
           className="spine-plate"
           style={hero.image_url ? bg(hero.image_url, "hero") : undefined}
           aria-hidden="true"
         />
+        {/* A soft pool of shade, not a hard edge — just enough for the type
+            to hold against a bright sky without a line anyone can point to. */}
+        <div className="spine-veil" aria-hidden="true" />
 
         {slides.length > 1 && (
           <nav className="spine-index" aria-label="Choose a destination">
@@ -486,12 +490,8 @@ export default function HomeTemplateV2({
           </nav>
         )}
 
-        {/* The plaque — a brass nameplate on a boutique hotel door, not a
-            band across the picture. Its own ink ground carries the text, so
-            legibility never depends on how bright that one corner of the
-            photograph happens to be, and the photograph itself stays whole. */}
-        <div className="container">
-          <div className="spine-plaque" key={`copy-${heroIndex}`}>
+        <div className="container spine-inner">
+          <div className="spine-copy" key={`copy-${heroIndex}`}>
             {heroPlace && (
               <p className="spine-place">
                 <span className="spine-rule" aria-hidden="true" />
