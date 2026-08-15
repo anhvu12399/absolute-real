@@ -6,8 +6,9 @@
  * `{country}-tours` page, and which ACF tab a field sits under. That is
  * knowledge the site owner should not have to carry, so the page carries it.
  *
- * Off by default: set `NEXT_PUBLIC_SHOW_EDIT_LINKS=1` to turn the bar on for a
- * staging deploy, or leave it off and it never renders for a visitor.
+ * Link targets are prepared whenever a WordPress origin is configured. Their
+ * visibility is controlled client-side by `?asledit=1` in EditBar, which lets
+ * an editor enable the tools without rebuilding or changing Vercel env vars.
  */
 
 const ADMIN_ORIGIN = (
@@ -21,7 +22,7 @@ const SITE_ORIGIN = (
 ).replace(/\/+$/, "");
 
 export const EDIT_LINKS_ENABLED =
-  process.env.NEXT_PUBLIC_SHOW_EDIT_LINKS === "1" && ADMIN_ORIGIN !== "";
+  ADMIN_ORIGIN !== "";
 
 /** The WordPress edit screen for one post. */
 export function editPostUrl(id?: number | null) {
@@ -85,4 +86,3 @@ export function editTargets(opts: {
   targets.push({ label: "Import & settings", url: importScreenUrl() });
   return targets.filter((target) => target.url);
 }
-

@@ -18,11 +18,37 @@ add_action('admin_footer', 'aat_admin_preview_panel');
 
 function aat_admin_preview_panel() {
     $screen = get_current_screen();
-    if (!$screen || $screen->base !== 'post') return;
+    if (!$screen || !in_array($screen->base, ['post', 'term'], true)) return;
 
     $frontend = get_option('aat_frontend_url', '');
     if (!$frontend) $frontend = rtrim(home_url(), '/');
     $frontend = rtrim($frontend, '/');
+
+    $preview_type = '';
+    $preview_slug = '';
+    $permalink_path = '/';
+
+    if ($screen->base === 'post') {
+        global $post;
+        if ($post) {
+            $preview_type = (string) $post->post_type;
+            $preview_slug = (string) $post->post_name;
+            $full = get_permalink($post->ID);
+            $parsed = $full ? wp_parse_url($full) : [];
+            $permalink_path = isset($parsed['path']) ? $parsed['path'] : '/';
+        }
+    } else {
+        $taxonomy = isset($_GET['taxonomy']) ? sanitize_key(wp_unslash($_GET['taxonomy'])) : '';
+        $term_id = isset($_GET['tag_ID']) ? absint($_GET['tag_ID']) : 0;
+        $term = $term_id && $taxonomy ? get_term($term_id, $taxonomy) : null;
+        if ($term && !is_wp_error($term)) {
+            $preview_type = (string) $taxonomy;
+            $preview_slug = (string) $term->slug;
+            $full = get_term_link($term);
+            $parsed = !is_wp_error($full) ? wp_parse_url($full) : [];
+            $permalink_path = isset($parsed['path']) ? $parsed['path'] : '/';
+        }
+    }
 
     ?>
     <style>
@@ -129,21 +155,12 @@ function aat_admin_preview_panel() {
     <script>
     jQuery(function($) {
         var frontendUrl = <?php echo wp_json_encode($frontend); ?>;
-        var postSlug = $('#post_name').val() || '';
-        var postType = $('#post_type').val() || '';
+        var postSlug = <?php echo wp_json_encode($preview_slug); ?> || $('#post_name').val() || '';
+        var postType = <?php echo wp_json_encode($preview_type); ?> || $('#post_type').val() || '';
 
         /* Use the real permalink path so Hotels (/collection/…), Tours (/tours/…)
            and every other post type land on the correct frontend URL. */
-        var wpPermalink = <?php
-            global $post;
-            $permalink_path = '/';
-            if ($post && $post->post_name) {
-                $full = get_permalink($post->ID);
-                $parsed = wp_parse_url($full);
-                $permalink_path = isset($parsed['path']) ? $parsed['path'] : '/';
-            }
-            echo wp_json_encode($permalink_path);
-        ?>;
+        var wpPermalink = <?php echo wp_json_encode($permalink_path); ?>;
 
         var previewPath = '/';
         if (postType === 'homepage') previewPath = '/';
@@ -202,7 +219,7 @@ function aat_admin_preview_panel() {
             'plan_btn':           { sel: '#plan a.btn', type: 'text', section: 'plan' },
             'specialists_headline': { sel: '#specialists h2', type: 'html', section: 'specialists' },
             'team':               { sel: '#specialists', section: 'specialists' },
-            'testimonials':       { sel: '#reviews', section: 'reviews' },
+            'testimonials':       { sel: '#reviews, #testimonials', section: 'reviews' },
             'review_summary':     { sel: '.review-summary', type: 'html', section: 'reviews' },
 
             /* ── Tour ── */
@@ -277,8 +294,8 @@ function aat_admin_preview_panel() {
             'related_description': { sel: '#related p', type: 'text', section: 'related' },
             'featured_tours':     { sel: '#journeys', section: 'journeys' },
             'related_places':     { sel: '#nearby', section: 'nearby' },
-            'testimonials_eyebrow': { sel: '#reviews .eyebrow', type: 'html', section: 'reviews' },
-            'testimonials_heading': { sel: '#reviews h2', type: 'text', section: 'reviews' },
+            'testimonials_eyebrow': { sel: '#testimonials .eyebrow, #reviews .eyebrow', type: 'html', section: 'testimonials' },
+            'testimonials_heading': { sel: '#testimonials h2, #reviews h2', type: 'text', section: 'testimonials' },
             'experiences_eyebrow': { sel: '#experiences .eyebrow', type: 'html', section: 'experiences' },
             'experiences_heading': { sel: '#experiences h2', type: 'text', section: 'experiences' },
 
@@ -302,6 +319,11 @@ function aat_admin_preview_panel() {
             'specialist_text':    { sel: '#specialist p, .specialist-block p', type: 'text', section: 'specialist' },
             'specialist_photo':   { sel: '#specialist img, .specialist-block img', type: 'image', section: 'specialist' },
             'specialist_phone':   { sel: '#specialist .phone, .specialist-block .phone', type: 'text', section: 'specialist' },
+            'specialist_button':  { sel: '#specialist .btn, .specialist-block .btn', type: 'text', section: 'specialist' },
+            'specialist_link':    { sel: '#specialist .btn, .specialist-block .btn', section: 'specialist' },
+            'why_title':          { sel: '#why h2, #overview h2', type: 'html', section: 'overview' },
+            'image':              { sel: '#hero, .all-destinations-hero', type: 'image', section: 'hero' },
+            'intro':              { sel: '#overview .serif-block, #overview', type: 'text', section: 'overview' },
         };
 
         var FIELD_SECTION = {
@@ -327,6 +349,93 @@ function aat_admin_preview_panel() {
             'hero_image': 'hero',
             'pillars': 'pillars', 'team': 'team',
             'journeys': 'listing', 'cruises': 'listing', 'articles': 'listing',
+            /* Tour fields which share a rendered section but do not need a
+               destructive live DOM patch. */
+            'hero_eyebrow_link': 'hero', 'is_featured': 'hero',
+            'highlights_note': 'overview',
+            'group_cta_title': 'overview', 'group_cta_desc': 'overview',
+            'group_cta_btn': 'overview', 'classic_tour_link': 'overview',
+            'options_title': 'stays', 'options_note': 'stays',
+            'booking_policy_title': 'inclusions', 'cta_label': 'inclusions',
+            'cta_link': 'inclusions', 'dates_title': 'inclusions',
+            'inclusions_btn_text': 'inclusions', 'exclusions_title': 'inclusions',
+            'inquiry_btn_text': 'inclusions', 'gallery_eyebrow': 'gallery',
+            'faq_eyebrow': 'faqs', 'faq_title': 'faqs',
+            'related_tours_title': 'stays',
+
+            /* Destination and guide fields. */
+            'map_headline': 'map', 'map_description': 'map',
+            'latitude': 'map', 'longitude': 'map', 'location_map': 'map',
+            'testimonials_eyebrow': 'testimonials', 'testimonials_heading': 'testimonials',
+            'experiences_eyebrow': 'experiences', 'experiences_heading': 'experiences',
+            'stays_eyebrow': 'hotels', 'stays_heading': 'hotels',
+            'route_eyebrow': 'journeys', 'guides_eyebrow': 'explore',
+            'guides_heading': 'explore', 'planning_eyebrow': 'explore',
+            'planning_heading': 'explore', 'related_title': 'explore',
+            'related_description': 'explore',
+            'month_guide_title': 'months', 'best_time_image': 'best-time',
+            'best_time_html': 'best-time', 'popular_places_html': 'popular',
+            'experiences_html': 'ideas', 'trip_ideas_html': 'trip-ideas',
+            'trip_ideas_title': 'trip-ideas',
+
+            /* Editorial, hotel, homepage and directory-only controls. */
+            'plan_footer': 'plan', 'view_more_label': 'further',
+            'view_more_link': 'further', 'location_subtitle': 'nearby',
+            'specialist_button': 'specialist', 'specialist_link': 'specialist',
+            'ticker_link': 'hero', 'intro_cta_link': 'statement',
+            'review_link': 'reviews', 'review_text': 'reviews',
+            'text_phone': 'plan', 'phone': 'plan', 'link_email_icon': 'plan',
+            'why_reasons': 'why',
+        };
+
+        var TAB_SECTIONS = {
+            'Hero Banner & Trust': 'hero',
+            'Brand Statement & Intro': 'statement',
+            'Destinations & Journeys Tabs': 'journeys',
+            'Featured Journeys & Stays': 'featured',
+            'Map & Core Values': 'map',
+            'Story & Standards': 'values',
+            'Plan Your Trip Form': 'plan',
+            'Specialists & Reviews': 'reviews',
+            'Key Facts': 'hero',
+            'Overview': 'overview',
+            'Itinerary': 'itinerary',
+            'Stays & Accommodations': 'stays',
+            'Stays & Options': 'stays',
+            'Inclusions & Dates': 'inclusions',
+            'Gallery, Experiences & FAQs': 'gallery',
+            'Speak to a Specialist': 'specialist',
+            'Hero & Overview': 'hero',
+            'Location & Map': 'facts',
+            'Gallery': 'plates',
+            'Related Content': 'journeys',
+            'Section Headings': 'overview',
+            'Hero & Content': 'hero',
+            'Sidebar & Further Reading': 'further',
+            'Sidebar': 'overview',
+            'Gallery & Related Tours': 'gallery',
+            'Gallery & Related': 'gallery',
+            'Plan Your Trip': 'plan',
+            'Map': 'map',
+            'Related & Gallery': 'explore',
+            '📜 Câu chuyện — Our Story': 'story',
+            'Team': 'team',
+            'Country Page': 'overview',
+            'Travel Specialist': 'specialist',
+            'Directory Cards': 'listing'
+        };
+
+        var POST_TYPE_FALLBACK = {
+            'homepage': { section: 'hero', selector: '#hero' },
+            'tour': { section: 'overview', selector: '#overview' },
+            'hotel': { section: 'story', selector: '#story' },
+            'place_to_go': { section: 'overview', selector: '#overview' },
+            'page': { section: 'hero', selector: '#hero, main, article' },
+            'travel_guide': { selector: '.dispatch-masthead, article' },
+            'thing_to_do': { selector: '.dispatch-masthead, article' },
+            'blog': { selector: '.dispatch-masthead, article' },
+            'trip': { selector: '.dispatch-masthead, article' },
+            'country': { section: 'hero', selector: '#hero, .all-destinations-hero, #overview' }
         };
 
         var $panel = $('#aat-preview-panel');
@@ -335,6 +444,8 @@ function aat_admin_preview_panel() {
         var $sectionLabel = $('#aat-preview-section');
         var $status = $('#aat-preview-status');
         var isOpen = false;
+        var iframeReady = false;
+        var pendingMessages = [];
         var debounceTimer = null;
 
         $status.text('Preview URL: ' + baseUrl);
@@ -346,10 +457,36 @@ function aat_admin_preview_panel() {
                 isOpen = true;
                 if ($iframe.attr('src') === 'about:blank') {
                     $status.text('Loading: ' + baseUrl);
+                    iframeReady = false;
                     $iframe.attr('src', baseUrl);
                 }
             }
         }
+
+        function postToPreview(message) {
+            if (!iframeReady) {
+                /* Keep only the newest scroll command, but retain live field
+                   updates. This fixes the first click being lost while the
+                   preview iframe is still loading. */
+                if (message.type === 'aat-scroll-to') {
+                    pendingMessages = pendingMessages.filter(function(item) {
+                        return item.type !== 'aat-scroll-to';
+                    });
+                }
+                pendingMessages.push(message);
+                return;
+            }
+            $iframe[0].contentWindow.postMessage(message, '*');
+        }
+
+        $iframe.on('load', function() {
+            iframeReady = true;
+            pendingMessages.forEach(function(message) {
+                $iframe[0].contentWindow.postMessage(message, '*');
+            });
+            pendingMessages = [];
+            $status.text('✓ Preview đã sẵn sàng — bấm vào một field để xem đúng phần').css('color', '#00a32a');
+        });
 
         function closePanel() {
             $panel.removeClass('is-open');
@@ -367,14 +504,14 @@ function aat_admin_preview_panel() {
             if (!mapping) return;
 
             try {
-                $iframe[0].contentWindow.postMessage({
+                postToPreview({
                     type: 'aat-live-update',
                     field: fieldName,
                     value: value,
                     selector: mapping.sel,
                     updateType: mapping.type,
                     section: mapping.section
-                }, '*');
+                });
 
                 $sectionLabel.text('→ #' + mapping.section + ' (' + fieldName + ')');
                 $status.text('✏️ Đang cập nhật: ' + fieldName).css('color', '#2271b1');
@@ -391,12 +528,12 @@ function aat_admin_preview_panel() {
             $sectionLabel.text('→ #' + (section || 'element') + (fieldName ? ' (' + fieldName + ')' : ''));
 
             try {
-                $iframe[0].contentWindow.postMessage({
+                postToPreview({
                     type: 'aat-scroll-to',
                     section: section,
                     selector: selector,
                     field: fieldName
-                }, '*');
+                });
             } catch (e) {
                 if (section) {
                     var url = baseUrl + '#' + section;
@@ -444,43 +581,29 @@ function aat_admin_preview_panel() {
             var section = mapping ? mapping.section : FIELD_SECTION[fieldName];
             var selector = mapping ? mapping.sel : null;
 
-            if (section || selector) {
-                openPanel();
-                scrollToTarget(section, selector, fieldName);
+            /* A field without an explicit map inherits the nearest ACF tab.
+               This is what makes newly added fields previewable immediately
+               instead of silently doing nothing until FIELD_MAP is updated. */
+            if (!section && !selector) {
+                var tabLabel = $field.prevAll('.acf-field-tab').first().find('.acf-tab-button, a').first().text().trim();
+                if (!tabLabel) {
+                    tabLabel = $field.closest('.acf-fields').find('.acf-tab-button.active, .acf-tab-group .active a').first().text().trim();
+                }
+                if (tabLabel && TAB_SECTIONS[tabLabel]) section = TAB_SECTIONS[tabLabel];
             }
+
+            if (!section && !selector && POST_TYPE_FALLBACK[postType]) {
+                section = POST_TYPE_FALLBACK[postType].section || null;
+                selector = POST_TYPE_FALLBACK[postType].selector || null;
+            }
+
+            openPanel();
+            scrollToTarget(section, selector, fieldName);
         });
 
         /* ── ACF tab clicks ── */
         $(document).on('click', '.acf-tab-button, .acf-tab-group a', function() {
             var label = $(this).text().trim();
-            var TAB_SECTIONS = {
-                'Hero Banner & Trust': 'hero',
-                'Brand Statement & Intro': 'statement',
-                'Destinations & Journeys Tabs': 'journeys',
-                'Featured Journeys & Stays': 'featured',
-                'Map & Core Values': 'map',
-                'Story & Standards': 'values',
-                'Plan Your Trip Form': 'plan',
-                'Specialists & Reviews': 'reviews',
-                'Key Facts': 'hero',
-                'Overview': 'overview',
-                'Itinerary': 'itinerary',
-                'Stays & Options': 'stays',
-                'Inclusions & Dates': 'inclusions',
-                'Gallery, Experiences & FAQs': 'gallery',
-                'Speak to a Specialist': 'specialist',
-                'Hero & Overview': 'hero',
-                'Location & Map': 'facts',
-                'Gallery': 'plates',
-                'Related Content': 'journeys',
-                'Section Headings': 'overview',
-                'Hero & Content': 'hero',
-                'Sidebar': 'overview',
-                'Gallery & Related': 'gallery',
-                'Plan Your Trip': 'plan',
-                'Map': 'map',
-                'Related & Gallery': 'nearby',
-            };
             if (TAB_SECTIONS[label]) {
                 openPanel();
                 scrollToTarget(TAB_SECTIONS[label], null, label);

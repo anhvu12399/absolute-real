@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { EditTarget } from "@/lib/admin";
 
 /**
@@ -12,12 +12,34 @@ import type { EditTarget } from "@/lib/admin";
  * live content when their repeater is left empty. Rather than expect the owner
  * to hold that map in their head, each page names its own edit targets.
  *
- * Renders nothing unless NEXT_PUBLIC_SHOW_EDIT_LINKS is on, so a visitor never
- * sees it.
+ * `?asledit=1` enables the controls for the current browser tab. The flag is
+ * remembered in sessionStorage so the controls stay visible while the editor
+ * follows internal links. `?asledit=0` turns them off again.
  */
 export function EditBar({ targets }: { targets: EditTarget[] }) {
   const [open, setOpen] = useState(false);
-  if (!targets.length) return null;
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedMode = params.get("asledit");
+
+    if (requestedMode === "1") {
+      window.sessionStorage.setItem("aat-edit-mode", "1");
+      setEnabled(true);
+      return;
+    }
+
+    if (requestedMode === "0") {
+      window.sessionStorage.removeItem("aat-edit-mode");
+      setEnabled(false);
+      return;
+    }
+
+    setEnabled(window.sessionStorage.getItem("aat-edit-mode") === "1");
+  }, []);
+
+  if (!enabled || !targets.length) return null;
 
   /* Group targets by their `group` field for visual clustering. */
   const groups: { label: string; items: EditTarget[] }[] = [];
