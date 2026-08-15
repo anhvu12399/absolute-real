@@ -118,10 +118,32 @@ function aat_repair_borrowed_images() {
  */
 function aat_url_exists($url) {
     if (!is_string($url) || $url === '') return false;
+
+    /* Already in the library: no request needed, and this is the case that
+       matters most - these URLs point at this very site. */
     if (attachment_url_to_postid($url)) return true;
 
+    /* Some size variants and CDN rewrites do not resolve by URL, so fall back
+       to matching the filename against what the library has attached. */
+    $file = basename(wp_parse_url($url, PHP_URL_PATH) ?: '');
+    if ($file !== '') {
+        global $wpdb;
+        $hit = $wpdb->get_var($wpdb->prepare(
+            "SELECT post_id FROM {$wpdb->postmeta}
+              WHERE meta_key = '_wp_attached_file' AND meta_value LIKE %s LIMIT 1",
+            '%' . $wpdb->esc_like($file)
+        ));
+        if ($hit) return true;
+    }
+
     $response = wp_remote_head($url, ['timeout' => 6, 'redirection' => 2]);
-    return !is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200;
+    /* "Could not check" is not "does not exist". A host that blocks loopback
+       requests would otherwise reject every URL and the seeder would report a
+       clean zero while doing nothing. Only a definite 404/410 blocks. */
+    if (is_wp_error($response)) return true;
+
+    $code = (int) wp_remote_retrieve_response_code($response);
+    return !in_array($code, [404, 410], true);
 }
 
 /**
@@ -1142,16 +1164,34 @@ function aat_seed_hotel_images() {
     ];
 
     $filled = [];
+    $skipped = [];
+
     foreach ($CURATED as $slug => $url) {
-        $post = get_page_by_path($slug, OBJECT, 'hotel');
-        if (!$post) continue;
-        if (get_post_meta($post->ID, 'hero_image', true)) continue;
-        if (!aat_url_exists($url)) continue;
+        /* get_page_by_path() is built for hierarchical types and walks parents;
+           a flat CPT is found more reliably by asking for the post_name
+           outright. */
+        $found = get_posts([
+            'post_type' => 'hotel',
+            'post_status' => ['publish', 'draft', 'pending', 'private'],
+            'name' => $slug,
+            'posts_per_page' => 1,
+        ]);
+        $post = $found ? $found[0] : null;
+
+        if (!$post) { $skipped[] = $slug . ': không tìm thấy bài'; continue; }
+        if (get_post_meta($post->ID, 'hero_image', true)) { $skipped[] = $slug . ': đã có ảnh'; continue; }
+        if (!aat_url_exists($url)) { $skipped[] = $slug . ': ảnh không tồn tại'; continue; }
 
         update_post_meta($post->ID, 'hero_image', wp_slash($url));
         update_post_meta($post->ID, '_aat_seeded', 'hero_image');
         $filled[] = $post->post_title;
     }
 
-    return ['imported' => count($filled), 'done' => true, 'details' => $filled];
+    /* Reported rather than swallowed: a bare "+0" gave no way to tell a
+       finished job from a broken lookup. */
+    return [
+        'imported' => count($filled),
+        'done' => true,
+        'details' => array_merge($filled, $skipped),
+    ];
 }
