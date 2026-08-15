@@ -12,12 +12,17 @@ import type { EditTarget } from "@/lib/admin";
  * live content when their repeater is left empty. Rather than expect the owner
  * to hold that map in their head, each page names its own edit targets.
  *
- * Who sees it: whoever is signed into WordPress with permission to edit posts,
- * and nobody else. The controls used to appear for anyone who added
- * `?asledit=1` to the URL. Nothing was exposed by that — every link points at
- * wp-admin, which does its own checking — but it put an editing UI in front of
- * readers. The page now asks the backend outright, sending the visitor's
- * WordPress cookie; `?asledit=0` still hides the bar for the current tab.
+ * Who sees it, in order:
+ *   `?asledit=1` — turn it on for this browser, remembered while the tab
+ *                  lives. The quick way in, and the only one that works
+ *                  before the plugin is uploaded or the Frontend URL is set.
+ *   `?asledit=0` — turn it back off.
+ *   otherwise    — ask WordPress. Signed in with permission to edit posts,
+ *                  the bar appears on its own; a reader never sees it.
+ *
+ * The manual switch is safe to keep: every link here points at wp-admin,
+ * which checks permission itself, and the republish button carries a token
+ * only WordPress issues to a real editor.
  */
 export function EditBar({ targets }: { targets: EditTarget[] }) {
   const [open, setOpen] = useState(false);
@@ -27,16 +32,23 @@ export function EditBar({ targets }: { targets: EditTarget[] }) {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("asledit") === "0") {
-      window.sessionStorage.setItem("aat-edit-hidden", "1");
+    const asked = params.get("asledit");
+
+    if (asked === "0") {
+      window.sessionStorage.removeItem("aat-edit-mode");
+      setCanEdit(false);
       return;
     }
-    if (params.get("asledit") === "1") window.sessionStorage.removeItem("aat-edit-hidden");
-    if (window.sessionStorage.getItem("aat-edit-hidden") === "1") return;
+    if (asked === "1") window.sessionStorage.setItem("aat-edit-mode", "1");
+
+    const forced = window.sessionStorage.getItem("aat-edit-mode") === "1";
+    if (forced) setCanEdit(true);
 
     const origin = process.env.NEXT_PUBLIC_WP_URL;
     if (!origin) return;
 
+    /* Asked either way: a forced bar still wants the token, so "republish"
+       works for an editor who is also signed in. */
     const stop = new AbortController();
     fetch(`${origin.replace(/\/+$/, "")}/wp-json/absolute-asia/v1/me`, {
       credentials: "include",
@@ -46,7 +58,7 @@ export function EditBar({ targets }: { targets: EditTarget[] }) {
       /* A reader gets `canEdit: false`, not an error — no console noise on a
          page that simply has no editor looking at it. */
       .then((body) => {
-        setCanEdit(Boolean(body?.canEdit));
+        if (body?.canEdit) setCanEdit(true);
         setToken(typeof body?.token === "string" ? body.token : "");
       })
       .catch(() => {});
