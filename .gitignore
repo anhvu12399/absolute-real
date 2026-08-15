@@ -24,3 +24,4 @@ outputs/
 # Chọn site đang chạy — mỗi máy một khác
 .env.local
 .env.local.*
+.vercel
