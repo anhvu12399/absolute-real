@@ -1269,6 +1269,7 @@ add_action('rest_api_init', function () {
         if ($type === 'seed-copy') return rest_ensure_response(aat_seed_homepage_copy());
         if ($type === 'hotel-copy') return rest_ensure_response(aat_seed_hotel_copy());
         if ($type === 'fill-itineraries') return rest_ensure_response(aat_backfill_itineraries(25));
+        if ($type === 'hotel-images') return rest_ensure_response(aat_seed_hotel_images());
         if ($type === 'fill-images') return rest_ensure_response(aat_backfill_images(20));
         if ($type === 'fill-excerpts') return rest_ensure_response(aat_backfill_excerpts(30));
         if ($type === 'enrich-tours') {
@@ -1379,6 +1380,7 @@ function aat_import_screen() {
             <button class="button aat-run" data-type="fill-images">Gán ảnh còn thiếu</button>
             <button class="button aat-run" data-type="fill-excerpts">Viết mô tả còn thiếu</button>
             <button class="button aat-run" data-type="fill-itineraries">Tách lịch trình theo ngày</button>
+            <button class="button aat-run" data-type="hotel-images">Gán ảnh khách sạn đã chọn</button>
             <button class="button aat-run" data-type="seed-copy">Soạn nội dung trang chủ</button>
             <button class="button aat-run" data-type="hotel-copy">Viết mô tả khách sạn</button>
             <button class="button aat-run" data-type="story">Soạn trang Our Story</button>
@@ -1553,7 +1555,7 @@ function aat_import_screen() {
                 /* `rebrand` is deliberately absent: renaming the sister agency
                    is a business decision, and it touches wording customers
                    wrote. It stays a separate button. */
-                ['menu', 'relink', 'fix-records', 'fill-images', 'fill-excerpts', 'fill-itineraries', 'seed-copy', 'hotel-copy', 'story', 'hub-pages']
+                ['menu', 'relink', 'fix-records', 'fill-images', 'fill-excerpts', 'fill-itineraries', 'hotel-images', 'seed-copy', 'hotel-copy', 'story', 'hub-pages']
             )); ?>;
 
             var $btn = $(this).prop('disabled', true).text('Đang chạy…');

@@ -14,6 +14,11 @@ import { organizationSchema, schemaScript, websiteSchema } from "@/lib/schema";
 
 const siteUrl = SITE_URL;
 
+/* Warm the connection to whichever WordPress this build talks to. It named one
+   site's backend outright, so a sister site preconnected to a host it never
+   calls and paid a DNS lookup for the one it does. */
+const wpOrigin = (process.env.NEXT_PUBLIC_WP_URL || "").replace(/\/+$/, "");
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -36,8 +41,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <head>
-        <link rel="dns-prefetch" href="https://backend.absoluteasiatours.com" />
-        <link rel="preconnect" href="https://backend.absoluteasiatours.com" crossOrigin="anonymous" />
+        {wpOrigin && (
+          <>
+            <link rel="dns-prefetch" href={wpOrigin} />
+            <link rel="preconnect" href={wpOrigin} crossOrigin="anonymous" />
+          </>
+        )}
         {/* Organization and WebSite, once site-wide. Page-level schema is
             emitted by the route so each type describes itself. */}
         <script

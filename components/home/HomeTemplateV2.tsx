@@ -119,27 +119,6 @@ export default function HomeTemplateV2({
   const IS_TOUR = /^\/tours\//;
   const IS_STAY = /^\/collection\//;
 
-  const AUTHENTIC_COUNTRY_PHOTOS: Record<string, string> = {
-    cambodia: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/06/pexels-sergk1-158907081.jpg", // Angkor Wat
-    bhutan: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-infinityadventure-5011707.jpg", // Tiger's Nest Monastery
-    vietnam: "https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Ninh-Binh-2000.jpg", // Ninh Binh
-    thailand: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/03/Grand-Palace-12121.jpg", // Grand Palace
-    japan: "https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/Kyoto-1211-scaled-1.jpg", // Kyoto
-    china: "https://backend.absoluteasiatours.com/wp-content/uploads/2026/05/fisherman-Guangxi-China.jpg", // Guangxi
-    laos: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/02/Luang-Prabang-30-1.jpg", // Luang Prabang
-    indonesia: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-joyston-judah-331625-27682192.jpg", // Bali & Indonesia
-    bali: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-iqxazmi-3935736.jpg", // Bali
-    india: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/08/pexels-jodaarba-860577.jpg", // India
-    malaysia: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/08/Pangkor-islands-12.jpg", // Malaysia
-    "south-korea": "https://backend.absoluteasiatours.com/wp-content/uploads/2025/05/seoul2.jpg", // Seoul
-    singapore: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-chaitgawat-2128033.jpg",
-    myanmar: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/06/Bagan-Plains.jpg",
-    nepal: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/08/pexels-samrat-maharjan-156568-14496011.jpg",
-    "sri-lanka": "https://backend.absoluteasiatours.com/wp-content/uploads/2025/08/pexels-godson-bright-352845-962464.jpg",
-    taiwan: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/06/Taiwan-Lantern.jpg",
-    philippines: "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/El-Nido-Palawan.jpg",
-  };
-
   /* "Where do you want to go" is answered with countries, not with individual
      towns — a visitor picks Vietnam before they pick Hoi An. The country
      taxonomy carries them; the photograph is borrowed from that country's own
@@ -157,10 +136,13 @@ export default function HomeTemplateV2({
           item.title?.toLowerCase().includes(cleanTermSlug)
         );
       });
+      /* WordPress first. The eighteen URLs pasted in here instead were
+         editorial choices with nowhere to edit them, and four of the
+         eighteen pointed at files that were never uploaded - a 404 that
+         nothing on this side could notice. They live on the country term
+         now; see aat_backfill_country_images(). */
       const foundImage =
         term.image ||
-        AUTHENTIC_COUNTRY_PHOTOS[cleanTermSlug] ||
-        AUTHENTIC_COUNTRY_PHOTOS[term.slug] ||
         own.find((i) => i.featuredMedia?.url)?.featuredMedia?.url ||
         "";
       return {
@@ -176,15 +158,10 @@ export default function HomeTemplateV2({
     });
   }, [countries, places, tours, hotels, cruises, guides]);
 
-  const destinations = useMemo(() => {
-    return tabCards(acf.home_tab_destinations, IS_PLACE, countryCards).map((card: any) => {
-      const slug = String(card?.link || "").replace(/\//g, "").toLowerCase().replace(/-tours|-vacations/g, "");
-      return {
-        ...card,
-        image_url: card.image_url || AUTHENTIC_COUNTRY_PHOTOS[slug] || "",
-      };
-    });
-  }, [acf.home_tab_destinations, countryCards]);
+  const destinations = useMemo(
+    () => tabCards(acf.home_tab_destinations, IS_PLACE, countryCards),
+    [acf.home_tab_destinations, countryCards],
+  );
 
   const journeys = useMemo(() => {
     return tabCards(acf.home_tab_journeys, IS_TOUR, tours.map(toCard));
