@@ -8,7 +8,9 @@ export function LeadForm({ sourcePath = "" }: { sourcePath?: string }) {
   async function submit(formData: FormData) {
     setState("sending");
     const payload = Object.fromEntries(formData.entries());
-    const response = await fetch("/api/leads", {
+    const response = await /* Trailing slash: the site redirects without it, and a 308 on every
+       submission is a wasted round trip. */
+    fetch("/api/leads/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...payload, sourcePath }),

@@ -5,43 +5,45 @@ import Link from "next/link";
 import { BRAND_SHORT } from "@/lib/site";
 import { optimized } from "@/lib/images";
 
-const ALL_DESTINATIONS = [
-  "Vietnam",
-  "Thailand",
-  "Cambodia",
-  "Laos",
-  "Japan",
-  "Bhutan",
-  "Bali & Indonesia",
-  "Myanmar",
-  "Sri Lanka",
-  "India",
-  "Nepal",
-  "Singapore",
-  "South Korea",
-  "Maldives",
-  "Taiwan",
-  "China",
+/* The countries this company actually sells, from its own destination list. */
+const DESTINATIONS = [
+  "Vietnam", "Cambodia", "Laos", "Thailand", "Myanmar", "Malaysia", "Singapore",
+  "Indonesia / Bali", "Philippines", "Japan", "China", "South Korea", "Taiwan",
+  "India", "Nepal", "Bhutan", "Sri Lanka", "Maldives", "Tibet", "Not sure yet",
 ];
 
-const TRAVEL_EXPERIENCES = [
-  { id: "culture", label: "Ancient Temples & Cultural Heritage" },
-  { id: "culinary", label: "Gourmet Dining & Culinary Trails" },
-  { id: "nature", label: "Pristine Nature & Wildlife Encounters" },
-  { id: "wellness", label: "Holistic Wellness, Spa & Yoga" },
-  { id: "beach", label: "Private Island & Coastal Escapes" },
-  { id: "arts", label: "Local Arts, Crafts & Living Traditions" },
-  { id: "cruise", label: "Private Yacht & Luxury River Cruises" },
-  { id: "adventure", label: "Light Trekking & Active Discovery" },
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 
-function safeParse(val: unknown) {
-  if (Array.isArray(val)) return val;
-  if (typeof val === "string") {
-    try {
-      const parsed = JSON.parse(val);
-      if (Array.isArray(parsed)) return parsed;
-    } catch {}
+/* Five years ahead: long-haul private travel is booked well in advance. */
+const YEARS = Array.from({ length: 5 }, (_, i) => String(new Date().getFullYear() + i));
+
+const BUDGETS = [
+  "Under $5,000",
+  "$5,000 - $10,000",
+  "$10,000 - $20,000",
+  "$20,000 - $40,000",
+  "$40,000 - $75,000",
+  "Over $75,000",
+  "Not sure yet",
+];
+
+/* The markets this company sells into, then the rest alphabetically. */
+const COUNTRIES = [
+  "United States", "Canada", "United Kingdom", "Australia", "New Zealand",
+  "Ireland", "Germany", "France", "Netherlands", "Belgium", "Switzerland",
+  "Austria", "Spain", "Italy", "Sweden", "Norway", "Denmark", "Finland",
+  "Singapore", "Hong Kong", "Japan", "South Korea", "United Arab Emirates",
+  "South Africa", "Brazil", "Mexico", "Other",
+];
+
+/** Repeaters arrive as JSON strings when ACF free is in play. */
+function safeParse(value: unknown): any[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string" && value.trim().startsWith("[")) {
+    try { return JSON.parse(value); } catch { return []; }
   }
   return [];
 }
@@ -56,53 +58,81 @@ export default function PlanTripTemplateV2({
   fallbackImage?: string;
 }) {
   const heroBg = data?.featuredMedia?.url || fallbackImage;
+
   const [submitted, setSubmitted] = useState(false);
-  const [formData, setFormData] = useState({
-    destinations: ["Vietnam"],
-    timeframe: "Autumn 2026",
-    duration: "10 - 14 Days",
-    travelers: "2 Adults (Couple)",
-    childrenCount: "No Children",
-    occasion: "Vacation & Leisure",
-    budget: "$8,000 - $12,000 pp",
-    hotelStyle: "5-Star Luxury & Boutique",
-    interests: ["culture", "culinary"],
-    name: "",
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    isAdvisor: false,
     email: "",
-    phone: "",
     country: "",
-    contactPreference: "Email",
-    bestTimeToCall: "Morning",
+    dialCode: "",
+    phone: "",
+    destinations: [] as string[],
+    startMonth: "",
+    startYear: "",
+    nights: "",
+    budget: "",
+    travelers: "",
     notes: "",
+    newsletter: false,
+    company: "",
   });
 
-  const toggleDestination = (dest: string) => {
-    setFormData((prev) => {
-      const exists = prev.destinations.includes(dest);
-      return {
-        ...prev,
-        destinations: exists
-          ? prev.destinations.filter((d) => d !== dest)
-          : [...prev.destinations, dest],
-      };
-    });
-  };
+  const set = (key: keyof typeof form) => (
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => setForm((prev) => ({ ...prev, [key]: event.target.value }));
 
-  const toggleInterest = (id: string) => {
-    setFormData((prev) => {
-      const exists = prev.interests.includes(id);
-      return {
-        ...prev,
-        interests: exists
-          ? prev.interests.filter((i) => i !== id)
-          : [...prev.interests, id],
-      };
-    });
-  };
+  const setBool = (key: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((prev) => ({ ...prev, [key]: event.target.checked }));
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
+  /* The enquiry goes to the office. The previous handler set a flag and threw
+     the submission away, so every message sent from this page was lost. */
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (sending) return;
+    setError("");
+    setSending(true);
+
+    try {
+      const response = await /* Trailing slash: the site redirects without it, and a 308 on every
+         submission is a wasted round trip. */
+      fetch("/api/leads/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${form.firstName} ${form.lastName}`.trim(),
+          email: form.email,
+          phone: [form.dialCode, form.phone].filter(Boolean).join(" ").trim(),
+          destination: form.destinations.join(", "),
+          message: form.notes,
+          sourcePath: window.location.pathname,
+          company: form.company,
+          details: {
+            "Home country": form.country,
+            "Travel advisor": form.isAdvisor ? "Yes" : "No",
+            "Start date": [form.startMonth, form.startYear].filter(Boolean).join(" "),
+            "Trip length": form.nights ? `${form.nights} nights` : "",
+            "Total budget": form.budget,
+            "Number of travellers": form.travelers,
+            Newsletter: form.newsletter ? "Yes" : "No",
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        setError(body?.error || "Something went wrong. Please try again, or email us directly.");
+        return;
+      }
+      setSubmitted(true);
+    } catch {
+      setError("Could not reach the server. Please check your connection and try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   /* Reviews data aligned with Homepage */
@@ -220,557 +250,217 @@ export default function PlanTripTemplateV2({
         </div>
       </section>
 
-      {/* ═══ FORM SECTION ═══ */}
-      <section id="form" className="section on-cream" style={{ background: "var(--cream)", paddingTop: "3rem" }}>
-        <div className="container" style={{ maxWidth: "920px" }}>
+      {/* ═══ ENQUIRY FORM ═══
+          What the office actually needs to open a conversation, in the order
+          a traveller can answer it: who you are, then where and when. The
+          previous version asked eighteen questions across six numbered steps
+          and, having asked them, posted nowhere - `handleSubmit` set a flag
+          and the enquiry was gone. */}
+      <section id="form" className="section on-white">
+        <div className="container">
           {submitted ? (
-            <div
-              style={{
-                background: "var(--white)",
-                padding: "clamp(3rem,6vw,4.5rem) clamp(2rem,4vw,3.5rem)",
-                borderRadius: "4px",
-                border: "1px solid var(--line-on-cream)",
-                textAlign: "center",
-                boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
-              }}
-            >
+            <div className="enquiry-done">
               <p className="eyebrow" style={{ justifyContent: "center" }}>
-                <em>Inquiry</em> Received
+                <em>Enquiry</em> Received
               </p>
-              <h2 style={{ fontSize: "2.2rem", fontFamily: "'Playfair Display', serif", marginTop: "0.6rem" }}>
-                Thank You, {formData.name || "Traveler"}
-              </h2>
-              <p
-                style={{
-                  color: "var(--text-dim-on-cream)",
-                  marginTop: "1rem",
-                  fontSize: "1.05rem",
-                  lineHeight: 1.7,
-                  maxWidth: "52ch",
-                  marginLeft: "auto",
-                  marginRight: "auto",
-                }}
-              >
-                Your custom travel request for <strong>{formData.destinations.join(", ") || "Asia"}</strong> has been
-                routed to our senior destination designer. We will review your preferences and deliver your personalized
-                draft itinerary within one business day.
+              <h2>Thank you{form.firstName ? `, ${form.firstName}` : ""}</h2>
+              <p>
+                A private travel designer will read this and reply within one business day.
+                Nothing is booked and nothing is charged.
               </p>
-              {/* This printed +1 (800) 736-8187 while every other page showed
-                  the number from WordPress. One of the two was wrong and
-                  nobody could tell which; with no number set, the offer to
-                  call goes away rather than trailing off. */}
               {String(acf.phone || "") && (
-                <div
-                  style={{
-                    marginTop: "2rem",
-                    padding: "1.2rem",
-                    background: "var(--cream)",
-                    borderRadius: "4px",
-                    display: "inline-block",
-                    fontSize: "0.9rem",
-                    color: "var(--ink)",
-                  }}
-                >
-                  Need urgent assistance? Call us directly:{" "}
-                  <strong>{String(acf.phone)}</strong>
-                </div>
+                <p className="enquiry-call">
+                  Need to speak sooner? <strong>{String(acf.phone)}</strong>
+                </p>
               )}
-              <div style={{ marginTop: "2.4rem" }}>
-                <Link href="/" className="btn btn-fill-ink">
-                  Return to Homepage
-                </Link>
-              </div>
+              <Link href="/" className="btn btn-line-ink">
+                Return home
+              </Link>
             </div>
           ) : (
-            <form
-              onSubmit={handleSubmit}
-              style={{
-                background: "var(--white)",
-                padding: "clamp(2rem,4vw,3.5rem)",
-                borderRadius: "4px",
-                border: "1px solid var(--line-on-cream)",
-                boxShadow: "0 14px 45px rgba(0,0,0,0.06)",
-              }}
-            >
-              <div className="center" style={{ marginBottom: "2.5rem" }}>
-                <p className="eyebrow" style={{ justifyContent: "center" }}>
-                  <em>Tailor-Made</em> Request
-                </p>
-                <h2 style={{ fontSize: "clamp(1.6rem,2.8vw,2.2rem)", marginTop: "0.4rem" }}>
-                  Start Planning Your Private Journey
-                </h2>
-                <p style={{ color: "var(--text-dim-on-cream)", fontSize: "0.92rem", marginTop: "0.5rem" }}>
-                  Private · Custom-Crafted · 100% Obligation-Free
-                </p>
-              </div>
+            <>
+              <p className="enquiry-lede">
+                Please fill out the information below or speak to your travel advisor.
+                Required fields are marked with an asterisk (*).
+              </p>
 
-              {/* ─── SECTION 1: DESTINATIONS ─── */}
-              <div style={{ marginBottom: "2.4rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.8rem" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.8rem",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      fontWeight: 700,
-                      color: "var(--ink)",
-                    }}
-                  >
-                    1. Which destinations would you like to visit? *
-                  </label>
-                  <span style={{ fontSize: "0.78rem", color: "var(--text-dim-on-cream)" }}>Select all that apply</span>
-                </div>
-
-                <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-                  {ALL_DESTINATIONS.map((dest) => {
-                    const isSelected = formData.destinations.includes(dest);
-                    return (
-                      <button
-                        type="button"
-                        key={dest}
-                        onClick={() => toggleDestination(dest)}
-                        style={{
-                          padding: "0.55rem 1.1rem",
-                          fontSize: "0.85rem",
-                          borderRadius: "2px",
-                          border: isSelected ? "2px solid var(--rust)" : "1px solid var(--line-on-cream)",
-                          background: isSelected ? "rgba(72,98,79,0.09)" : "var(--cream)",
-                          color: isSelected ? "var(--rust)" : "var(--ink)",
-                          fontWeight: isSelected ? 600 : 400,
-                          cursor: "pointer",
-                          transition: "all 0.15s ease",
-                        }}
-                      >
-                        {dest} {isSelected && "✓"}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* ─── SECTION 2: TIMING & TRAVELERS ─── */}
-              <div style={{ marginBottom: "2.4rem" }}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.8rem",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    fontWeight: 700,
-                    color: "var(--ink)",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  2. Travel Timing &amp; Party Details
-                </label>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                    gap: "1.4rem",
-                  }}
-                >
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 600, color: "var(--ink)", marginBottom: "0.4rem" }}>
-                      Estimated Travel Dates / Season
-                    </label>
-                    <select
-                      value={formData.timeframe}
-                      onChange={(e) => setFormData({ ...formData, timeframe: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "0.8rem 0.9rem",
-                        border: "1px solid var(--line-on-cream)",
-                        borderRadius: "2px",
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        fontSize: "0.9rem",
-                      }}
-                    >
-                      <option>Autumn 2026 (Sep – Nov)</option>
-                      <option>Winter 2026 / 2027 (Dec – Feb)</option>
-                      <option>Spring 2027 (Mar – May)</option>
-                      <option>Summer 2027 (Jun – Aug)</option>
-                      <option>Late 2027 or 2028</option>
-                      <option>Flexible / Ready Anytime</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 600, color: "var(--ink)", marginBottom: "0.4rem" }}>
-                      Trip Duration
-                    </label>
-                    <select
-                      value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "0.8rem 0.9rem",
-                        border: "1px solid var(--line-on-cream)",
-                        borderRadius: "2px",
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        fontSize: "0.9rem",
-                      }}
-                    >
-                      <option>7 - 10 Days</option>
-                      <option>10 - 14 Days</option>
-                      <option>14 - 21 Days</option>
-                      <option>21 - 28 Days</option>
-                      <option>1 Month+ (Grand Asian Expedition)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 600, color: "var(--ink)", marginBottom: "0.4rem" }}>
-                      Adult Travelers
-                    </label>
-                    <select
-                      value={formData.travelers}
-                      onChange={(e) => setFormData({ ...formData, travelers: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "0.8rem 0.9rem",
-                        border: "1px solid var(--line-on-cream)",
-                        borderRadius: "2px",
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        fontSize: "0.9rem",
-                      }}
-                    >
-                      <option>Solo Traveler (1 Adult)</option>
-                      <option>2 Adults (Couple / Partners)</option>
-                      <option>2 Adults (Twin / Friends)</option>
-                      <option>3 - 4 Adults (Family / Group)</option>
-                      <option>5 - 8 Adults (Private Group)</option>
-                      <option>9+ Adults (Multi-Gen Group)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 600, color: "var(--ink)", marginBottom: "0.4rem" }}>
-                      Children / Minors
-                    </label>
-                    <select
-                      value={formData.childrenCount}
-                      onChange={(e) => setFormData({ ...formData, childrenCount: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "0.8rem 0.9rem",
-                        border: "1px solid var(--line-on-cream)",
-                        borderRadius: "2px",
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        fontSize: "0.9rem",
-                      }}
-                    >
-                      <option>No Children</option>
-                      <option>1 Child (under 12)</option>
-                      <option>2 Children (under 12)</option>
-                      <option>3+ Children</option>
-                      <option>Teenagers (12 - 17)</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* ─── SECTION 3: BUDGET & ACCOMMODATION ─── */}
-              <div style={{ marginBottom: "2.4rem" }}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.8rem",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    fontWeight: 700,
-                    color: "var(--ink)",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  3. Accommodation &amp; Investment Tier (Excl. Intl. Flights)
-                </label>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.4rem" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 600, color: "var(--ink)", marginBottom: "0.4rem" }}>
-                      Estimated Budget Per Person
-                    </label>
-                    <select
-                      value={formData.budget}
-                      onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "0.8rem 0.9rem",
-                        border: "1px solid var(--line-on-cream)",
-                        borderRadius: "2px",
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        fontSize: "0.9rem",
-                      }}
-                    >
-                      <option>$5,000 – $8,000 pp</option>
-                      <option>$8,000 – $12,000 pp</option>
-                      <option>$12,000 – $18,000 pp</option>
-                      <option>$18,000+ pp (Ultra-Luxury / Private Jet / Villas)</option>
-                      <option>Flexible / Advise Me on Best Value</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 600, color: "var(--ink)", marginBottom: "0.4rem" }}>
-                      Preferred Hotel Style
-                    </label>
-                    <select
-                      value={formData.hotelStyle}
-                      onChange={(e) => setFormData({ ...formData, hotelStyle: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "0.8rem 0.9rem",
-                        border: "1px solid var(--line-on-cream)",
-                        borderRadius: "2px",
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        fontSize: "0.9rem",
-                      }}
-                    >
-                      <option>5-Star Luxury &amp; Boutique (Rosewood, Capella, Four Seasons)</option>
-                      <option>Ultra-Luxury &amp; Private Sanctuaries (Aman, Six Senses, Soneva)</option>
-                      <option>Authentic Heritage &amp; Historic Palaces</option>
-                      <option>Eco-Luxe Nature Lodges &amp; Overwater Pavilions</option>
-                      <option>Mix of Classic Luxury &amp; Characterful Stays</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* ─── SECTION 4: INTERESTS & PASSIONS ─── */}
-              <div style={{ marginBottom: "2.4rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.8rem" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "0.8rem",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      fontWeight: 700,
-                      color: "var(--ink)",
-                    }}
-                  >
-                    4. Signature Experiences &amp; Travel Passions
-                  </label>
-                  <span style={{ fontSize: "0.78rem", color: "var(--text-dim-on-cream)" }}>Optional</span>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.6rem" }}>
-                  {TRAVEL_EXPERIENCES.map((exp) => {
-                    const isSelected = formData.interests.includes(exp.id);
-                    return (
-                      <button
-                        type="button"
-                        key={exp.id}
-                        onClick={() => toggleInterest(exp.id)}
-                        style={{
-                          padding: "0.65rem 0.85rem",
-                          fontSize: "0.82rem",
-                          textAlign: "left",
-                          borderRadius: "2px",
-                          border: isSelected ? "2px solid var(--rust)" : "1px solid var(--line-on-cream)",
-                          background: isSelected ? "rgba(72,98,79,0.09)" : "var(--cream)",
-                          color: isSelected ? "var(--rust)" : "var(--ink)",
-                          fontWeight: isSelected ? 600 : 400,
-                          cursor: "pointer",
-                          transition: "all 0.15s ease",
-                        }}
-                      >
-                        {exp.label} {isSelected && "✓"}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* ─── SECTION 5: CONTACT INFORMATION ─── */}
-              <div style={{ marginBottom: "2.4rem" }}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.8rem",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    fontWeight: 700,
-                    color: "var(--ink)",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  5. Your Contact Information
-                </label>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.4rem", marginBottom: "1.2rem" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 600, color: "var(--ink)", marginBottom: "0.4rem" }}>
-                      Your Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Eleanor Vance"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "0.85rem",
-                        border: "1px solid var(--line-on-cream)",
-                        borderRadius: "2px",
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        fontSize: "0.9rem",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 600, color: "var(--ink)", marginBottom: "0.4rem" }}>
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="eleanor@example.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "0.85rem",
-                        border: "1px solid var(--line-on-cream)",
-                        borderRadius: "2px",
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        fontSize: "0.9rem",
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.4rem" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 600, color: "var(--ink)", marginBottom: "0.4rem" }}>
-                      Phone / WhatsApp (with country code) *
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="+1 (212) 627-1950"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "0.85rem",
-                        border: "1px solid var(--line-on-cream)",
-                        borderRadius: "2px",
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        fontSize: "0.9rem",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.78rem", textTransform: "uppercase", fontWeight: 600, color: "var(--ink)", marginBottom: "0.4rem" }}>
-                      Country / City of Residence
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. New York, USA"
-                      value={formData.country}
-                      onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                      style={{
-                        width: "100%",
-                        padding: "0.85rem",
-                        border: "1px solid var(--line-on-cream)",
-                        borderRadius: "2px",
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        fontSize: "0.9rem",
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* ─── SECTION 6: SPECIAL WISHES ─── */}
-              <div style={{ marginBottom: "2.4rem" }}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.8rem",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    fontWeight: 700,
-                    color: "var(--ink)",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  6. Special Wishes, Celebration &amp; Itinerary Notes
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder="Tell us about specific sights on your bucket list, celebratory occasions (Honeymoon, Anniversary), physical pace, dietary preferences, or flights already booked..."
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  style={{
-                    width: "100%",
-                    padding: "0.85rem",
-                    border: "1px solid var(--line-on-cream)",
-                    borderRadius: "2px",
-                    background: "var(--cream)",
-                    color: "var(--ink)",
-                    fontSize: "0.9rem",
-                    lineHeight: 1.6,
-                  }}
+              <form className="enquiry" onSubmit={handleSubmit} noValidate={false}>
+                {/* Honeypot: hidden from people, filled by bots. */}
+                <input
+                  type="text"
+                  name="company"
+                  value={form.company}
+                  onChange={set("company")}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="enquiry-trap"
                 />
-              </div>
 
-              {/* ─── SUBMIT BUTTON ─── */}
-              <button
-                type="submit"
-                className="btn btn-fill-ink"
-                style={{
-                  width: "100%",
-                  padding: "1.2rem",
-                  fontSize: "0.95rem",
-                  letterSpacing: "0.12em",
-                  fontWeight: 700,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.6rem",
-                  cursor: "pointer",
-                }}
-              >
-                SUBMIT BESPOKE INQUIRY <span>→</span>
-              </button>
+                <div className="enquiry-col">
+                  <div className="enquiry-row">
+                    <label htmlFor="firstName">First Name <span aria-hidden="true">*</span></label>
+                    <input id="firstName" name="firstName" required value={form.firstName} onChange={set("firstName")} autoComplete="given-name" />
+                  </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "1.8rem",
-                  marginTop: "1.5rem",
-                  fontSize: "0.78rem",
-                  color: "var(--text-dim-on-cream)",
-                  flexWrap: "wrap",
-                }}
-              >
-                <span>Privacy Protected</span>
-                <span>·</span>
-                <span>24-Hour Specialist Response</span>
-                <span>·</span>
-                <span>100% Obligation-Free</span>
-              </div>
-            </form>
+                  <div className="enquiry-row">
+                    <label htmlFor="lastName">Last Name <span aria-hidden="true">*</span></label>
+                    <input id="lastName" name="lastName" required value={form.lastName} onChange={set("lastName")} autoComplete="family-name" />
+                  </div>
+
+                  <div className="enquiry-row">
+                    <span />
+                    <label className="enquiry-toggle">
+                      <input type="checkbox" checked={form.isAdvisor} onChange={setBool("isAdvisor")} />
+                      <span className="enquiry-switch" aria-hidden="true" />
+                      I am a travel advisor
+                    </label>
+                  </div>
+
+                  <div className="enquiry-row">
+                    <label htmlFor="email">Email <span aria-hidden="true">*</span></label>
+                    <input id="email" name="email" type="email" required value={form.email} onChange={set("email")} autoComplete="email" />
+                  </div>
+
+                  <div className="enquiry-row">
+                    <label htmlFor="country">Home Country <span aria-hidden="true">*</span></label>
+                    <select id="country" name="country" required value={form.country} onChange={set("country")} autoComplete="country-name">
+                      <option value="">Your Country</option>
+                      {COUNTRIES.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="enquiry-row">
+                    <label htmlFor="phone">Phone <span aria-hidden="true">*</span></label>
+                    <div className="enquiry-phone">
+                      <input
+                        id="dialCode"
+                        name="dialCode"
+                        value={form.dialCode}
+                        onChange={set("dialCode")}
+                        placeholder="+1"
+                        aria-label="Country dialling code"
+                        inputMode="tel"
+                      />
+                      <input id="phone" name="phone" required value={form.phone} onChange={set("phone")} autoComplete="tel" inputMode="tel" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="enquiry-col">
+                  <div className="enquiry-row">
+                    <label htmlFor="destinations">Desired Destinations</label>
+                    {/* A multi-select, so a two-country journey can say so. */}
+                    <select
+                      id="destinations"
+                      name="destinations"
+                      multiple
+                      size={5}
+                      value={form.destinations}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          destinations: [...event.target.selectedOptions].map((option) => option.value),
+                        }))
+                      }
+                    >
+                      {DESTINATIONS.map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="enquiry-row">
+                    <label htmlFor="startMonth">Start Date</label>
+                    <div className="enquiry-pair">
+                      <select id="startMonth" name="startMonth" value={form.startMonth} onChange={set("startMonth")}>
+                        <option value="">Month</option>
+                        {MONTHS.map((m) => (
+                          <option key={m} value={m}>{m}</option>
+                        ))}
+                      </select>
+                      <select id="startYear" name="startYear" value={form.startYear} onChange={set("startYear")}>
+                        <option value="">Year</option>
+                        {YEARS.map((y) => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="enquiry-row">
+                    <label htmlFor="nights">Trip Length</label>
+                    <input
+                      id="nights"
+                      name="nights"
+                      type="number"
+                      min={1}
+                      max={120}
+                      value={form.nights}
+                      onChange={set("nights")}
+                      placeholder="Number of Nights in Asia"
+                    />
+                  </div>
+
+                  <div className="enquiry-row">
+                    <label htmlFor="budget">Total Budget for All Travelers <span aria-hidden="true">*</span></label>
+                    <select id="budget" name="budget" required value={form.budget} onChange={set("budget")}>
+                      <option value="">All Prices are in USD</option>
+                      {BUDGETS.map((b) => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="enquiry-row">
+                    <label htmlFor="travelers">Number of Travelers</label>
+                    <input
+                      id="travelers"
+                      name="travelers"
+                      type="number"
+                      min={1}
+                      max={40}
+                      value={form.travelers}
+                      onChange={set("travelers")}
+                      placeholder="Number of Travelers"
+                    />
+                  </div>
+
+                  <div className="enquiry-row">
+                    <label htmlFor="notes">Enquiry Details</label>
+                    <textarea
+                      id="notes"
+                      name="notes"
+                      rows={6}
+                      value={form.notes}
+                      onChange={set("notes")}
+                      placeholder="Tell us about your interests, passions, needs, and any other details relevant to your trip."
+                    />
+                  </div>
+
+                  <div className="enquiry-row">
+                    <span />
+                    <label className="enquiry-toggle">
+                      <input type="checkbox" checked={form.newsletter} onChange={setBool("newsletter")} />
+                      <span className="enquiry-switch" aria-hidden="true" />
+                      Subscribe to newsletter
+                    </label>
+                  </div>
+
+                  <div className="enquiry-row enquiry-actions">
+                    <span />
+                    <div>
+                      {error && <p className="enquiry-error" role="alert">{error}</p>}
+                      <button type="submit" className="btn btn-line-ink" disabled={sending}>
+                        {sending ? "Sending…" : "Enquire"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </>
           )}
         </div>
       </section>

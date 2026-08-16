@@ -20,7 +20,9 @@ export function SpecialistBlock({ acf }: { acf?: Record<string, unknown> | null 
   const photo = str("specialist_photo");
   const phone = str("specialist_phone");
   const button = str("specialist_button") || "Plan Your Trip";
-  const link = str("specialist_link") || "/#plan";
+  /* "/#plan" was a CTA band that only links onward to the same form, so the
+     button cost the reader an extra click. Land them on the form itself. */
+  const link = str("specialist_link") || "/plan-my-trip/#form";
 
   return (
     <section className="section on-cream">

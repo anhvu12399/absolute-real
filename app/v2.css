@@ -1078,7 +1078,7 @@ footer{
   color: var(--chrome-text);
   border-top: 1px solid rgba(var(--chrome-gold-rgb),0.22);
 }
-.footer-top{padding:clamp(3rem,6vw,5rem) 0 3rem; display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr; gap:2.5rem;}
+.footer-top{padding:clamp(3rem,6vw,5rem) 0 3rem; display:grid; grid-template-columns:1.5fr repeat(5,minmax(0,1fr)); gap:2.5rem 1.8rem;}
 .footer-mark{font-family:'Playfair Display',serif; font-style:italic; font-size:2.6rem; color:var(--chrome-gold);}
 .footer-brand h3{font-size:1.5rem; margin-top:1.2rem; color:#ffffff;}
 .footer-brand h3 em{color:var(--chrome-gold);}
@@ -1093,8 +1093,14 @@ footer{
 .footer-col ul{list-style:none; margin:1.1rem 0 0; padding:0; display:flex; flex-direction:column; gap:0.65rem;}
 .footer-col a{color:var(--chrome-dim); font-size:0.88rem; transition:color 0.2s, padding-left 0.2s;}
 .footer-col a:hover{color:var(--chrome-gold); padding-left:3px;}
-.footer-bottom{border-top:1px solid rgba(255,255,255,0.08); padding:1.4rem 0; font-size:0.76rem; color:#8e887d; display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.6rem;}
-@media (max-width:860px){.footer-top{grid-template-columns:1fr 1fr; row-gap:2.4rem;}}
+/* Three stacked rows now, not two items facing each other. */
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.08); padding:1.6rem 0; font-size:0.76rem; color:#8e887d; display:flex; flex-direction:column; align-items:center; text-align:center; gap:0.9rem;}
+.footer-legal-links{display:flex; flex-wrap:wrap; justify-content:center; gap:0.5rem 1.4rem;}
+.footer-legal-links a{color:var(--chrome-dim); transition:color 0.2s;}
+.footer-legal-links a:hover{color:var(--chrome-gold);}
+.footer-entity{margin:0; max-width:62ch; line-height:1.6;}
+.footer-brand-title{font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--chrome-gold); font-weight:600; margin:0 0 0.9rem;}
+@media (max-width:1180px){.footer-top{grid-template-columns:1.4fr repeat(3,minmax(0,1fr)); row-gap:2.4rem;}}
 @media (max-width:860px){.footer-top{grid-template-columns:1fr 1fr; row-gap:2.4rem;}}
 @media (max-width:560px){.footer-top{grid-template-columns:1fr;}}
 @media (max-width:560px){.footer-top{grid-template-columns:1fr;}}
@@ -2288,3 +2294,98 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .not-found-ways a:hover{border-color:var(--gold-deep);}
 .not-found .btn{margin-top:2.4rem;}
+
+/* ══════════════════════════════════════════════════════════════
+   TAILOR-MADE ENQUIRY
+
+   Two columns of label-beside-field: who you are on the left,
+   what you want on the right. The previous form ran six numbered
+   steps down a single column and asked eighteen questions.
+   ══════════════════════════════════════════════════════════════ */
+.enquiry-lede{
+  max-width:64ch; margin:0 auto clamp(2rem,4vw,3rem); text-align:center;
+  font-size:1.02rem; line-height:1.6; color:var(--text-dim-on-cream);
+}
+.enquiry{
+  display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(2rem,5vw,4.5rem);
+  align-items:start; max-width:1140px; margin-inline:auto;
+}
+.enquiry-col{display:flex; flex-direction:column; gap:1.4rem;}
+
+/* Label and field on one line, labels aligned down the column. */
+.enquiry-row{display:grid; grid-template-columns:minmax(9rem,34%) 1fr; gap:1rem; align-items:start;}
+.enquiry-row > label{
+  font-family:'Playfair Display',serif; font-size:1.02rem; color:var(--ink);
+  padding-top:0.7rem; line-height:1.35;
+}
+.enquiry-row > label span{color:var(--rust);}
+
+.enquiry input[type="text"],
+.enquiry input[type="email"],
+.enquiry input[type="number"],
+.enquiry input:not([type]),
+.enquiry select,
+.enquiry textarea{
+  width:100%; font-family:'Work Sans',sans-serif; font-size:0.96rem; color:var(--ink);
+  background:var(--white); border:1px solid var(--line-on-cream); border-radius:3px;
+  padding:0.72rem 0.85rem; transition:border-color .2s ease, box-shadow .2s ease;
+}
+.enquiry textarea{resize:vertical; min-height:9rem; line-height:1.6;}
+.enquiry select[multiple]{padding:0.35rem; min-height:9.5rem;}
+.enquiry select[multiple] option{padding:0.4rem 0.5rem; border-radius:2px;}
+.enquiry input:focus, .enquiry select:focus, .enquiry textarea:focus{
+  outline:none; border-color:var(--gold-deep); box-shadow:0 0 0 3px rgba(var(--chrome-gold-rgb),0.16);
+}
+.enquiry input::placeholder, .enquiry textarea::placeholder{color:var(--text-dim-on-cream);}
+
+/* Dial code sits in front of the number, narrow. */
+.enquiry-phone{display:grid; grid-template-columns:5.2rem 1fr; gap:0.6rem;}
+.enquiry-pair{display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;}
+
+/* Toggle: a real checkbox, styled as a switch, so it stays keyboard-usable. */
+.enquiry-toggle{
+  display:flex; align-items:center; gap:0.7rem; padding-top:0.5rem;
+  font-size:0.95rem; color:var(--ink); cursor:pointer;
+}
+.enquiry-toggle input{position:absolute; opacity:0; width:0; height:0;}
+.enquiry-switch{
+  width:2.6rem; height:1.4rem; border-radius:1rem; background:var(--ink); flex:none;
+  position:relative; transition:background .25s ease;
+}
+.enquiry-switch::after{
+  content:""; position:absolute; top:0.18rem; left:0.2rem;
+  width:1.04rem; height:1.04rem; border-radius:50%; background:var(--white);
+  transition:transform .25s cubic-bezier(.2,.7,.2,1);
+}
+.enquiry-toggle input:checked + .enquiry-switch{background:var(--gold-deep);}
+.enquiry-toggle input:checked + .enquiry-switch::after{transform:translateX(1.18rem);}
+.enquiry-toggle input:focus-visible + .enquiry-switch{outline:2px solid var(--gold-deep); outline-offset:3px;}
+
+.enquiry-actions{margin-top:0.6rem;}
+.enquiry-actions .btn{min-width:11rem;}
+.enquiry-error{
+  margin:0 0 0.7rem; font-size:0.9rem; color:#b32d2e;
+}
+.enquiry-trap{position:absolute !important; left:-9999px !important; width:1px !important; height:1px !important;}
+
+/* Confirmation */
+.enquiry-done{max-width:44rem; margin-inline:auto; text-align:center;}
+.enquiry-done h2{
+  font-family:'Playfair Display',serif; font-weight:400;
+  font-size:clamp(1.9rem,3.6vw,2.7rem); margin:0.6rem 0 0;
+}
+.enquiry-done > p{margin:1.1rem auto 0; max-width:48ch; color:var(--text-dim-on-cream); line-height:1.65;}
+.enquiry-done .enquiry-call{color:var(--ink);}
+.enquiry-done .btn{margin-top:2rem;}
+
+@media (max-width:900px){
+  .enquiry{grid-template-columns:1fr; gap:1.4rem;}
+  .enquiry-col{gap:1.2rem;}
+}
+@media (max-width:600px){
+  /* Label above field: at this width the two-column row leaves the input
+     too narrow to type a country name into. */
+  .enquiry-row{grid-template-columns:1fr; gap:0.4rem;}
+  .enquiry-row > label{padding-top:0;}
+  .enquiry-row > span:empty{display:none;}
+}

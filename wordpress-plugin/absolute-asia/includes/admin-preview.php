@@ -306,6 +306,7 @@ function aat_admin_preview_panel() {
             /* ── Destination (Places to Go) ── */
             'hero_tagline':       { sel: '.hero-copy h1, .hero-tagline', type: 'text', section: 'hero' },
             'destination_overview': { sel: '#overview .serif-block, #overview', type: 'html', section: 'overview' },
+            'post_content':       { sel: '.wordpress-content, #overview .wordpress-content, .dispatch-column', type: 'html', section: 'overview' },
             'map_stops':          { sel: '#map', section: 'map' },
             'related_title':      { sel: '#journeys h2', type: 'text', section: 'journeys' },
             'related_description': { sel: '#journeys .center p', type: 'text', section: 'journeys' },
@@ -610,6 +611,34 @@ function aat_admin_preview_panel() {
                 sendLiveUpdate(fieldName, value);
             }, 150);
         });
+
+        /* ── The main editor, which is not an ACF field ── */
+        /* Typing in the body did nothing to the preview, so an edit there
+           looked like the preview was ignoring it — or worse, like the text
+           was hardcoded. It is `post_content`, not a field, so it needs its
+           own listener: TinyMCE fires its own events, and the Text tab is a
+           plain textarea. */
+        function sendBody(html) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function () {
+                sendLiveUpdate('post_content', html);
+            }, 200);
+        }
+
+        $(document).on('input keyup change', '#content', function () {
+            sendBody($(this).val());
+        });
+
+        if (window.tinymce) {
+            /* `init` fires once the visual editor exists; binding straight
+               away misses it because ACF and TinyMCE both load after this. */
+            tinymce.on('AddEditor', function (e) {
+                if (e.editor.id !== 'content') return;
+                e.editor.on('KeyUp Change SetContent', function () {
+                    sendBody(e.editor.getContent());
+                });
+            });
+        }
 
         /* ── Focus or click on ANY field/element → instantly scroll preview to target ── */
         $(document).on('focus click', '.acf-field, .acf-field *, .custom-free-repeater, .custom-free-repeater *', function(e) {
