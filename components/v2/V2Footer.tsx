@@ -29,9 +29,12 @@ const FALLBACK_COLUMNS: Array<{ title: string; links: Array<{ label: string; hre
   {
     title: "Policies",
     links: [
-      { label: "Booking Terms", href: "/terms-and-conditions/" },
+      /* "Booking Terms" (/terms-and-conditions/) and "Travel Protection"
+         (/travel-protection/) stood here too. Neither page exists, so the
+         footer offered two 404s from every page on the site. Publish them in
+         WordPress and add them to the footer menu — this list is only the
+         stand-in for when that menu is empty. */
       { label: "Privacy Policy", href: "/privacy-policy/" },
-      { label: "Travel Protection", href: "/travel-protection/" },
     ],
   },
 ];

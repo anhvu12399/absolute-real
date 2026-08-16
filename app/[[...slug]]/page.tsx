@@ -20,7 +20,7 @@ import { BRAND_NAME } from "@/lib/site";
 import { EditBar } from "@/components/v2/EditBar";
 import { editPostUrl, editTargets, editTermUrl } from "@/lib/admin";
 import { breadcrumbSchema, collectionSchema, contentSchema, destinationSchema, reviewSchema, schemaScript } from "@/lib/schema";
-import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 export const revalidate = 300;
 
@@ -42,7 +42,10 @@ export async function generateMetadata({
   params: Promise<{ slug?: string[] }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const path = !slug || slug.length === 0 ? "/" : `/${slug.join("/")}`;
+  /* Trailing slash, the same shape the renderer uses for cleanPath. Without
+     it the route lookups here missed every directory — "/tours" is not
+     "/tours/" — so those pages never picked up their own title. */
+  const path = !slug || slug.length === 0 ? "/" : `/${slug.join("/")}/`;
 
   if (path === "/") {
     return {
@@ -50,32 +53,167 @@ export async function generateMetadata({
          is already inside this title, and the tab read it twice. */
       title: { absolute: SITE_TITLE },
       description: SITE_DESCRIPTION,
+      alternates: { canonical: "/" },
+      openGraph: { title: SITE_TITLE, description: SITE_DESCRIPTION, url: "/", type: "website" },
     };
   }
 
   /* Try WP content API for metadata */
   const content = await getContentByPath(path);
-  if (!content) return { title: BRAND_NAME };
+
+  /* Directory routes and country pages render from queries, not from a post,
+     so there is nothing here to describe them. They were falling through to
+     `{ title: BRAND_NAME }`, which the layout template turned into "Absolute
+     Asia Tours | Absolute Asia Tours" — the same duplicated title on every one
+     of them, with no description, no canonical and no card image. */
+  if (!content) return routeMetadata(path);
 
   const seo = await getSeo(path, content.seo);
   /* RankMath returns the title still escaped, and a browser tab shows exactly
      what it is given - "Thailand Honeymoon &#038; Romance" and all. */
-  const title = decodeEntities(seo?.title || content.title);
-  const description = decodeEntities(seo?.description || content.excerpt);
+  const ownTitle = decodeEntities(seo?.title || content.title);
+  const ownDescription = decodeEntities(seo?.description || content.excerpt);
+
+  /* A directory path can still resolve to a record — the content lookup falls
+     back to the front page — and that record is titled with the brand, so
+     /tours/, /destinations/ and /where-to-stay/ all published "Absolute Asia
+     Tours | Absolute Asia Tours" and the homepage's description. When the
+     record says nothing this path does not already say, the route's own
+     wording wins. */
+  const route = ROUTE_META[path] || hubMeta(path);
+  const saysNothing = !ownTitle || ownTitle.trim().toLowerCase() === BRAND_NAME.toLowerCase();
+  if (route && saysNothing) return routeMetadata(path);
+
+  const title = ownTitle;
+  const description = clampDescription(ownDescription);
+  const canonical = publicCanonical(seo?.canonical, path);
 
   return {
     title,
     description,
-    alternates: { canonical: seo?.canonical || path },
+    alternates: { canonical },
     robots: { index: seo?.robots?.index !== false, follow: seo?.robots?.follow !== false },
     openGraph: {
       title,
       description,
-      url: seo?.canonical || path,
+      url: canonical,
       type: "article",
       images: content.featuredMedia ? [{ url: content.featuredMedia.url }] : undefined,
     },
   };
+}
+
+/**
+ * A canonical URL that points at this site.
+ *
+ * RankMath stores the canonical against the WordPress install, so every page
+ * was telling search engines that the real version lived on
+ * backend.absoluteasiatours.com — the admin host, which is not meant to be
+ * indexed at all. Only a canonical already on the public site is trusted; any
+ * other host keeps just its path.
+ */
+function publicCanonical(canonical: string | undefined, path: string) {
+  if (!canonical) return path;
+  try {
+    const url = new URL(canonical);
+    const site = new URL(SITE_URL);
+    return url.host === site.host ? url.pathname : url.pathname || path;
+  } catch {
+    return canonical.startsWith("/") ? canonical : path;
+  }
+}
+
+/** Search engines cut the snippet around 160 characters; WordPress excerpts run far past it. */
+function clampDescription(value: string) {
+  const text = value.replace(/\s+/g, " ").trim();
+  if (text.length <= 160) return text;
+  const clipped = text.slice(0, 160);
+  const stop = clipped.lastIndexOf(" ");
+  return `${(stop > 100 ? clipped.slice(0, stop) : clipped).replace(/[,;:.\s]+$/, "")}…`;
+}
+
+/** Titles and descriptions for the pages assembled from queries. */
+const ROUTE_META: Record<string, { title: string; description: string }> = {
+  "/tours/": { title: "Private Asia Journeys", description: "Tailor-made private journeys across Asia, designed around your pace and interests." },
+  "/journeys/": { title: "Private Asia Journeys", description: "Tailor-made private journeys across Asia, designed around your pace and interests." },
+  "/destinations/": { title: "Asia Destinations", description: "Every country we travel, with the journeys, stays and guides that belong to each." },
+  "/where-to-stay/": { title: "Where to Stay in Asia", description: "Hotels and private villas chosen for character rather than chain, across Asia." },
+  "/hotels/": { title: "Where to Stay in Asia", description: "Hotels and private villas chosen for character rather than chain, across Asia." },
+  "/collection/": { title: "The Hotel Collection", description: "Hotels and private villas chosen for character rather than chain, across Asia." },
+  "/inspirations/": { title: "Travel Inspiration", description: "Guides, itineraries and stories to read before you travel across Asia." },
+  "/travel-ideas/": { title: "Travel Inspiration", description: "Guides, itineraries and stories to read before you travel across Asia." },
+  "/plan-my-trip/": { title: "Plan Your Journey", description: "Tell us where you want to go and a private travel designer will shape the itinerary around you." },
+  "/tailor-made-tours/": { title: "Tailor-Made Tours", description: "Tell us where you want to go and a private travel designer will shape the itinerary around you." },
+};
+
+/**
+ * Hub routes are matched by prefix, not by exact path.
+ *
+ * /journeys/private-tours/ and /cruises/halong-bay/ are rendered by the same
+ * directory templates as their parents, but they are not in ROUTE_META, so
+ * they fell through to the brand-only title.
+ */
+function hubMeta(path: string) {
+  const segment = path.split("/").filter(Boolean)[1];
+  const label = segment
+    ? segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : "";
+
+  if (path.startsWith("/journeys/")) {
+    return {
+      title: label ? `${label} Journeys` : "Private Asia Journeys",
+      description: `Private, tailor-made journeys across Asia${label ? ` — ${label.toLowerCase()}` : ""}, arranged around how you want to travel.`,
+    };
+  }
+  if (path.startsWith("/cruises/")) {
+    return {
+      title: label ? `${label} Cruises` : "Asia Cruises",
+      description: `Boutique ships and private junks${label ? ` on ${label}` : " across Asia"}, chartered around your own itinerary.`,
+    };
+  }
+  if (path.startsWith("/inspiration/")) {
+    return { title: label || "Travel Inspiration", description: ROUTE_META["/inspirations/"].description };
+  }
+  return null;
+}
+
+async function routeMetadata(path: string): Promise<Metadata> {
+  const known = ROUTE_META[path] || hubMeta(path);
+  if (known) {
+    return {
+      title: known.title,
+      description: known.description,
+      alternates: { canonical: path },
+      openGraph: { title: known.title, description: known.description, url: path, type: "website" },
+    };
+  }
+
+  /* A country page: /vietnam/ is a taxonomy term, not a post. */
+  const slug = path.replace(/^\/|\/$/g, "");
+  if (slug && !slug.includes("/")) {
+    const term = await getTermBySlug(slug, "country");
+    if (term) {
+      const title = `${term.name} Tours & Private Journeys`;
+      const description = clampDescription(
+        decodeEntities(term.intro || term.description || "") ||
+          `Private, tailor-made journeys through ${term.name}, arranged around how you want to travel.`,
+      );
+      return {
+        title,
+        description,
+        alternates: { canonical: path },
+        openGraph: {
+          title,
+          description,
+          url: path,
+          type: "website",
+          images: term.image ? [{ url: term.image }] : undefined,
+        },
+      };
+    }
+  }
+
+  return { title: BRAND_NAME, alternates: { canonical: path } };
 }
 
 /** Repeaters arrive as JSON strings when ACF free is in play. */
@@ -408,6 +546,15 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
     ]);
     return (
       <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: schemaScript(
+              collectionSchema({ name: content?.title || "Asia Destinations", path: cleanPath, description: content?.excerpt, items: items }),
+              breadcrumbSchema(cleanPath, content?.title || "Asia Destinations"),
+            )!,
+          }}
+        />
         <EditBar targets={editTargets({ content })} />
         <AllDestinationsTemplateV2 data={content} items={items} countries={realCountries(countries)} />
       </>
@@ -564,6 +711,15 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
     const items = await getArchiveSafe({ type: "tour", perPage: 24 });
     return (
       <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: schemaScript(
+              collectionSchema({ name: content?.title || "Private Journeys", path: cleanPath, description: content?.excerpt, items: items }),
+              breadcrumbSchema(cleanPath, content?.title || "Private Journeys"),
+            )!,
+          }}
+        />
         <EditBar targets={editTargets({ content })} />
         <JourneysDirectoryTemplateV2 data={content} items={items} />
       </>
@@ -581,6 +737,15 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
     });
     return (
       <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: schemaScript(
+              collectionSchema({ name: content?.title || "Asia Cruises", path: cleanPath, description: content?.excerpt, items: items }),
+              breadcrumbSchema(cleanPath, content?.title || "Asia Cruises"),
+            )!,
+          }}
+        />
         <EditBar targets={editTargets({ content })} />
         <CruisesDirectoryTemplateV2 data={content} items={items} />
       </>
@@ -591,6 +756,15 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
     const items = await getArchiveSafe({ type: "travel_guide,blog,thing_to_do", perPage: 24 });
     return (
       <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: schemaScript(
+              collectionSchema({ name: content?.title || "Travel Inspiration", path: cleanPath, description: content?.excerpt, items: items }),
+              breadcrumbSchema(cleanPath, content?.title || "Travel Inspiration"),
+            )!,
+          }}
+        />
         <EditBar targets={editTargets({ content })} />
         <InspirationDirectoryTemplateV2 data={content} items={items} />
       </>
@@ -673,6 +847,15 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
     const items = await getArchiveSafe({ type: "tour", perPage: 24 });
     return (
       <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: schemaScript(
+              collectionSchema({ name: content?.title || "Private Asia Journeys", path: cleanPath, description: content?.excerpt, items: items }),
+              breadcrumbSchema(cleanPath, content?.title || "Private Asia Journeys"),
+            )!,
+          }}
+        />
         <EditBar targets={editTargets({ content })} />
         <TourListingTemplateV2 tours={items} />
       </>
