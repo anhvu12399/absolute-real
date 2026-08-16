@@ -7,6 +7,8 @@ import { RevealInit } from "@/components/v2/RevealWrapper";
 import { AdminPreviewBridge } from "@/components/v2/AdminPreviewBridge";
 import { PageProgressBar } from "@/components/v2/PageProgressBar";
 import { WhatsAppButton } from "@/components/v2/WhatsAppButton";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { getSiteDataSafe } from "@/lib/wp";
 
 import "./v2.css";
@@ -77,6 +79,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <Suspense><AdminPreviewBridge /></Suspense>
         <Suspense><PageProgressBar /></Suspense>
         <WhatsAppButton site={site} />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
