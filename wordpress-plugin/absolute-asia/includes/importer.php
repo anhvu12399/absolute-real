@@ -1462,6 +1462,8 @@ function aat_import_screen() {
            phần nội dung do mình viết. Chỉ bấm nếu bạn muốn bỏ tên đó khỏi bài viết.</p>
         <?php aat_foreign_field(); ?>
         <?php aat_founded_field(); ?>
+
+        <?php aat_backend_noindex_field(); ?>
         <p>Nút <em>Sửa nước, bản trùng &amp; ảnh gán sai</em>: bài bị gán hai nước, bản trùng rỗng,
            mục không phải quốc gia trong lưới điểm đến — và soát lại toàn bộ ảnh mà plugin
            từng mượn giúp. Ảnh mượn sai nước (ví dụ ảnh Phuket nằm trên một điểm ở Myanmar)
