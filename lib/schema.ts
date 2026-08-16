@@ -37,19 +37,59 @@ export function organizationSchema(opts: { logo?: string; phone?: string; descri
     "@type": "TravelAgency",
     "@id": `${SITE_URL}/#organization`,
     name: BRAND_NAME,
+    alternateName: ["Absolute Asia", "Absolute Asia Tours LLC"],
     url: SITE_URL,
+    slogan: "Private, luxury, tailor-made journeys across Asia",
+    priceRange: "$$$$",
+    currenciesAccepted: "USD",
+    paymentAccepted: "Credit Card, Wire Transfer",
+    knowsAbout: [
+      "Luxury Asia Travel",
+      "Private Guided Tours in Asia",
+      "Tailor-Made Custom Itineraries",
+      "Boutique & 5-Star Hotel Accommodations",
+      "Vietnam Luxury Tours",
+      "Japan Private Journeys",
+      "Thailand Custom Vacations",
+      "Cambodia & Angkor Wat Expeditions",
+      "Laos Heritage Tours",
+      "Indonesia & Bali Luxury Escapes",
+      "Bhutan Cultural Journeys",
+      "India Palace & Heritage Tours",
+      "Halong Bay & Mekong River Cruises",
+    ],
+    areaServed: [
+      { "@type": "Country", name: "Vietnam" },
+      { "@type": "Country", name: "Thailand" },
+      { "@type": "Country", name: "Japan" },
+      { "@type": "Country", name: "Cambodia" },
+      { "@type": "Country", name: "Laos" },
+      { "@type": "Country", name: "Indonesia" },
+      { "@type": "Country", name: "China" },
+      { "@type": "Country", name: "Bhutan" },
+      { "@type": "Country", name: "India" },
+      { "@type": "Country", name: "Nepal" },
+      { "@type": "Country", name: "Sri Lanka" },
+      { "@type": "Country", name: "Singapore" },
+      { "@type": "Country", name: "Malaysia" },
+      { "@type": "Country", name: "Philippines" },
+      { "@type": "Country", name: "South Korea" },
+      { "@type": "Country", name: "Taiwan" },
+      { "@type": "Country", name: "Mongolia" },
+    ],
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: opts.phone || "(+1) 315 998 1998",
+      contactType: "travel concierge",
+      areaServed: ["US", "CA", "GB", "AU", "NZ", "Worldwide"],
+      availableLanguage: ["English"],
+    },
   };
   if (opts.description) schema.description = plain(opts.description);
 
-  /* Google reads `logo` to decide what to show beside the result. It has to be
-     a URL that keeps resolving, which rules out anything on the public domain
-     itself while that domain is being moved from WordPress to this site: the
-     new frontend serves no /wp-content/. WordPress uploads live on the backend
-     host and are unaffected; if the stored logo still points at the public
-     domain, the site's own icon is the honest fallback. */
+  /* Google & AI agents read `logo` to identify the organization */
   const logo = opts.logo && !isDoomedUpload(opts.logo) ? abs(opts.logo) : `${SITE_URL}/icon.svg`;
   schema.logo = { "@type": "ImageObject", url: logo };
-  /* Same image again as `image`: some consumers read only one of the two. */
   schema.image = logo;
 
   if (opts.phone) schema.telephone = opts.phone;
