@@ -26,6 +26,7 @@ npm run site tenmoi
 | Nhóm | Biến |
 |---|---|
 | Nhận diện | `NEXT_PUBLIC_BRAND_NAME`, `_SHORT`, `_TAGLINE`, `SITE_TITLE`, `SITE_DESCRIPTION` |
+| Logo | `NEXT_PUBLIC_BRAND_LOGO` — `vector` dùng dấu hiệu vẽ sẵn trong mã (chỉ Absolute Asia có), `wordpress` lấy logo từ CMS. Mặc định `vector`, nên site mới phải đặt `wordpress`. |
 | Tên miền | `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_LEGACY_HOSTS` |
 | WordPress | `NEXT_PUBLIC_WP_URL`, `WORDPRESS_API_URL`, `WORDPRESS_ORIGIN` |
 | Khác | `NEXT_PUBLIC_SOCIALS`, `WORDPRESS_REVALIDATE_SECRET` |

@@ -1,8 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
+import { BrandMark } from "./BrandMark";
 import type { MenuItem, SitePayload } from "@/lib/wp";
 import { toLocalHref } from "@/lib/links";
-import { BRAND_NAME, BRAND_SHORT, SOCIAL_LINKS } from "@/lib/site";
+import Image from "next/image";
+import { BRAND_LOGO_SOURCE, BRAND_NAME, BRAND_SHORT, isDoomedUpload, SOCIAL_LINKS } from "@/lib/site";
 
 /**
  * Footer columns come from the WordPress "footer" menu; these ship until it
@@ -106,6 +107,10 @@ function columnsFromMenu(menu?: MenuItem[]) {
 }
 
 export function V2Footer({ site }: { site?: SitePayload | null }) {
+  /* The bundled mark, unless this deployment says its logo lives in the CMS.
+     A WordPress logo on the public domain's /wp-content/ is dropped either
+     way: it resolves today and 404s the moment that domain points here. */
+  const logo = BRAND_LOGO_SOURCE === "wordpress" && !isDoomedUpload(site?.logo) ? site?.logo : null;
   const columns = columnsFromMenu(site?.footerMenu);
   const name = site?.name || BRAND_SHORT;
 
@@ -114,10 +119,10 @@ export function V2Footer({ site }: { site?: SitePayload | null }) {
       <div className="container footer-top">
         <div className="footer-brand">
           <Link href="/" className="brand-mark footer-brand-mark" style={{ marginBottom: "1.2rem", display: "inline-flex", textDecoration: "none" }}>
-            {site?.logo ? (
-              <Image className="brand-logo" src={site.logo} width={240} height={80} sizes="132px" alt={site?.name || BRAND_NAME} />
+            {logo ? (
+              <Image className="brand-logo" src={logo} width={240} height={80} sizes="132px" alt={site?.name || BRAND_NAME} />
             ) : (
-              <span className="seal">A</span>
+              <BrandMark size={40} className="brand-logo" />
             )}
             <span className="brand-text">
               <span className="name">{site?.name || BRAND_NAME}</span>

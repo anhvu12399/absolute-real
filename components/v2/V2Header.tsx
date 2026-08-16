@@ -1,10 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { BrandMark } from "./BrandMark";
 import type { SitePayload } from "@/lib/wp";
 import { resolveSections } from "./navigation";
-import { BRAND_NAME } from "@/lib/site";
+import Image from "next/image";
+import { BRAND_LOGO_SOURCE, BRAND_NAME, isDoomedUpload } from "@/lib/site";
 import type { NavSection } from "./navigation";
 
 /** A section with no links of its own has no panel worth opening. */
@@ -13,6 +14,10 @@ function hasPanel(section: NavSection) {
 }
 
 export function V2Header({ site }: { site?: SitePayload | null }) {
+  /* The bundled mark, unless this deployment says its logo lives in the CMS.
+     A WordPress logo on the public domain's /wp-content/ is dropped either
+     way: it resolves today and 404s the moment that domain points here. */
+  const logo = BRAND_LOGO_SOURCE === "wordpress" && !isDoomedUpload(site?.logo) ? site?.logo : null;
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -78,10 +83,15 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
       <nav className={`site-nav${isScrolled ? " is-scrolled" : ""}`} id="siteNav">
         <div className="container nav-inner">
           <Link href="/" className="brand-mark" onClick={closeAll}>
-            {site?.logo ? (
-              <Image className="brand-logo" src={site.logo} width={240} height={80} sizes="(max-width: 760px) 108px, 132px" alt={site?.name || BRAND_NAME} />
+            {/* The mark is drawn, not fetched. WordPress held it as a 765x547
+                PNG that the header displays at 40 - soft at every size, and
+                carrying a second copy of the company name that the type beside
+                it already says. The full logo still goes to Google through the
+                Organization schema, where the wordmark belongs. */}
+            {logo ? (
+              <Image className="brand-logo" src={logo} width={240} height={80} sizes="(max-width: 760px) 108px, 132px" alt={site?.name || BRAND_NAME} />
             ) : (
-              <span className="seal">A</span>
+              <BrandMark size={40} className="brand-logo" />
             )}
             <span className="brand-text">
               <span className="name">{site?.name || BRAND_NAME}</span>
@@ -192,10 +202,10 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
         {/* Header row */}
         <div className="mobile-menu-head">
           <Link href="/" className="mobile-menu-brand" onClick={closeAll}>
-            {site?.logo ? (
-              <Image src={site.logo} width={120} height={40} sizes="120px" alt={site?.name || BRAND_NAME} />
+            {logo ? (
+              <Image src={logo} width={120} height={40} sizes="120px" alt={site?.name || BRAND_NAME} />
             ) : (
-              <span className="seal" style={{ fontSize: "1.2rem", width: 32, height: 32 }}>A</span>
+              <BrandMark size={34} />
             )}
             <div className="mobile-menu-brand-text">
               <span className="mobile-menu-brand-name">{site?.name || BRAND_NAME}</span>

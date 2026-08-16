@@ -91,3 +91,33 @@ export const INTERNAL_HOSTS: RegExp[] = (() => {
 export function isInternalHost(hostname: string) {
   return INTERNAL_HOSTS.some((pattern) => pattern.test(hostname));
 }
+
+/**
+ * True for a WordPress upload served from the public domain itself.
+ *
+ * That host is being moved from WordPress to this site, and this site serves
+ * no /wp-content/ — so such a URL resolves today and 404s the moment DNS
+ * changes. Anything matching this must not be rendered or published in schema;
+ * uploads on the backend host are unaffected and pass.
+ */
+export function isDoomedUpload(url?: string | null) {
+  if (!url || !url.includes("/wp-content/")) return false;
+  const bare = (host: string) => host.replace(/^www\./, "").toLowerCase();
+  try {
+    return bare(new URL(url).hostname) === bare(new URL(SITE_URL).hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Which logo the header and footer draw.
+ *
+ * "vector" uses the mark bundled with this code: exact at every size, and
+ * immune to the domain move. It is also specific to Absolute Asia, so a sister
+ * site built on this repo sets "wordpress" and gets its own logo from the CMS
+ * the way it did before. Declared rather than guessed, because guessing which
+ * brand a deployment belongs to is how the wrong logo ships.
+ */
+export const BRAND_LOGO_SOURCE =
+  process.env.NEXT_PUBLIC_BRAND_LOGO === "wordpress" ? "wordpress" : "vector";

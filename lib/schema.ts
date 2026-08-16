@@ -12,7 +12,7 @@
  */
 
 import type { ContentRecord } from "./types";
-import { BRAND_NAME, SITE_URL, SOCIAL_LINKS } from "./site";
+import { BRAND_NAME, isDoomedUpload, SITE_URL, SOCIAL_LINKS } from "./site";
 
 type Json = Record<string, unknown>;
 
@@ -47,7 +47,7 @@ export function organizationSchema(opts: { logo?: string; phone?: string; descri
      new frontend serves no /wp-content/. WordPress uploads live on the backend
      host and are unaffected; if the stored logo still points at the public
      domain, the site's own icon is the honest fallback. */
-  const logo = opts.logo && !isPublicDomainUpload(opts.logo) ? abs(opts.logo) : `${SITE_URL}/icon.svg`;
+  const logo = opts.logo && !isDoomedUpload(opts.logo) ? abs(opts.logo) : `${SITE_URL}/icon.svg`;
   schema.logo = { "@type": "ImageObject", url: logo };
   /* Same image again as `image`: some consumers read only one of the two. */
   schema.image = logo;
@@ -57,16 +57,6 @@ export function organizationSchema(opts: { logo?: string; phone?: string; descri
   return schema;
 }
 
-/** A /wp-content/ URL on the public domain stops resolving at the cutover. */
-function isPublicDomainUpload(url: string) {
-  if (!url.includes("/wp-content/")) return false;
-  try {
-    const bare = (host: string) => host.replace(/^www\./, "").toLowerCase();
-    return bare(new URL(url).hostname) === bare(new URL(SITE_URL).hostname);
-  } catch {
-    return false;
-  }
-}
 
 /**
  * The site as a thing in its own right.
