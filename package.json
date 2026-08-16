@@ -10,7 +10,8 @@
     "contract:check": "node scripts/validate-contract.mjs",
     "check": "npm run contract:check && npm run typecheck",
     "lighthouse": "node scripts/lighthouse.mjs",
-    "site": "node scripts/site.mjs"
+    "site": "node scripts/site.mjs",
+    "index:submit": "node scripts/google-index.mjs"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.22",
