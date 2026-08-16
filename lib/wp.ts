@@ -1,5 +1,6 @@
 import { cache } from "react";
 import type { ContentRecord, SeoData } from "./types";
+export type { ContentRecord, SeoData };
 import { localizeHtmlLinks } from "./links";
 import { BRAND_NAME, SITE_URL } from "./site";
 

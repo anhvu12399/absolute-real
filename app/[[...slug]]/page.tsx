@@ -13,6 +13,7 @@ import PlanTripTemplateV2 from "@/components/plan/PlanTripTemplateV2";
 import TourListingTemplateV2 from "@/components/tour/TourListingTemplateV2";
 import SingleTourTemplateV2 from "@/components/tour/SingleTourTemplateV2";
 import SingleArticleTemplateV2 from "@/components/article/SingleArticleTemplateV2";
+import StandardPageTemplateV2 from "@/components/page/StandardPageTemplateV2";
 import TaxonomyArchiveTemplate from "@/components/archive/TaxonomyArchiveTemplate";
 import type { ArchiveItem } from "@/lib/wp";
 import { decodeEntities, getAllPathsSafe, getArchiveSafe, getContentByPath, getSeo, getTermBySlug, getTermsSafe, getSiteDataSafe, illustratedFirst, realCountries, searchContent } from "@/lib/wp";
@@ -242,6 +243,7 @@ async function renderSingle(content: NonNullable<Awaited<ReturnType<typeof getCo
     case "blog":
     case "trip":
     case "post": return renderArticle(content);
+    case "page": return renderPage(content);
     default: return null;
   }
 }
@@ -355,6 +357,33 @@ async function renderArticle(content: NonNullable<Awaited<ReturnType<typeof getC
       countryTours={illustratedFirst(tours)}
       siblings={monthSiblings}
     />
+  );
+}
+
+async function renderPage(content: NonNullable<Awaited<ReturnType<typeof getContentByPath>>>) {
+  const country = countryOf(content);
+  let tours: ArchiveItem[] = [];
+
+  if (country) {
+    tours = await getArchiveSafe({ type: "tour", taxonomy: "country", term: country, perPage: 4 });
+  } else {
+    const query = keywordsOf(content.title);
+    const [found, latest] = await Promise.all([
+      query ? searchContent(query) : Promise.resolve([]),
+      getArchiveSafe({ type: "tour", perPage: 4 }),
+    ]);
+    tours = found.filter((item) => item.type === "tour").slice(0, 4).map(toArchiveShape);
+    if (!tours.length) tours = latest;
+  }
+
+  return (
+    <>
+      <EditBar targets={editTargets({ content })} />
+      <StandardPageTemplateV2
+        data={content}
+        relatedTours={illustratedFirst(tours)}
+      />
+    </>
   );
 }
 
@@ -816,9 +845,8 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
         <DestinationTemplateV2 data={content} />
       </>
     );
-    /* Same treatment as a guide: an imported page with a body still needs a
-       way onward at the foot. It used to render with nothing below it. */
-    if (content.content) return renderArticle(content);
+    /* Standalone static page (Terms, Privacy, About, Team, etc.) with related journeys */
+    if (content.content) return renderPage(content);
 
     /* Region hubs like /southeast-asia-tours/ are empty posts on the legacy
        site - their content came from a PHP template that queried live. Rather

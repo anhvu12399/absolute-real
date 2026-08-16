@@ -82,7 +82,6 @@ const LEGAL_LINKS = [
   { label: "Privacy Policy", href: "/privacy-policy/" },
   { label: "About Us", href: "/about-us/" },
   { label: "Meet the Team", href: "/meet-the-team/" },
-  { label: "My Wishlist", href: "/my-wishlist/" },
 ];
 
 /* Who the company legally is. Required on the page, and it is also the answer
