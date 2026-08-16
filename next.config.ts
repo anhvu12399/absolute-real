@@ -57,6 +57,17 @@ const nextConfig: NextConfig = {
         destination: "/collection/rosewood-phuket/",
         permanent: true,
       },
+      /* Post-type archives the legacy site published and Google still has
+         indexed. This site groups the same content differently, so each one
+         points at the page that now does its job rather than 404ing. Checked
+         against the old sitemap: these were the only three of 670 indexed
+         URLs with nowhere to land. */
+      { source: "/places-to-go", destination: "/destinations/", permanent: true },
+      { source: "/places-to-go/", destination: "/destinations/", permanent: true },
+      { source: "/travel-guides", destination: "/inspirations/", permanent: true },
+      { source: "/travel-guides/", destination: "/inspirations/", permanent: true },
+      { source: "/things-to-do", destination: "/inspirations/", permanent: true },
+      { source: "/things-to-do/", destination: "/inspirations/", permanent: true },
     ];
   },
   async rewrites() {
