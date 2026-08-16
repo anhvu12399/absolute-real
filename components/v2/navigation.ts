@@ -271,7 +271,7 @@ export const FALLBACK_SECTIONS: NavSection[] = [
         { label: "24/7 On-Ground Support", href: "/why-us/concierge/" },
         { label: "Community Impact", href: "/why-us/sustainability/" },
         { label: "Awards & Recognition", href: "/why-us/awards/" },
-        { label: "Contact Our Designers", href: "/#plan" },
+        { label: "Contact Our Designers", href: "/plan-my-trip/" },
       ],
     ],
     ctaLabel: "PLAN YOUR JOURNEY WITH A SPECIALIST",

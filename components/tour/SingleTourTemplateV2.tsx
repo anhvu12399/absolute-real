@@ -457,7 +457,7 @@ export default function SingleTourTemplateV2({
 
           {legacyCtaLabel && (
             <div className="reveal" style={{ marginTop: "1.8rem" }}>
-              <Link href={legacyCtaLink || "/#plan"} className="btn btn-fill-ink">{legacyCtaLabel}</Link>
+              <Link href={legacyCtaLink || "/plan-my-trip/"} className="btn btn-fill-ink">{legacyCtaLabel}</Link>
             </div>
           )}
 
@@ -713,7 +713,7 @@ export default function SingleTourTemplateV2({
               <div>
                 <p className="tag">Offer</p>
                 <p className="body">{offerText}</p>
-                <Link href="/#plan">Learn more</Link>
+                <Link href="/plan-my-trip/">Learn more</Link>
               </div>
             </div>
           )}
@@ -757,7 +757,7 @@ export default function SingleTourTemplateV2({
           )}
 
           <div className="center reveal" style={{ marginTop: "2.6rem" }}>
-            <Link href={legacyCtaLink || "/#plan"} className="btn btn-fill-ink" data-preview="inquiry_btn_text">{legacyCtaLabel || text(acf.inquiry_btn_text) || "Request This Itinerary"}</Link>
+            <Link href={legacyCtaLink || "/plan-my-trip/"} className="btn btn-fill-ink" data-preview="inquiry_btn_text">{legacyCtaLabel || text(acf.inquiry_btn_text) || "Request This Itinerary"}</Link>
           </div>
         </div>
       </section>

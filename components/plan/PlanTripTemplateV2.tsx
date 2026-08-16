@@ -30,13 +30,32 @@ const BUDGETS = [
   "Not sure yet",
 ];
 
-/* The markets this company sells into, then the rest alphabetically. */
+/* The full worldwide ISO list of all countries for Home Country */
 const COUNTRIES = [
-  "United States", "Canada", "United Kingdom", "Australia", "New Zealand",
-  "Ireland", "Germany", "France", "Netherlands", "Belgium", "Switzerland",
-  "Austria", "Spain", "Italy", "Sweden", "Norway", "Denmark", "Finland",
-  "Singapore", "Hong Kong", "Japan", "South Korea", "United Arab Emirates",
-  "South Africa", "Brazil", "Mexico", "Other",
+  "United States", "United Kingdom", "Canada", "Australia", "New Zealand",
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Austria", "Azerbaijan",
+  "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
+  "Cabo Verde", "Cambodia", "Cameroon", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czechia",
+  "Denmark", "Djibouti", "Dominica", "Dominican Republic",
+  "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia",
+  "Fiji", "Finland", "France",
+  "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guyana",
+  "Haiti", "Honduras", "Hong Kong", "Hungary",
+  "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Ivory Coast",
+  "Jamaica", "Japan", "Jordan",
+  "Kazakhstan", "Kenya", "Kuwait", "Kyrgyzstan",
+  "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
+  "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Mauritania", "Mauritius", "Mexico", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
+  "Namibia", "Nepal", "Netherlands", "Nicaragua", "Niger", "Nigeria", "Norway",
+  "Oman",
+  "Pakistan", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal",
+  "Qatar",
+  "Romania", "Russia", "Rwanda",
+  "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Singapore", "Slovakia", "Slovenia", "South Africa", "South Korea", "Spain", "Sri Lanka", "Sweden", "Switzerland",
+  "Taiwan", "Tanzania", "Thailand", "Tunisia", "Turkey",
+  "Uganda", "Ukraine", "United Arab Emirates", "Uruguay", "Uzbekistan",
+  "Vatican City", "Venezuela", "Vietnam",
+  "Yemen", "Zambia", "Zimbabwe", "Other",
 ];
 
 /** Repeaters arrive as JSON strings when ACF free is in play. */
@@ -80,6 +99,28 @@ export default function PlanTripTemplateV2({
     newsletter: false,
     company: "",
   });
+
+  const [destOpen, setDestOpen] = useState(false);
+
+  const toggleDest = (d: string) => {
+    setForm((prev) => {
+      const exists = prev.destinations.includes(d);
+      return {
+        ...prev,
+        destinations: exists
+          ? prev.destinations.filter((x) => x !== d)
+          : [...prev.destinations, d],
+      };
+    });
+  };
+
+  const removeDest = (d: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setForm((prev) => ({
+      ...prev,
+      destinations: prev.destinations.filter((x) => x !== d),
+    }));
+  };
 
   const set = (key: keyof typeof form) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -351,35 +392,68 @@ export default function PlanTripTemplateV2({
 
                 <div className="enquiry-col">
                   <div className="enquiry-row">
-                    <span id="destinations-label" className="enquiry-label">Desired Destinations</span>
-                    {/* Was a <select multiple>. Two problems with that: it paints the
-                        selected row in the operating system's blue, which is the one
-                        colour on the page nobody chose, and it hides the fact that
-                        more than one country can be picked behind a ctrl-click
-                        nobody discovers. Checkboxes say both things out loud. */}
-                    <div className="enquiry-chips" role="group" aria-labelledby="destinations-label">
-                      {DESTINATIONS.map((d) => {
-                        const on = form.destinations.includes(d);
-                        return (
-                          <label key={d} className={`enquiry-chip${on ? " is-on" : ""}`}>
-                            <input
-                              type="checkbox"
-                              name="destinations"
-                              value={d}
-                              checked={on}
-                              onChange={() =>
-                                setForm((prev) => ({
-                                  ...prev,
-                                  destinations: on
-                                    ? prev.destinations.filter((x) => x !== d)
-                                    : [...prev.destinations, d],
-                                }))
-                              }
-                            />
-                            {d}
-                          </label>
-                        );
-                      })}
+                    <label id="destinations-label">Desired Destinations</label>
+                    <div className="enquiry-multiselect">
+                      <button
+                        type="button"
+                        className={`enquiry-multiselect-trigger ${destOpen ? "is-open" : ""}`}
+                        onClick={() => setDestOpen(!destOpen)}
+                        aria-expanded={destOpen}
+                        aria-haspopup="listbox"
+                        aria-labelledby="destinations-label"
+                      >
+                        {form.destinations.length === 0 ? (
+                          <span className="enquiry-multiselect-placeholder">Select destination(s)...</span>
+                        ) : (
+                          form.destinations.map((d) => (
+                            <span className="dest-badge" key={d}>
+                              {d}
+                              <button
+                                type="button"
+                                onClick={(e) => removeDest(d, e)}
+                                aria-label={`Remove ${d}`}
+                              >
+                                ✕
+                              </button>
+                            </span>
+                          ))
+                        )}
+                        <svg className="enquiry-multiselect-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                      </button>
+
+                      {destOpen && (
+                        <div className="enquiry-multiselect-panel" role="listbox">
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.6rem", paddingBottom: "0.4rem", borderBottom: "1px solid var(--line-on-cream)" }}>
+                            <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "var(--ink)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                              Asia Destinations ({form.destinations.length} selected)
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setDestOpen(false)}
+                              style={{ fontSize: "0.8rem", color: "var(--rust)", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}
+                            >
+                              Done ✓
+                            </button>
+                          </div>
+                          <div className="enquiry-multiselect-grid">
+                            {DESTINATIONS.map((d) => {
+                              const on = form.destinations.includes(d);
+                              return (
+                                <label key={d} className={`dest-option ${on ? "is-selected" : ""}`}>
+                                  <input
+                                    type="checkbox"
+                                    checked={on}
+                                    onChange={() => toggleDest(d)}
+                                  />
+                                  <span>{d}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 

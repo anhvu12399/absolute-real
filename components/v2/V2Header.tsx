@@ -169,7 +169,7 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
           </ul>
 
           <div className="nav-right">
-            <Link href="/#plan" className="btn btn-fill-ink" onClick={closeAll}>Plan Your Journey</Link>
+            <Link href="/plan-my-trip/" className="btn btn-fill-ink" onClick={closeAll}>Plan Your Journey</Link>
             <button
               className="nav-toggle"
               onClick={() => {
@@ -261,7 +261,7 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
             <svg><use href="#i-phone"></use></svg>
             <span>{phoneLabel} <strong>{phone}</strong></span>
           </div>
-          <Link href="/#plan" className="btn btn-fill-ink" onClick={closeAll}>
+          <Link href="/plan-my-trip/" className="btn btn-fill-ink" onClick={closeAll}>
             Plan Your Journey
           </Link>
         </div>

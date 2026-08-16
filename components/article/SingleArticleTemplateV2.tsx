@@ -153,7 +153,7 @@ export default function SingleArticleTemplateV2({
   const planDescription = text(acf.plan_description);
   const planHtml = text(acf.plan_html);
   const planFooter = text(acf.plan_footer);
-  const planLink = text(acf.view_more_link) || "/#plan";
+  const planLink = text(acf.view_more_link) || "/plan-my-trip/";
   const planLinkLabel = text(acf.view_more_label) || "Start Planning";
   const hasPlan = Boolean(planTitle || planDescription || planHtml || planFooter);
 

@@ -163,7 +163,7 @@ export default function SingleHotelTemplateV2({
           {intro && <p className="hotel-hero-intro">{intro}</p>}
 
           <div className="hotel-hero-actions">
-            <Link href="/#plan" className="btn btn-fill-ink">Enquire About This Stay</Link>
+            <Link href="/plan-my-trip/" className="btn btn-fill-ink">Enquire About This Stay</Link>
           </div>
 
           {(lat || lng) && (

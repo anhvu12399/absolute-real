@@ -459,7 +459,7 @@ export default function DestinationTemplateV2({
                 We are composing new {name} itineraries right now. Tell us what you have in mind and a designer will build one around you.
               </p>
               <div style={{ marginTop: "1.2rem" }}>
-                <Link href="/#plan" className="btn btn-fill-ink">Design a {name} Journey</Link>
+                <Link href="/plan-my-trip/" className="btn btn-fill-ink">Design a {name} Journey</Link>
               </div>
             </div>
           )}
@@ -629,7 +629,7 @@ export default function DestinationTemplateV2({
           <p className="eyebrow" style={{ justifyContent: "center" }}>{text(acfData.planning_eyebrow) ? <span dangerouslySetInnerHTML={{ __html: text(acfData.planning_eyebrow) }} /> : <><em>Start</em> Planning</>}</p>
           <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{text(acfData.planning_heading) || `Ready to see ${name} on your own terms?`}</h2>
           <p style={{ marginTop: "1rem", color: "var(--text-dim-on-ink)" }}>Share a few details and a private travel designer will reach out within one business day.</p>
-          <div style={{ marginTop: "1.8rem" }}><Link href="/#plan" className="btn btn-line-white">Plan My {name} Journey</Link></div>
+          <div style={{ marginTop: "1.8rem" }}><Link href="/plan-my-trip/" className="btn btn-line-white">Plan My {name} Journey</Link></div>
         </div>
       </section>
     </>

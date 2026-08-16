@@ -96,7 +96,7 @@ export function GuideSections({ acf }: { acf?: Record<string, unknown> | null })
             )}
             <div className="wordpress-content reveal" dangerouslySetInnerHTML={{ __html: tripIdeas }} />
             <div style={{ marginTop: "1.6rem" }}>
-              <Link href="/#plan" className="btn btn-line-ink">Start Planning</Link>
+              <Link href="/plan-my-trip/" className="btn btn-line-ink">Start Planning</Link>
             </div>
           </div>
         </section>

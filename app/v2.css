@@ -92,7 +92,11 @@ h1 em,h2 em,h3 em{font-style:italic; font-weight:400; color:var(--rust);}
 @media (max-width:640px){.stat-item{border-left:none; border-top:1px solid var(--line-on-cream); padding:1rem 1.4rem 0; margin-top:1rem;} .stat-item:first-child{border-top:none; margin-top:0; padding-top:0;}}
 
 /* ---------- dropcap ---------- */
-.dropcap{float:left; font-family:'Playfair Display',serif; font-style:italic; font-weight:600; font-size:3.6em; line-height:0.78; padding:0.04em 0.1em 0 0; color:var(--rust);}
+.dropcap{
+  float:left; font-family:'Playfair Display',Georgia,serif; font-style:italic; font-weight:600;
+  font-size:3.5em; line-height:0.85; margin:0.04em 0.22em 0.05em 0; padding:0 0.06em 0 0;
+  color:var(--rust); display:inline-block;
+}
 
 /* ---------- buttons ---------- */
 .btn{display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; font-size:0.76rem; letter-spacing:0.12em; text-transform:uppercase; font-weight:600; padding:0.9rem 1.7rem; border-radius:3px; border:1px solid transparent; cursor:pointer; transition:background .2s ease,color .2s ease,border-color .2s ease; white-space:nowrap;}
@@ -2348,6 +2352,123 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .enquiry-label{
   font-family:'Playfair Display',serif; font-size:0.98rem; color:var(--ink);
   padding-top:0.55rem; line-height:1.4;
+}
+
+/* Compact Luxury Multi-Select for Desired Destinations */
+.enquiry-multiselect {
+  position: relative;
+  width: 100%;
+}
+.enquiry-multiselect-trigger {
+  min-height: 2.75rem;
+  width: 100%;
+  padding: 0.45rem 2rem 0.45rem 0.75rem;
+  border: 1px solid var(--line-on-cream);
+  border-radius: 4px;
+  background: var(--white);
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  position: relative;
+  text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.enquiry-multiselect-trigger:focus,
+.enquiry-multiselect-trigger.is-open {
+  outline: none;
+  border-color: var(--gold-deep);
+  box-shadow: 0 0 0 3px rgba(var(--chrome-gold-rgb), 0.16);
+}
+.enquiry-multiselect-placeholder {
+  color: var(--text-dim-on-cream);
+  font-size: 0.92rem;
+}
+.enquiry-multiselect-arrow {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  color: var(--text-dim-on-cream);
+  transition: transform 0.2s ease;
+}
+.enquiry-multiselect-trigger.is-open .enquiry-multiselect-arrow {
+  transform: translateY(-50%) rotate(180deg);
+}
+.dest-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  background: rgba(197, 168, 128, 0.16);
+  border: 1px solid rgba(197, 168, 128, 0.4);
+  border-radius: 3px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.dest-badge button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--rust);
+  font-size: 0.85rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+.enquiry-multiselect-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--white);
+  border: 1px solid var(--line-on-cream);
+  border-radius: 6px;
+  box-shadow: 0 12px 32px rgba(17, 24, 39, 0.15);
+  padding: 0.9rem;
+  max-height: 320px;
+  overflow-y: auto;
+  animation: fadeInDown 0.18s ease-out;
+}
+.enquiry-multiselect-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+}
+@media (max-width: 600px) {
+  .enquiry-multiselect-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.dest-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.84rem;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.dest-option:hover {
+  background: var(--cream);
+}
+.dest-option input {
+  accent-color: var(--gold-deep);
+  cursor: pointer;
+}
+.dest-option.is-selected {
+  background: rgba(197, 168, 128, 0.16);
+  font-weight: 600;
 }
 .enquiry input:focus, .enquiry select:focus, .enquiry textarea:focus{
   outline:none; border-color:var(--gold-deep); box-shadow:0 0 0 3px rgba(var(--chrome-gold-rgb),0.16);

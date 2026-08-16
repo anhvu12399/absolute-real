@@ -121,7 +121,7 @@ export default function TourListingTemplateV2({
           <p className="eyebrow" style={{ justifyContent: "center" }}><em>Can&apos;t</em> Decide</p>
           <h2 style={{ color: "var(--white)", fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>Tell us what you&apos;re after, and we&apos;ll shortlist it for you.</h2>
           <p style={{ marginTop: "1rem", color: "var(--text-dim-on-ink)" }}>A private travel designer will reach out within one business day, no obligation.</p>
-          <div style={{ marginTop: "1.8rem" }}><Link href="/#plan" className="btn btn-line-white">Talk to a Travel Designer</Link></div>
+          <div style={{ marginTop: "1.8rem" }}><Link href="/plan-my-trip/" className="btn btn-line-white">Talk to a Travel Designer</Link></div>
         </div>
       </section>
     </>

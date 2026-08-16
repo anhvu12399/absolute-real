@@ -100,7 +100,7 @@ export default function TaxonomyArchiveTemplate({
           )}
 
           <div className="center" style={{ marginTop: "3rem" }}>
-            <Link href="/#plan" className="btn btn-fill-ink">Plan a Private Journey</Link>
+            <Link href="/plan-my-trip/" className="btn btn-fill-ink">Plan a Private Journey</Link>
           </div>
         </div>
       </section>
