@@ -48,6 +48,13 @@ add_action('rest_api_init', function () {
        itself with a permission_callback would return 401 to every reader and
        fill their console with errors. */
     register_rest_route('absolute-asia/v1', '/me', $public + ['callback' => 'aat_rest_me']);
+
+    /* Public lead inquiry submission endpoint */
+    register_rest_route('absolute-asia/v1', '/lead', [
+        'methods' => 'POST',
+        'permission_callback' => '__return_true',
+        'callback' => 'aat_rest_submit_lead',
+    ]);
 });
 
 /**
@@ -655,4 +662,103 @@ function aat_rest_images(WP_REST_Request $request) {
         if ($meta) $map[$url] = $meta;
     }
     return rest_ensure_response($map ?: (object) []);
+}
+
+/**
+ * Handles incoming lead submissions, sends email to mywaytravelinc@gmail.com,
+ * and records the enquiry in WordPress options.
+ */
+function aat_rest_submit_lead(WP_REST_Request $request) {
+    $params = $request->get_json_params();
+    if (!is_array($params)) {
+        $params = $request->get_params();
+    }
+
+    // Honeypot check
+    if (!empty($params['company'])) {
+        return rest_ensure_response(['ok' => true, 'id' => 'hp_ok']);
+    }
+
+    $name = sanitize_text_field($params['name'] ?? '');
+    $email = sanitize_email($params['email'] ?? '');
+    $phone = sanitize_text_field($params['phone'] ?? '');
+    $destination = sanitize_text_field($params['destination'] ?? '');
+    $message = sanitize_textarea_field($params['message'] ?? '');
+    $source_path = sanitize_text_field($params['sourcePath'] ?? '/');
+    $details = is_array($params['details'] ?? null) ? $params['details'] : [];
+
+    if (empty($name) || empty($email)) {
+        return new WP_Error('invalid_lead', 'Name and valid email are required', ['status' => 400]);
+    }
+
+    $to_email = 'mywaytravelinc@gmail.com';
+    $subject = '[New Enquiry] ' . ($destination ?: 'Asia Custom Tour') . ' — ' . $name;
+
+    // Compose HTML Email Body
+    $detail_rows = '';
+    foreach ($details as $label => $val) {
+        if (!empty($val)) {
+            $detail_rows .= '<tr><td style="padding:10px 14px;border:1px solid #e8e2d8;font-weight:600;background:#fcfbf9;color:#333;width:180px;">' . esc_html($label) . '</td><td style="padding:10px 14px;border:1px solid #e8e2d8;color:#222;">' . esc_html((string)$val) . '</td></tr>';
+        }
+    }
+
+    $html = '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:24px;background-color:#f6f4f0;font-family:Helvetica,Arial,sans-serif;color:#1e2a27;">'
+        . '<div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e5dfd5;box-shadow:0 4px 16px rgba(0,0,0,0.06);">'
+        . '<div style="background:#1b2b27;padding:24px;text-align:center;border-bottom:3px solid #c5a880;">'
+        . '<h1 style="color:#ffffff;margin:0;font-size:20px;letter-spacing:1px;font-weight:400;font-family:Georgia,serif;">ABSOLUTE ASIA TOURS</h1>'
+        . '<p style="color:#c5a880;margin:6px 0 0 0;font-size:12px;letter-spacing:2px;text-transform:uppercase;">New Tailor-Made Enquiry</p>'
+        . '</div>'
+        . '<div style="padding:28px 24px;">'
+        . '<h2 style="font-size:17px;margin-top:0;color:#1b2b27;border-bottom:1px solid #ede8e1;padding-bottom:8px;font-family:Georgia,serif;">Traveller Details</h2>'
+        . '<table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px;">'
+        . '<tr><td style="padding:10px 14px;border:1px solid #e8e2d8;font-weight:600;background:#fcfbf9;color:#333;width:180px;">Full Name</td><td style="padding:10px 14px;border:1px solid #e8e2d8;font-weight:bold;color:#1b2b27;font-size:15px;">' . esc_html($name) . '</td></tr>'
+        . '<tr><td style="padding:10px 14px;border:1px solid #e8e2d8;font-weight:600;background:#fcfbf9;color:#333;">Email Address</td><td style="padding:10px 14px;border:1px solid #e8e2d8;"><a href="mailto:' . esc_attr($email) . '" style="color:#a85a3c;text-decoration:none;font-weight:600;">' . esc_html($email) . '</a></td></tr>'
+        . ($phone ? '<tr><td style="padding:10px 14px;border:1px solid #e8e2d8;font-weight:600;background:#fcfbf9;color:#333;">Phone Number</td><td style="padding:10px 14px;border:1px solid #e8e2d8;"><a href="tel:' . esc_attr(preg_replace('/[^\d+]/', '', $phone)) . '" style="color:#1b2b27;text-decoration:none;font-weight:600;">' . esc_html($phone) . '</a></td></tr>' : '')
+        . ($destination ? '<tr><td style="padding:10px 14px;border:1px solid #e8e2d8;font-weight:600;background:#fcfbf9;color:#333;">Destinations</td><td style="padding:10px 14px;border:1px solid #e8e2d8;font-weight:600;color:#1b2b27;">' . esc_html($destination) . '</td></tr>' : '')
+        . '<tr><td style="padding:10px 14px;border:1px solid #e8e2d8;font-weight:600;background:#fcfbf9;color:#333;">Source Page</td><td style="padding:10px 14px;border:1px solid #e8e2d8;">' . esc_html($source_path) . '</td></tr>'
+        . $detail_rows
+        . '</table>';
+
+    if ($message) {
+        $html .= '<h2 style="font-size:17px;color:#1b2b27;margin-top:24px;border-bottom:1px solid #ede8e1;padding-bottom:8px;font-family:Georgia,serif;">Client Notes & Ideal Journey</h2>'
+            . '<div style="background:#fcfbf9;border:1px solid #e8e2d8;padding:16px;border-radius:4px;font-size:14px;line-height:1.65;color:#333;white-space:pre-wrap;">'
+            . nl2br(esc_html($message))
+            . '</div>';
+    }
+
+    $html .= '<div style="margin-top:32px;padding-top:16px;border-top:1px solid #eee;font-size:12px;color:#888;text-align:center;">'
+        . 'Delivered to <strong>' . esc_html($to_email) . '</strong> at ' . gmdate('Y-m-d H:i:s') . ' UTC via Absolute Asia Tours.'
+        . '</div></div></div></body></html>';
+
+    $headers = [
+        'Content-Type: text/html; charset=UTF-8',
+        'From: Absolute Asia Tours <no-reply@absoluteasiatours.com>',
+        'Reply-To: ' . $name . ' <' . $email . '>',
+    ];
+
+    $sent = wp_mail($to_email, $subject, $html, $headers);
+
+    // Also persist lead into WordPress options / log for 100% data safety
+    $leads = get_option('aat_received_leads', []);
+    if (!is_array($leads)) $leads = [];
+    $lead_record = [
+        'id' => wp_generate_uuid4(),
+        'date' => gmdate(DATE_ATOM),
+        'name' => $name,
+        'email' => $email,
+        'phone' => $phone,
+        'destination' => $destination,
+        'message' => $message,
+        'source_path' => $source_path,
+        'details' => $details,
+        'email_sent' => (bool)$sent,
+    ];
+    array_unshift($leads, $lead_record);
+    update_option('aat_received_leads', array_slice($leads, 0, 300), false);
+
+    return rest_ensure_response([
+        'ok' => true,
+        'email_sent' => (bool)$sent,
+        'id' => $lead_record['id'],
+    ]);
 }

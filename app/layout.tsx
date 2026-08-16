@@ -6,6 +6,7 @@ import { V2Icons } from "@/components/v2/V2Icons";
 import { RevealInit } from "@/components/v2/RevealWrapper";
 import { AdminPreviewBridge } from "@/components/v2/AdminPreviewBridge";
 import { PageProgressBar } from "@/components/v2/PageProgressBar";
+import { WhatsAppButton } from "@/components/v2/WhatsAppButton";
 import { getSiteDataSafe } from "@/lib/wp";
 
 import "./v2.css";
@@ -75,6 +76,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <RevealInit />
         <Suspense><AdminPreviewBridge /></Suspense>
         <Suspense><PageProgressBar /></Suspense>
+        <WhatsAppButton site={site} />
       </body>
     </html>
   );

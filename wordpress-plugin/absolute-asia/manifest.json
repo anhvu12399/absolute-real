@@ -14,6 +14,7 @@
     "GET /absolute-asia/v1/import/export",
     "POST /absolute-asia/v1/import/reconcile",
     "POST /absolute-asia/v1/import/cleanup",
-    "GET /absolute-asia/v1/me"
+    "GET /absolute-asia/v1/me",
+    "POST /absolute-asia/v1/lead"
   ]
 }
