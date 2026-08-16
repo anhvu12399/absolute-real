@@ -351,25 +351,36 @@ export default function PlanTripTemplateV2({
 
                 <div className="enquiry-col">
                   <div className="enquiry-row">
-                    <label htmlFor="destinations">Desired Destinations</label>
-                    {/* A multi-select, so a two-country journey can say so. */}
-                    <select
-                      id="destinations"
-                      name="destinations"
-                      multiple
-                      size={5}
-                      value={form.destinations}
-                      onChange={(event) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          destinations: [...event.target.selectedOptions].map((option) => option.value),
-                        }))
-                      }
-                    >
-                      {DESTINATIONS.map((d) => (
-                        <option key={d} value={d}>{d}</option>
-                      ))}
-                    </select>
+                    <span id="destinations-label" className="enquiry-label">Desired Destinations</span>
+                    {/* Was a <select multiple>. Two problems with that: it paints the
+                        selected row in the operating system's blue, which is the one
+                        colour on the page nobody chose, and it hides the fact that
+                        more than one country can be picked behind a ctrl-click
+                        nobody discovers. Checkboxes say both things out loud. */}
+                    <div className="enquiry-chips" role="group" aria-labelledby="destinations-label">
+                      {DESTINATIONS.map((d) => {
+                        const on = form.destinations.includes(d);
+                        return (
+                          <label key={d} className={`enquiry-chip${on ? " is-on" : ""}`}>
+                            <input
+                              type="checkbox"
+                              name="destinations"
+                              value={d}
+                              checked={on}
+                              onChange={() =>
+                                setForm((prev) => ({
+                                  ...prev,
+                                  destinations: on
+                                    ? prev.destinations.filter((x) => x !== d)
+                                    : [...prev.destinations, d],
+                                }))
+                              }
+                            />
+                            {d}
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div className="enquiry-row">

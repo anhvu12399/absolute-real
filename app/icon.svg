@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Absolute Asia Tours">
+  <!--
+    The brand mark, reduced to what survives at 16 pixels: the gold disc with
+    the A cut out of it, and the bar that slices the disc clean across. The
+    wordmark from the full logo is dropped - at favicon size it is a grey smear,
+    and the header already prints the name in type beside it.
+
+    The A and the bar are knocked out rather than drawn, so the shape reads on
+    a dark browser tab and a light one alike.
+  -->
+  <defs>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E0BA55"/>
+      <stop offset="1" stop-color="#B98F28"/>
+    </linearGradient>
+    <mask id="cut">
+      <rect width="64" height="64" fill="#fff"/>
+      <g stroke="#000" fill="none" stroke-linecap="butt">
+        <!-- One polyline, not two strokes meeting: separate strokes leave a
+             notch where they cross, and this letterform's apex is a point. -->
+        <path d="M9 59 L30.5 5 L52 59" stroke-width="8.5" stroke-linejoin="miter" stroke-miterlimit="8"/>
+        <path d="M-2 38.5 H66" stroke-width="5.5"/>
+      </g>
+    </mask>
+  </defs>
+  <circle cx="32" cy="32" r="31" fill="url(#leaf)" mask="url(#cut)"/>
+</svg>

@@ -2331,8 +2331,24 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   padding:0.72rem 0.85rem; transition:border-color .2s ease, box-shadow .2s ease;
 }
 .enquiry textarea{resize:vertical; min-height:9rem; line-height:1.6;}
-.enquiry select[multiple]{padding:0.35rem; min-height:9.5rem;}
-.enquiry select[multiple] option{padding:0.4rem 0.5rem; border-radius:2px;}
+/* Destination picker: checkboxes wearing the page's own palette, because a
+   native multi-select paints its selection in the OS blue. */
+.enquiry-chips{display:flex; flex-wrap:wrap; gap:0.5rem;}
+.enquiry-chip{
+  display:inline-flex; align-items:center; gap:0.4rem;
+  padding:0.42rem 0.85rem; border:1px solid var(--line-on-cream);
+  border-radius:999px; font-size:0.85rem; color:var(--text-dim-on-cream);
+  cursor:pointer; user-select:none; background:transparent;
+  transition:border-color 0.18s, color 0.18s, background 0.18s;
+}
+.enquiry-chip:hover{border-color:var(--gold-deep); color:var(--ink);}
+.enquiry-chip input{position:absolute; opacity:0; width:0; height:0;}
+.enquiry-chip.is-on{background:var(--gold-deep); border-color:var(--gold-deep); color:#fff;}
+.enquiry-chip:has(input:focus-visible){outline:2px solid var(--gold-deep); outline-offset:2px;}
+.enquiry-label{
+  font-family:'Playfair Display',serif; font-size:0.98rem; color:var(--ink);
+  padding-top:0.55rem; line-height:1.4;
+}
 .enquiry input:focus, .enquiry select:focus, .enquiry textarea:focus{
   outline:none; border-color:var(--gold-deep); box-shadow:0 0 0 3px rgba(var(--chrome-gold-rgb),0.16);
 }

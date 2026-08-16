@@ -54,9 +54,13 @@ export async function generateMetadata({
       title: { absolute: SITE_TITLE },
       description: SITE_DESCRIPTION,
       alternates: { canonical: "/" },
-      openGraph: { title: SITE_TITLE, description: SITE_DESCRIPTION, url: "/", type: "website" },
+      openGraph: { siteName: BRAND_NAME, title: SITE_TITLE, description: SITE_DESCRIPTION, url: "/", type: "website" },
     };
   }
+
+  /* Every openGraph block below repeats siteName on purpose: route metadata
+     replaces the layout's openGraph object whole rather than merging into it,
+     so a block that omits it drops og:site_name from that page. */
 
   /* Try WP content API for metadata */
   const content = await getContentByPath(path);
@@ -94,6 +98,7 @@ export async function generateMetadata({
     alternates: { canonical },
     robots: { index: seo?.robots?.index !== false, follow: seo?.robots?.follow !== false },
     openGraph: {
+      siteName: BRAND_NAME,
       title,
       description,
       url: canonical,
@@ -184,7 +189,7 @@ async function routeMetadata(path: string): Promise<Metadata> {
       title: known.title,
       description: known.description,
       alternates: { canonical: path },
-      openGraph: { title: known.title, description: known.description, url: path, type: "website" },
+      openGraph: { siteName: BRAND_NAME, title: known.title, description: known.description, url: path, type: "website" },
     };
   }
 
@@ -203,6 +208,7 @@ async function routeMetadata(path: string): Promise<Metadata> {
         description,
         alternates: { canonical: path },
         openGraph: {
+          siteName: BRAND_NAME,
           title,
           description,
           url: path,

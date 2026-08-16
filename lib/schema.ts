@@ -40,12 +40,42 @@ export function organizationSchema(opts: { logo?: string; phone?: string; descri
     url: SITE_URL,
   };
   if (opts.description) schema.description = plain(opts.description);
-  if (opts.logo) schema.logo = abs(opts.logo);
+
+  /* Google reads `logo` to decide what to show beside the result. It has to be
+     a URL that keeps resolving, which rules out anything on the public domain
+     itself while that domain is being moved from WordPress to this site: the
+     new frontend serves no /wp-content/. WordPress uploads live on the backend
+     host and are unaffected; if the stored logo still points at the public
+     domain, the site's own icon is the honest fallback. */
+  const logo = opts.logo && !isPublicDomainUpload(opts.logo) ? abs(opts.logo) : `${SITE_URL}/icon.svg`;
+  schema.logo = { "@type": "ImageObject", url: logo };
+  /* Same image again as `image`: some consumers read only one of the two. */
+  schema.image = logo;
+
   if (opts.phone) schema.telephone = opts.phone;
   if (SOCIAL_LINKS.length) schema.sameAs = SOCIAL_LINKS.map((s) => s.url);
   return schema;
 }
 
+/** A /wp-content/ URL on the public domain stops resolving at the cutover. */
+function isPublicDomainUpload(url: string) {
+  if (!url.includes("/wp-content/")) return false;
+  try {
+    const bare = (host: string) => host.replace(/^www\./, "").toLowerCase();
+    return bare(new URL(url).hostname) === bare(new URL(SITE_URL).hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The site as a thing in its own right.
+ *
+ * This is what Google reads to print "Absolute Asia Tours" above the result
+ * instead of the bare domain. `name` has to agree with the `og:site_name` and
+ * the homepage title, or Google picks whichever it trusts most and the three
+ * disagree in public.
+ */
 export function websiteSchema(): Json {
   return {
     "@context": "https://schema.org",
@@ -53,6 +83,7 @@ export function websiteSchema(): Json {
     "@id": `${SITE_URL}/#website`,
     url: SITE_URL,
     name: BRAND_NAME,
+    inLanguage: "en",
     publisher: { "@id": `${SITE_URL}/#organization` },
   };
 }

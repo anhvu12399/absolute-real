@@ -45,6 +45,81 @@ function aat_site_logo() {
 }
 
 /**
+ * True when the logo is hosted somewhere this WordPress does not control.
+ *
+ * This matters on the day the main domain is pointed at the Next.js site. The
+ * logo was imported as an absolute URL on www.absoluteasiatours.com, which is
+ * the legacy WordPress today and will be the new frontend tomorrow — and the
+ * new frontend serves no /wp-content/. The moment DNS moves, the logo 404s in
+ * the header and the footer of every page at once, which is the most visible
+ * thing on the site.
+ */
+function aat_logo_is_offsite($url) {
+    $url = trim((string) $url);
+    if ($url === '') return false;
+
+    $host = strtolower((string) wp_parse_url($url, PHP_URL_HOST));
+    $here = strtolower((string) wp_parse_url(home_url(), PHP_URL_HOST));
+    if ($host === '' || $here === '') return false;
+
+    /* www and the bare domain are the same place for this purpose. */
+    $strip = function ($h) { return preg_replace('/^www\./', '', $h); };
+    return $strip($host) !== $strip($here);
+}
+
+/**
+ * Copy an off-site logo into this install's Media Library.
+ *
+ * Runs once and records the attachment, so the URL the API hands out is one
+ * this WordPress will keep serving no matter where the main domain points.
+ */
+function aat_localise_logo() {
+    $url = trim((string) get_option('aat_logo_url', ''));
+    if ($url === '' || !aat_logo_is_offsite($url)) {
+        return ['moved' => false, 'reason' => 'Logo đã nằm trên chính backend này, không cần chuyển.'];
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/media.php';
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+
+    $id = media_sideload_image($url, 0, get_bloginfo('name') . ' logo', 'id');
+    if (is_wp_error($id)) {
+        return ['moved' => false, 'reason' => 'Tải về không được: ' . $id->get_error_message()];
+    }
+
+    $local = wp_get_attachment_image_url((int) $id, 'full');
+    if (!$local) {
+        return ['moved' => false, 'reason' => 'Đã tải về nhưng không đọc được URL của ảnh.'];
+    }
+
+    update_option('aat_logo_id', (int) $id, false);
+    /* Cleared, or aat_site_logo() would keep preferring the off-site copy. */
+    update_option('aat_logo_url', '', false);
+
+    return ['moved' => true, 'from' => $url, 'to' => $local, 'attachment' => (int) $id];
+}
+
+/**
+ * Self-heal on the next admin page load rather than waiting to be asked.
+ *
+ * Deliberately not on the REST path: /site is on the critical path of every
+ * page render and must not stop to download a file.
+ */
+add_action('admin_init', function () {
+    if (!current_user_can('manage_options')) return;
+    if (get_option('aat_logo_localised', '') === 'done') return;
+
+    $url = trim((string) get_option('aat_logo_url', ''));
+    if ($url === '' || !aat_logo_is_offsite($url)) return;
+
+    $result = aat_localise_logo();
+    if (!empty($result['moved'])) {
+        update_option('aat_logo_localised', 'done', false);
+    }
+});
+
+/**
  * The legacy install this site imports from.
  *
  * Hard-coded until now, which meant a second site built on this plugin could
@@ -176,7 +251,43 @@ function aat_logo_field() {
             <img src="<?php echo esc_url($url); ?>" alt="Logo" style="height:48px;display:block">
         </p>
         <p class="description">Xem thử trên đúng nền xanh của thanh menu.</p>
+        <?php if (aat_logo_is_offsite($url)) : ?>
+            <div class="notice notice-error inline" style="margin:12px 0;padding:10px 14px">
+                <p><strong>Logo đang nằm ngoài backend này.</strong>
+                   Nó được lưu ở <code><?php echo esc_html((string) wp_parse_url($url, PHP_URL_HOST)); ?></code>,
+                   là chính tên miền bạn sắp trỏ sang web mới. Khi đổi DNS, tên miền đó không còn phục vụ
+                   <code>/wp-content/</code> nữa, nên logo sẽ mất ở header và footer của <em>mọi trang</em>.</p>
+                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                    <input type="hidden" name="action" value="aat_localise_logo">
+                    <?php wp_nonce_field('aat_localise_logo'); ?>
+                    <button class="button button-primary">Chép logo về backend này</button>
+                </form>
+            </div>
+        <?php endif; ?>
+        <?php if (isset($_GET['aat_logo_moved'])) : ?>
+            <p style="color:<?php echo $_GET['aat_logo_moved'] === 'ok' ? '#008a20' : '#b32d2e'; ?>">
+                <?php echo esc_html((string) get_transient('aat_logo_move_note')); ?>
+            </p>
+        <?php endif; ?>
     <?php else : ?>
         <p class="description">Chưa có logo — frontend đang hiện hình tròn vàng tạm.</p>
     <?php endif;
 }
+
+add_action('admin_post_aat_localise_logo', function () {
+    if (!current_user_can('manage_options')) wp_die('Không đủ quyền');
+    check_admin_referer('aat_localise_logo');
+
+    $result = aat_localise_logo();
+    $note = !empty($result['moved'])
+        ? 'Đã chép logo về backend: ' . $result['to']
+        : 'Chưa chép được — ' . ($result['reason'] ?? 'không rõ lý do');
+    set_transient('aat_logo_move_note', $note, 60);
+    if (!empty($result['moved'])) update_option('aat_logo_localised', 'done', false);
+
+    wp_safe_redirect(add_query_arg(
+        'aat_logo_moved', !empty($result['moved']) ? 'ok' : 'fail',
+        admin_url('admin.php?page=aat-import')
+    ));
+    exit;
+});
