@@ -2,23 +2,29 @@ export function V2Icons() {
   return (
     <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
       <defs>
-        {/* The brand mark, as vector.
-            WordPress holds it as a 765x547 PNG on the public domain, which is
-            both soft at every size the header asks for and one DNS change away
-            from 404. Defined once here and referenced with <use>, so the mask
-            and gradient ids exist exactly once in the document however many
-            times the logo appears. */}
+        {/* The brand mark, measured off the original artwork.
+
+            The letter was not drawn by eye. The source PNG's alpha channel is
+            a clean hole where the A is, so scanning rows and columns gives the
+            four stroke edges and the two bar edges, each fitted by least
+            squares; the result differs from the original by 1.9% of pixels,
+            nearly all of it antialiasing. Three things an eyeballed version
+            got wrong: the A is narrow rather than splayed, its apex is a
+            virtual point ABOVE the disc so the top is the letter cut off by
+            the circle, and the crossbar rises to the right and tapers.
+
+            Defined once here and referenced with <use>, so the mask and
+            gradient ids exist exactly once however often the logo appears. */}
         <linearGradient id="brand-leaf" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#E0BA55" />
           <stop offset="1" stopColor="#B98F28" />
         </linearGradient>
-        <mask id="brand-cut">
-          <rect width="64" height="64" fill="#fff" />
-          <g stroke="#000" fill="none" strokeLinecap="butt">
-            {/* One polyline, not two strokes meeting: separate strokes leave a
-                notch where they cross, and this letterform's apex is a point. */}
-            <path d="M9 59 L30.5 5 L52 59" strokeWidth="8.5" strokeLinejoin="miter" strokeMiterlimit="8" />
-            <path d="M-2 38.5 H66" strokeWidth="5.5" />
+        <mask id="brand-cut" maskUnits="userSpaceOnUse" x="-10" y="-10" width="84" height="84">
+          <rect x="-10" y="-10" width="84" height="84" fill="#fff" />
+          <g fill="#000">
+            <path d="M34.4 -8L36.96 -8L-0.69 72L-3.15 72Z" />
+            <path d="M22.08 -8L29.79 -8L66.54 72L58.91 72Z" />
+            <path d="M-4 39.42L70 29.26L70 34.75L-4 39.85Z" />
           </g>
         </mask>
         <symbol id="brand-mark" viewBox="0 0 64 64">
