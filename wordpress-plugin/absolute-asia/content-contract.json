@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "types": {
     "homepage": {
       "consumer": "components/home/HomeTemplateV2.tsx",
@@ -17,6 +17,7 @@
         "tab_inspiration_label",
         "home_tab_destinations",
         "home_tab_journeys",
+        "home_tab_inspiration",
         "featured_eyebrow",
         "featured_headline",
         "stay_eyebrow",

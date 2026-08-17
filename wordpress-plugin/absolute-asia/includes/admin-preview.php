@@ -193,6 +193,7 @@ function aat_admin_preview_panel() {
             'tab_inspiration_label': { sel: '.tabs-row button:nth-child(3)', type: 'text', section: 'journeys' },
             'home_tab_destinations': { sel: '#journeys', section: 'journeys' },
             'home_tab_journeys':     { sel: '#journeys', section: 'journeys' },
+            'home_tab_inspiration':  { sel: '#journeys', section: 'journeys' },
             'featured_eyebrow':   { sel: '#featured .eyebrow', type: 'html', section: 'featured' },
             'featured_headline':  { sel: '#featured h2', type: 'html', section: 'featured' },
             'stay_eyebrow':       { sel: '#stay .eyebrow', type: 'html', section: 'stay' },
@@ -382,6 +383,7 @@ function aat_admin_preview_panel() {
         var FIELD_SECTION = {
             'home_banner_slider': 'hero',
             'home_tab_destinations': 'journeys', 'home_tab_journeys': 'journeys',
+            'home_tab_inspiration': 'journeys',
             'home_values': 'values',
             'testimonials': 'reviews', 'review_summary': 'reviews',
             'review_logo': 'reviews', 'review_link': 'reviews', 'review_text': 'reviews',

@@ -1091,6 +1091,33 @@ function aat_import_item($old, $new_type, $legacy_terms = null) {
  * Legacy ids only resolve once every type has been imported, so relationships
  * are parked on the post and linked in a final pass.
  */
+/**
+ * Copy for a card, refusing an excerpt that is only a link.
+ *
+ * Several legacy posts carry their own permalink in the excerpt field, which
+ * published on the homepage as a card whose description was a raw URL. An
+ * excerpt with no spaces that parses as a URL is not a sentence; the opening
+ * of the post is.
+ */
+function aat_card_description($post_id, $card) {
+    $excerpt = trim(wp_strip_all_tags((string) ($card['excerpt'] ?? '')));
+
+    $looks_like_link = $excerpt !== ''
+        && preg_match('#^(https?://|www\.)\S+$#i', $excerpt)
+        && strpos($excerpt, ' ') === false;
+
+    if ($excerpt !== '' && !$looks_like_link) return $excerpt;
+
+    $post = get_post($post_id);
+    if (!$post) return '';
+
+    $body = trim(wp_strip_all_tags(strip_shortcodes((string) $post->post_content)));
+    $body = preg_replace('#https?://\S+#i', '', $body);
+    $body = trim(preg_replace('/\s+/', ' ', (string) $body));
+
+    return $body === '' ? '' : wp_html_excerpt($body, 180, '…');
+}
+
 function aat_import_relink($limit = 40) {
     $pending = get_posts([
         'post_type' => array_merge(aat_public_types(), ['homepage']),
@@ -1122,7 +1149,7 @@ function aat_import_relink($limit = 40) {
                             'badge' => $card['categories'][0]['name'] ?? '',
                             'title' => $card['title'],
                             'meta' => $card['duration'],
-                            'description' => $card['excerpt'],
+                            'description' => aat_card_description($id, $card),
                             'link' => $card['path'],
                             'link_text' => 'Explore',
                         ];
@@ -1291,6 +1318,7 @@ add_action('rest_api_init', function () {
         if ($type === 'story') return rest_ensure_response(aat_seed_story());
         if ($type === 'hub-pages') return rest_ensure_response(aat_seed_hub_pages());
         if ($type === 'legal-pages') return rest_ensure_response(aat_seed_legal_pages());
+        if ($type === 'fill-defaults') return rest_ensure_response(aat_seed_frontend_defaults());
         if ($type === 'rebrand') return rest_ensure_response(aat_rebrand_run(40));
         if ($type === 'fix-records') return rest_ensure_response(aat_cleanup_records());
         if ($type === 'fill-reset') return rest_ensure_response(aat_backfill_reset() + ['imported' => 0, 'done' => true]);
@@ -1387,6 +1415,7 @@ function aat_import_screen() {
             <button class="button aat-run" data-type="story">Soạn trang Our Story</button>
             <button class="button aat-run" data-type="hub-pages">Bơm dữ liệu trang hub</button>
             <button class="button aat-run" data-type="legal-pages">Tạo trang Terms &amp; Conditions</button>
+            <button class="button aat-run button-primary" data-type="fill-defaults">Bơm chữ mặc định của giao diện vào ô trống</button>
             <button class="button" data-type="fill-reset" id="aat-fill-reset">Xét lại từ đầu</button>
         </p>
 
@@ -1572,7 +1601,7 @@ function aat_import_screen() {
                 /* `rebrand` is deliberately absent: renaming the sister agency
                    is a business decision, and it touches wording customers
                    wrote. It stays a separate button. */
-                ['menu', 'relink', 'fix-records', 'fill-images', 'fill-excerpts', 'fill-itineraries', 'hotel-images', 'seed-copy', 'hotel-copy', 'story', 'hub-pages', 'legal-pages']
+                ['menu', 'relink', 'fix-records', 'fill-images', 'fill-excerpts', 'fill-itineraries', 'hotel-images', 'seed-copy', 'hotel-copy', 'story', 'hub-pages', 'legal-pages', 'fill-defaults']
             )); ?>;
 
             var $btn = $(this).prop('disabled', true).text('Đang chạy…');

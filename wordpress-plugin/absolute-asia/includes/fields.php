@@ -19,7 +19,10 @@ function aat_repeater_fields() {
            related_links. No field declares them any more, so listing them only
            told the decoder to look for meta nothing writes. */
         // homepage
+        /* Tab 3 had a label field and a tab on the page but no cards field, so
+           the third tab was the only one an editor could not set by hand. */
         'home_banner_slider', 'trust_items', 'home_tab_destinations', 'home_tab_journeys',
+        'home_tab_inspiration',
         'home_values', 'testimonials', 'team',
         // tour
         'itinerary', 'departure_dates', 'faqs', 'gallery', 'accommodation_options', 'experiences',
@@ -132,6 +135,7 @@ function aat_register_fields() {
             aat_text('field_aat_home_tab_insp_label', 'Tab 3 Label (Inspiration)', 'tab_inspiration_label', ['default_value' => 'Travel inspiration']),
             aat_repeater_field('field_aat_home_tab_dest_cards', 'Destinations Tab Cards (Auto-filled if empty)', 'home_tab_destinations', 'home-cards', aat_fills_itself('destination')),
             aat_repeater_field('field_aat_home_tab_jour_cards', 'Journeys Tab Cards (Auto-filled if empty)', 'home_tab_journeys', 'home-cards', aat_fills_itself('tour')),
+            aat_repeater_field('field_aat_home_tab_insp_cards', 'Inspiration Tab Cards (Auto-filled if empty)', 'home_tab_inspiration', 'home-cards', aat_fills_itself('bài cẩm nang')),
 
             aat_tab('tab_aat_home_featured', 'Featured Journeys, Stays & Inspiration'),
             aat_text('field_aat_home_feat_eye', 'Featured Journeys Eyebrow (HTML)', 'featured_eyebrow', ['default_value' => '<em>Private</em> Journeys']),

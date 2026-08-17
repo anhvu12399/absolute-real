@@ -118,6 +118,9 @@ export default function HomeTemplateV2({
   const IS_PLACE = /^\/(places-to-go\/|[a-z-]+\/$)/;
   const IS_TOUR = /^\/tours\//;
   const IS_STAY = /^\/collection\//;
+  /* Inspiration covers the journal and the guide types, which live under
+     several prefixes rather than one. */
+  const IS_READ = /^\/(blogs|inspirations|travel-guides|things-to-do)\//;
 
   /* "Where do you want to go" is answered with countries, not with individual
      towns — a visitor picks Vietnam before they pick Hoi An. The country
@@ -166,6 +169,13 @@ export default function HomeTemplateV2({
   const journeys = useMemo(() => {
     return tabCards(acf.home_tab_journeys, IS_TOUR, tours.map(toCard));
   }, [acf.home_tab_journeys, tours]);
+
+  /* Tab three used to take the newest guides and offer no way to choose. Tabs
+     one and two both had a cards field; this one was simply missed. */
+  const inspiration = useMemo(
+    () => tabCards(acf.home_tab_inspiration, IS_READ, guides.map(toCard)),
+    [acf.home_tab_inspiration, guides],
+  );
 
   /* Hero: the WordPress slider drives it; live tours stand in until it is filled. */
   const slides = useMemo(() => {
@@ -412,7 +422,7 @@ export default function HomeTemplateV2({
     {
       key: "inspiration",
       label: label("tab_inspiration_label", "Travel inspiration"),
-      rows: guides.slice(0, 6).map(toCard),
+      rows: inspiration,
       all: "/inspirations/",
       allLabel: "All travel inspiration",
     },
