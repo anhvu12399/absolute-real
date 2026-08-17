@@ -188,7 +188,7 @@ export default function SingleArticleTemplateV2({
 
             <div className="dispatch-meta">
               {published && <span>{published}</span>}
-              {readMinutes && <span>{readMinutes} min read</span>}
+              {readMinutes && <span data-preview="read_minutes">{readMinutes} min read</span>}
               {country && <span>{country.name}</span>}
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function SingleArticleTemplateV2({
 
       {/* ═══ PLATE ═══ */}
       {hero && (
-        <figure className="dispatch-plate">
+        <figure className="dispatch-plate" data-preview="hero_image">
           <div><Image src={hero} alt="" fill loading="eager" fetchPriority="high" sizes="100vw" style={{ objectFit: "cover" }} /></div>
           {data?.featuredMedia?.alt && <figcaption>{data.featuredMedia.alt}</figcaption>}
         </figure>
@@ -234,12 +234,12 @@ export default function SingleArticleTemplateV2({
             )}
 
             {extraBody && (
-              <div className="wordpress-content dispatch-prose" dangerouslySetInnerHTML={{ __html: extraBody }} />
+              <div className="wordpress-content dispatch-prose" data-preview="content_left" dangerouslySetInnerHTML={{ __html: extraBody }} />
             )}
 
             {text(acf.content_right_image) && (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img className="dispatch-inline-image" src={optimized(text(acf.content_right_image), "panel")} alt={title} loading="lazy" />
+              <img className="dispatch-inline-image" data-preview="content_right_image" src={optimized(text(acf.content_right_image), "panel")} alt={title} loading="lazy" />
             )}
           </div>
         </div>
@@ -247,11 +247,11 @@ export default function SingleArticleTemplateV2({
 
       {/* ═══ PLATES ═══ */}
       {gallery.length > 0 && (
-        <section className="section on-ink dispatch-gallery-band">
+        <section className="section on-ink dispatch-gallery-band" data-preview="gallery">
           <div className="container">
             <div className="dispatch-head light">
               <span className="dispatch-rule light" />
-              <h2>{text(acf.gallery_title) || "From the journey"}</h2>
+              <h2 data-preview="gallery_title">{text(acf.gallery_title) || "From the journey"}</h2>
             </div>
             <div className="dispatch-plates">
               {gallery.map((row, idx) => (
@@ -273,17 +273,19 @@ export default function SingleArticleTemplateV2({
         <section className="section on-cream" id="plan">
           <div className="container dispatch-endnote">
             <span className="dispatch-rule" />
-            {planTitle && <h2 className="dispatch-endnote-title">{planTitle}</h2>}
-            {planDescription && <div className="wordpress-content" dangerouslySetInnerHTML={{ __html: planDescription }} />}
-            {planHtml && <div className="wordpress-content plan-block" dangerouslySetInnerHTML={{ __html: planHtml }} />}
-            {planFooter && <div className="wordpress-content" dangerouslySetInnerHTML={{ __html: planFooter }} />}
-            <Link href={planLink} className="btn btn-fill-ink">{planLinkLabel}</Link>
+            {planTitle && <h2 className="dispatch-endnote-title" data-preview="plan_title">{planTitle}</h2>}
+            {planDescription && <div className="wordpress-content" data-preview="plan_description" dangerouslySetInnerHTML={{ __html: planDescription }} />}
+            {planHtml && <div className="wordpress-content plan-block" data-preview="plan_html" dangerouslySetInnerHTML={{ __html: planHtml }} />}
+            {planFooter && <div className="wordpress-content" data-preview="plan_footer" dangerouslySetInnerHTML={{ __html: planFooter }} />}
+            <Link href={planLink} className="btn btn-fill-ink" data-preview="view_more_label">{planLinkLabel}</Link>
           </div>
         </section>
       )}
 
       <RelatedIndex title="Other Months to Travel" items={siblings} />
-      <RelatedIndex title={text(acf.further_title) || "Further Reading"} items={reading} />
+      <span data-preview="further_title" style={{ display: "contents" }}>
+        <RelatedIndex title={text(acf.further_title) || "Further Reading"} items={reading} />
+      </span>
       <RelatedIndex title="Journeys That Go There" items={journeys} />
 
       <SpecialistBlock acf={acf} />

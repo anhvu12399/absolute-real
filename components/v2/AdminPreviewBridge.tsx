@@ -54,8 +54,26 @@ export function AdminPreviewBridge() {
       return null;
     }
 
-    function applyUpdate(selector: string, value: string, updateType: string): HTMLElement | null {
-      const el = findElement(selector);
+    /**
+     * The element a field belongs to.
+     *
+     * `data-preview="<field>"` on the markup itself is tried first, and only
+     * then the CSS selector the plugin sends. The selectors are written by
+     * hand in the plugin against markup that lives here, so they go stale
+     * silently: a check of all 177 of them found the article, trip and page
+     * templates matching none at all, which is why clicking those fields
+     * moved nothing. An attribute cannot drift from the element it is on.
+     */
+    function findTarget(field: string, selector: string): HTMLElement | null {
+      if (field) {
+        const owned = document.querySelector<HTMLElement>(`[data-preview="${CSS.escape(field)}"]`);
+        if (owned) return owned;
+      }
+      return findElement(selector);
+    }
+
+    function applyUpdate(field: string, selector: string, value: string, updateType: string): HTMLElement | null {
+      const el = findTarget(field, selector);
       if (!el) return null;
 
       switch (updateType) {
@@ -86,11 +104,11 @@ export function AdminPreviewBridge() {
       return el;
     }
 
-    function scrollToTarget(sectionId?: string, selector?: string) {
+    function scrollToTarget(sectionId?: string, selector?: string, field?: string) {
       let el: HTMLElement | null = null;
 
-      if (selector) {
-        el = findElement(selector);
+      if (field || selector) {
+        el = findTarget(field || "", selector || "");
       }
       if (!el && sectionId) {
         el = document.getElementById(sectionId);
@@ -107,7 +125,7 @@ export function AdminPreviewBridge() {
       if (!data || typeof data !== "object") return;
 
       if (data.type === "aat-live-update") {
-        const el = applyUpdate(data.selector, data.value, data.updateType);
+        const el = applyUpdate(data.field, data.selector, data.value, data.updateType);
         if (el) {
           highlightElement(el);
           const rect = el.getBoundingClientRect();
@@ -118,7 +136,7 @@ export function AdminPreviewBridge() {
       }
 
       if (data.type === "aat-scroll-to") {
-        scrollToTarget(data.section, data.selector);
+        scrollToTarget(data.section, data.selector, data.field);
       }
     }
 
