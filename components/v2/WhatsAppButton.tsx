@@ -16,15 +16,20 @@ export function WhatsAppButton({ site }: { site?: SitePayload | null }) {
 
   if (!mounted) return null;
 
-  // Determine phone number (configured via env or site payload, formatted for WhatsApp)
+  /* WordPress first, then the build-time settings. There is deliberately no
+     last-resort number: the fallback used to be +1 212 627 1950, which belongs
+     to nobody here, so an install that had configured nothing put a button on
+     every page that opened a chat with a stranger. With nothing to dial the
+     button does not render. */
   const rawNumber =
+    (site?.whatsapp || "").trim() ||
+    (site?.phone || "").trim() ||
     process.env.NEXT_PUBLIC_BRAND_WHATSAPP ||
     process.env.NEXT_PUBLIC_BRAND_PHONE ||
-    site?.phone ||
-    "+12126271950";
+    "";
 
-  // Clean number for WhatsApp international URL: keep only digits
   const cleanNumber = rawNumber.replace(/\D/g, "");
+  if (cleanNumber.length < 8) return null;
   const defaultMessage = encodeURIComponent(
     `Hello ${BRAND_NAME}, I would like to inquire about planning a private luxury journey.`
   );

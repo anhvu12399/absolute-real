@@ -300,3 +300,107 @@ add_action('admin_post_aat_localise_logo', function () {
     ));
     exit;
 });
+
+add_action('admin_post_aat_save_legal', function () {
+    if (!current_user_can('manage_options')) wp_die('Không đủ quyền');
+    check_admin_referer('aat_save_legal');
+    update_option('aat_legal_entity', sanitize_textarea_field(wp_unslash($_POST['aat_legal_entity'] ?? '')), false);
+    wp_safe_redirect(add_query_arg('aat_legal', 'saved', admin_url('admin.php?page=aat-import')));
+    exit;
+});
+
+/**
+ * The legal line at the foot of every page.
+ *
+ * Kept here rather than in the code because it is a statement about who is
+ * liable: it changes when the company does, and it must never travel to
+ * another site inside a copy of this plugin.
+ */
+function aat_legal_field() {
+    $value = (string) get_option('aat_legal_entity', '');
+    ?>
+    <h2>Dòng pháp nhân ở chân trang</h2>
+    <p>Câu nói rõ công ty nào chịu trách nhiệm, hiện ở chân <strong>mọi trang</strong>.
+       Để trống thì frontend dùng giá trị đặt sẵn khi build; trống cả hai thì không in dòng nào —
+       tốt hơn là in nhầm pháp nhân của công ty khác.</p>
+    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+        <input type="hidden" name="action" value="aat_save_legal">
+        <?php wp_nonce_field('aat_save_legal'); ?>
+        <textarea name="aat_legal_entity" class="large-text" rows="3"
+                  placeholder="X là một bộ phận của Y, công ty TNHH đăng ký tại …"><?php echo esc_textarea($value); ?></textarea>
+        <p>
+            <button class="button button-primary">Lưu</button>
+            <?php if (isset($_GET['aat_legal'])) : ?><span style="color:#008a20;margin-left:8px">Đã lưu</span><?php endif; ?>
+        </p>
+    </form>
+    <?php
+}
+
+add_action('admin_post_aat_save_identity', function () {
+    if (!current_user_can('manage_options')) wp_die('Không đủ quyền');
+    check_admin_referer('aat_save_identity');
+    update_option('aat_tagline', sanitize_text_field(wp_unslash($_POST['aat_tagline'] ?? '')), false);
+    update_option('aat_whatsapp', sanitize_text_field(wp_unslash($_POST['aat_whatsapp'] ?? '')), false);
+    update_option('aat_socials', sanitize_textarea_field(wp_unslash($_POST['aat_socials'] ?? '')), false);
+    wp_safe_redirect(add_query_arg('aat_identity', 'saved', admin_url('admin.php?page=aat-import')));
+    exit;
+});
+
+/**
+ * Decode the social list, one "Label|https://…" per line.
+ *
+ * A single textarea rather than a row of fields: the set differs per brand and
+ * grows, and nobody should have to ship a plugin update to add Pinterest.
+ */
+function aat_social_links() {
+    $out = [];
+    foreach (preg_split('/\r\n|\r|\n/', (string) get_option('aat_socials', '')) as $line) {
+        $line = trim($line);
+        if ($line === '') continue;
+        $parts = array_map('trim', explode('|', $line, 2));
+        if (count($parts) !== 2 || $parts[1] === '') continue;
+        $out[] = ['label' => $parts[0], 'url' => esc_url_raw($parts[1])];
+    }
+    return $out;
+}
+
+/**
+ * The wording and links that sit on every page outside the content.
+ *
+ * These were build-time variables on the host, so the line under the logo and
+ * the footer's social row could only be changed by someone with access to the
+ * deployment. One of them, the tagline, was not even wired up: the variable
+ * existed and the templates printed a literal, so setting it did nothing.
+ */
+function aat_identity_field() {
+    ?>
+    <h2>Chữ và liên kết ngoài nội dung</h2>
+    <p>Dòng nhỏ dưới logo, số WhatsApp, và hàng mạng xã hội ở chân trang.
+       Để trống ô nào thì frontend dùng giá trị đặt sẵn khi build.</p>
+    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+        <input type="hidden" name="action" value="aat_save_identity">
+        <?php wp_nonce_field('aat_save_identity'); ?>
+        <p>
+            <label style="display:block;margin-bottom:4px">Dòng dưới logo</label>
+            <input type="text" name="aat_tagline" class="large-text"
+                   value="<?php echo esc_attr(get_option('aat_tagline', '')); ?>"
+                   placeholder="Private | Luxury | Journeys">
+        </p>
+        <p>
+            <label style="display:block;margin-bottom:4px">WhatsApp (chỉ số, có mã nước)</label>
+            <input type="text" name="aat_whatsapp" class="regular-text"
+                   value="<?php echo esc_attr(get_option('aat_whatsapp', '')); ?>" placeholder="13159981998">
+        </p>
+        <p>
+            <label style="display:block;margin-bottom:4px">Mạng xã hội — mỗi dòng một mục, dạng <code>Tên|địa chỉ</code></label>
+            <textarea name="aat_socials" class="large-text" rows="4"
+                      placeholder="Instagram|https://instagram.com/…&#10;Facebook|https://facebook.com/…"><?php
+                echo esc_textarea(get_option('aat_socials', '')); ?></textarea>
+        </p>
+        <p>
+            <button class="button button-primary">Lưu</button>
+            <?php if (isset($_GET['aat_identity'])) : ?><span style="color:#008a20;margin-left:8px">Đã lưu</span><?php endif; ?>
+        </p>
+    </form>
+    <?php
+}

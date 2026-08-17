@@ -463,6 +463,13 @@ function aat_rest_site() {
         'logo' => aat_site_logo(),
         'phoneLabel' => $field('text_phone'),
         'phone' => $field('phone'),
+        /* Who the company legally is. It lived only in a build-time variable
+           on the host, which meant the one line on the site that states who is
+           liable could not be corrected without a redeploy. */
+        'legalEntity' => trim((string) get_option('aat_legal_entity', '')),
+        'tagline' => trim((string) get_option('aat_tagline', '')),
+        'whatsapp' => trim((string) get_option('aat_whatsapp', '')),
+        'socials' => aat_social_links(),
         /* Promises the whole site makes, held once on the homepage rather than
            repeated as fixed text in every template that shows them. */
         'whyTitle' => $field('why_title'),

@@ -5,7 +5,7 @@ import { BrandMark } from "./BrandMark";
 import type { SitePayload } from "@/lib/wp";
 import { resolveSections } from "./navigation";
 import Image from "next/image";
-import { BRAND_LOGO_SOURCE, BRAND_NAME, isDoomedUpload } from "@/lib/site";
+import { BRAND_LOGO_SOURCE, BRAND_NAME, BRAND_TAGLINE, isDoomedUpload } from "@/lib/site";
 import type { NavSection } from "./navigation";
 
 /** A section with no links of its own has no panel worth opening. */
@@ -14,6 +14,11 @@ function hasPanel(section: NavSection) {
 }
 
 export function V2Header({ site }: { site?: SitePayload | null }) {
+
+  /* WordPress first for everything that sits outside the content. The tagline
+     in particular was a literal here while BRAND_TAGLINE existed and went
+     unused, so setting it changed nothing. */
+  const tagline = (site?.tagline || "").trim() || BRAND_TAGLINE;
   /* The bundled mark, unless this deployment says its logo lives in the CMS.
      A WordPress logo on the public domain's /wp-content/ is dropped either
      way: it resolves today and 404s the moment that domain points here. */
@@ -95,7 +100,7 @@ export function V2Header({ site }: { site?: SitePayload | null }) {
             )}
             <span className="brand-text">
               <span className="name">{site?.name || BRAND_NAME}</span>
-              <span className="tag">Private | Luxury | Journeys</span>
+              <span className="tag">{tagline}</span>
             </span>
           </Link>
 

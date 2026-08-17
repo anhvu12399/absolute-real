@@ -3,7 +3,7 @@ import { BrandMark } from "./BrandMark";
 import type { MenuItem, SitePayload } from "@/lib/wp";
 import { toLocalHref } from "@/lib/links";
 import Image from "next/image";
-import { BRAND_LOGO_SOURCE, BRAND_NAME, BRAND_SHORT, isDoomedUpload, LEGAL_ENTITY, SOCIAL_LINKS } from "@/lib/site";
+import { BRAND_LOGO_SOURCE, BRAND_NAME, BRAND_SHORT, BRAND_TAGLINE, isDoomedUpload, LEGAL_ENTITY, SOCIAL_LINKS } from "@/lib/site";
 
 /**
  * Footer columns come from the WordPress "footer" menu; these ship until it
@@ -112,10 +112,21 @@ function columnsFromMenu(menu?: MenuItem[]) {
 }
 
 export function V2Footer({ site }: { site?: SitePayload | null }) {
+
+  /* WordPress first for everything that sits outside the content. The tagline
+     in particular was a literal here while BRAND_TAGLINE existed and went
+     unused, so setting it changed nothing. */
+  const tagline = (site?.tagline || "").trim() || BRAND_TAGLINE;
+  const socials = site?.socials?.length ? site.socials : SOCIAL_LINKS;
   /* The bundled mark, unless this deployment says its logo lives in the CMS.
      A WordPress logo on the public domain's /wp-content/ is dropped either
      way: it resolves today and 404s the moment that domain points here. */
   const logo = BRAND_LOGO_SOURCE === "wordpress" && !isDoomedUpload(site?.logo) ? site?.logo : null;
+
+  /* WordPress first: this is the one line on the site that says who is liable,
+     and correcting it should not need a redeploy. The build-time value is the
+     fallback for an install that has not filled it in. */
+  const legal = (site?.legalEntity || "").trim() || LEGAL_ENTITY;
   const columns = columnsFromMenu(site?.footerMenu);
   const name = site?.name || BRAND_SHORT;
 
@@ -131,7 +142,7 @@ export function V2Footer({ site }: { site?: SitePayload | null }) {
             )}
             <span className="brand-text">
               <span className="name">{site?.name || BRAND_NAME}</span>
-              <span className="tag">Private | Luxury | Journeys</span>
+              <span className="tag">{tagline}</span>
             </span>
           </Link>
           <h4 className="footer-brand-title">Stay in Touch</h4>
@@ -143,9 +154,9 @@ export function V2Footer({ site }: { site?: SitePayload | null }) {
           </div>
           {/* Configured per site; no row at all beats linking to the wrong
               company's profiles. See NEXT_PUBLIC_SOCIALS. */}
-          {SOCIAL_LINKS.length > 0 && (
+          {socials.length > 0 && (
             <div className="footer-socials">
-              {SOCIAL_LINKS.map((social) => (
+              {socials.map((social) => (
                 <a key={social.url} href={social.url} target="_blank" rel="noopener noreferrer">{social.label}</a>
               ))}
             </div>
@@ -174,7 +185,7 @@ export function V2Footer({ site }: { site?: SitePayload | null }) {
             <Link key={link.href} href={link.href}>{link.label}</Link>
           ))}
         </nav>
-        {LEGAL_ENTITY && <p className="footer-entity">{LEGAL_ENTITY}</p>}
+        {legal && <p className="footer-entity">{legal}</p>}
         <span>© {new Date().getFullYear()} {name}. All rights reserved.</span>
       </div>
     </footer>

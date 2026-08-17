@@ -61,6 +61,13 @@ export type SitePayload = {
   /** Promises the whole site makes, held once on the homepage. */
   whyTitle?: string;
   whyReasons?: Array<{ icon?: string; text?: string }>;
+  /** The legal line at the foot of every page, edited in WordPress. */
+  legalEntity?: string;
+  /** The small line under the logo. */
+  tagline?: string;
+  /** Digits only, with country code. */
+  whatsapp?: string;
+  socials?: Array<{ label: string; url: string }>;
   menu: MenuItem[];
   footerMenu?: MenuItem[];
   frontPage: ContentRecord | null;

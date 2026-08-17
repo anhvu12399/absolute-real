@@ -1537,6 +1537,10 @@ function aat_import_screen() {
         <?php aat_foreign_field(); ?>
         <?php aat_founded_field(); ?>
 
+        <?php aat_identity_field(); ?>
+
+        <?php aat_legal_field(); ?>
+
         <?php aat_revalidate_field(); ?>
 
         <?php aat_backend_noindex_field(); ?>
