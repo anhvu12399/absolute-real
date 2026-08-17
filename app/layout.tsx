@@ -32,12 +32,30 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: SITE_TITLE, template: `%s | ${BRAND_NAME}` },
   description: SITE_DESCRIPTION,
-  /* Google picks the name it prints above a result from three places: the
-     WebSite schema, this tag, and the homepage title. Routes set their own
-     openGraph title and url; siteName is the one part that must be identical
-     on every page, so it is declared once here and inherited. */
-  openGraph: { siteName: BRAND_NAME, locale: "en_US" },
-  robots: process.env.VERCEL_ENV === "production" ? { index: true, follow: true } : { index: false, follow: false },
+  /* Google & AI Crawlers image and rich snippet directives */
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    siteName: BRAND_NAME,
+    locale: "en_US",
+    type: "website",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

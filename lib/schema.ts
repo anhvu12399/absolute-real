@@ -154,13 +154,20 @@ export function contentSchema(content: ContentRecord, path: string): Json | null
   const str = (key: string) => (typeof acf[key] === "string" ? (acf[key] as string).trim() : "");
   const image = content.featuredMedia?.url || str("hero_image");
   const country = content.terms?.find((t) => t.taxonomy === "country")?.name;
+  const imgUrl = image ? abs(image) : null;
 
   const base: Json = {
     "@context": "https://schema.org",
     name: content.title,
     url: abs(path),
     ...(plain(content.excerpt) ? { description: plain(content.excerpt) } : {}),
-    ...(image ? { image: abs(image) } : {}),
+    ...(imgUrl
+      ? {
+          image: { "@type": "ImageObject", url: imgUrl },
+          thumbnailUrl: imgUrl,
+          primaryImageOfPage: { "@type": "ImageObject", url: imgUrl },
+        }
+      : {}),
   };
 
   switch (content.type) {
@@ -171,8 +178,6 @@ export function contentSchema(content: ContentRecord, path: string): Json | null
         "@type": "TouristTrip",
         provider: { "@id": `${SITE_URL}/#organization` },
         ...(country ? { touristType: "Private traveler", itinerary: { "@type": "ItemList", name: `${content.title} itinerary` } } : {}),
-        /* Only when WordPress actually holds a duration - an invented one is
-           worse than none. ISO 8601, which is what the spec wants. */
         ...(days > 0 ? { subjectOf: { "@type": "Trip", name: content.title }, duration: `P${days}D` } : {}),
       };
     }
@@ -225,52 +230,54 @@ export function contentSchema(content: ContentRecord, path: string): Json | null
 
 /**
  * A country landing page.
- *
- * These are assembled by the router from a `page` record, so `contentSchema`
- * cannot type them from the post type alone - and they are the pages that
- * compete for "Vietnam luxury tours", which makes them the ones that most need
- * describing. The journeys listed on the page become the destination's
- * `ItemList`, which is what search results show underneath a destination.
  */
 export function destinationSchema(opts: {
   name: string;
   path: string;
   description?: string;
   image?: string;
-  tours?: Array<{ title: string; path: string }>;
+  tours?: Array<{ title: string; path: string; featuredMedia?: { url?: string } | null }>;
 }): Json {
+  const imgUrl = opts.image ? abs(opts.image) : null;
   const schema: Json = {
     "@context": "https://schema.org",
     "@type": "TouristDestination",
     name: opts.name,
     url: abs(opts.path),
     ...(plain(opts.description) ? { description: plain(opts.description) } : {}),
-    ...(opts.image ? { image: abs(opts.image) } : {}),
+    ...(imgUrl
+      ? {
+          image: { "@type": "ImageObject", url: imgUrl },
+          thumbnailUrl: imgUrl,
+          primaryImageOfPage: { "@type": "ImageObject", url: imgUrl },
+        }
+      : {}),
     ...(opts.name ? { containedInPlace: { "@type": "Continent", name: "Asia" } } : {}),
   };
 
   if (opts.tours?.length) {
-    schema.hasPart = opts.tours.slice(0, 10).map((tour) => ({
-      "@type": "TouristTrip",
-      name: tour.title,
-      url: abs(tour.path),
-      provider: { "@id": `${SITE_URL}/#organization` },
-    }));
+    schema.hasPart = opts.tours.slice(0, 10).map((tour) => {
+      const tourImg = tour.featuredMedia?.url ? abs(tour.featuredMedia.url) : undefined;
+      return {
+        "@type": "TouristTrip",
+        name: tour.title,
+        url: abs(tour.path),
+        provider: { "@id": `${SITE_URL}/#organization` },
+        ...(tourImg ? { image: tourImg, thumbnailUrl: tourImg } : {}),
+      };
+    });
   }
   return schema;
 }
 
 /**
  * A directory page - the hotel collection, the destinations index.
- *
- * `CollectionPage` with an `ItemList` is what tells a search engine this URL is
- * the index for a set rather than a thin page repeating its members' titles.
  */
 export function collectionSchema(opts: {
   name: string;
   path: string;
   description?: string;
-  items?: Array<{ title: string; path: string }>;
+  items?: Array<{ title: string; path: string; featuredMedia?: { url?: string } | null }>;
 }): Json {
   return {
     "@context": "https://schema.org",
@@ -283,12 +290,16 @@ export function collectionSchema(opts: {
           mainEntity: {
             "@type": "ItemList",
             numberOfItems: opts.items.length,
-            itemListElement: opts.items.slice(0, 20).map((item, index) => ({
-              "@type": "ListItem",
-              position: index + 1,
-              name: item.title,
-              url: abs(item.path),
-            })),
+            itemListElement: opts.items.slice(0, 20).map((item, index) => {
+              const itemImg = item.featuredMedia?.url ? abs(item.featuredMedia.url) : undefined;
+              return {
+                "@type": "ListItem",
+                position: index + 1,
+                name: item.title,
+                url: abs(item.path),
+                ...(itemImg ? { image: itemImg } : {}),
+              };
+            }),
           },
         }
       : {}),

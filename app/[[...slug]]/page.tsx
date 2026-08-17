@@ -49,42 +49,36 @@ export async function generateMetadata({
   const path = !slug || slug.length === 0 ? "/" : `/${slug.join("/")}/`;
 
   if (path === "/") {
+    const homeImage = "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-dejongwout-750895.jpg";
     return {
-      /* `absolute` opts out of the layout's "%s | brand" template - the brand
-         is already inside this title, and the tab read it twice. */
       title: { absolute: SITE_TITLE },
       description: SITE_DESCRIPTION,
       alternates: { canonical: "/" },
-      openGraph: { siteName: BRAND_NAME, title: SITE_TITLE, description: SITE_DESCRIPTION, url: "/", type: "website" },
+      openGraph: {
+        siteName: BRAND_NAME,
+        title: SITE_TITLE,
+        description: SITE_DESCRIPTION,
+        url: "/",
+        type: "website",
+        images: [{ url: homeImage, width: 1200, height: 630, alt: `${BRAND_NAME} - Private Luxury Asia Journeys` }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: SITE_TITLE,
+        description: SITE_DESCRIPTION,
+        images: [homeImage],
+      },
     };
   }
 
-  /* Every openGraph block below repeats siteName on purpose: route metadata
-     replaces the layout's openGraph object whole rather than merging into it,
-     so a block that omits it drops og:site_name from that page. */
-
   /* Try WP content API for metadata */
   const content = await getContentByPath(path);
-
-  /* Directory routes and country pages render from queries, not from a post,
-     so there is nothing here to describe them. They were falling through to
-     `{ title: BRAND_NAME }`, which the layout template turned into "Absolute
-     Asia Tours | Absolute Asia Tours" — the same duplicated title on every one
-     of them, with no description, no canonical and no card image. */
   if (!content) return routeMetadata(path);
 
   const seo = await getSeo(path, content.seo);
-  /* RankMath returns the title still escaped, and a browser tab shows exactly
-     what it is given - "Thailand Honeymoon &#038; Romance" and all. */
   const ownTitle = decodeEntities(seo?.title || content.title);
   const ownDescription = decodeEntities(seo?.description || content.excerpt);
 
-  /* A directory path can still resolve to a record — the content lookup falls
-     back to the front page — and that record is titled with the brand, so
-     /tours/, /destinations/ and /where-to-stay/ all published "Absolute Asia
-     Tours | Absolute Asia Tours" and the homepage's description. When the
-     record says nothing this path does not already say, the route's own
-     wording wins. */
   const route = ROUTE_META[path] || hubMeta(path);
   const saysNothing = !ownTitle || ownTitle.trim().toLowerCase() === BRAND_NAME.toLowerCase();
   if (route && saysNothing) return routeMetadata(path);
@@ -92,6 +86,9 @@ export async function generateMetadata({
   const title = ownTitle;
   const description = clampDescription(ownDescription);
   const canonical = publicCanonical(seo?.canonical, path);
+  const acf = (content.acf || {}) as Record<string, unknown>;
+  const rawImg = content.featuredMedia?.url || (typeof acf.hero_image === "string" ? (acf.hero_image as string) : null);
+  const ogImages = rawImg ? [{ url: rawImg, width: 1200, height: 630, alt: title }] : undefined;
 
   return {
     title,
@@ -104,7 +101,13 @@ export async function generateMetadata({
       description,
       url: canonical,
       type: "article",
-      images: content.featuredMedia ? [{ url: content.featuredMedia.url }] : undefined,
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: rawImg ? [rawImg] : undefined,
     },
   };
 }
@@ -184,13 +187,27 @@ function hubMeta(path: string) {
 }
 
 async function routeMetadata(path: string): Promise<Metadata> {
+  const defaultHubImage = "https://backend.absoluteasiatours.com/wp-content/uploads/2025/07/pexels-dejongwout-750895.jpg";
   const known = ROUTE_META[path] || hubMeta(path);
   if (known) {
     return {
       title: known.title,
       description: known.description,
       alternates: { canonical: path },
-      openGraph: { siteName: BRAND_NAME, title: known.title, description: known.description, url: path, type: "website" },
+      openGraph: {
+        siteName: BRAND_NAME,
+        title: known.title,
+        description: known.description,
+        url: path,
+        type: "website",
+        images: [{ url: defaultHubImage, width: 1200, height: 630, alt: known.title }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: known.title,
+        description: known.description,
+        images: [defaultHubImage],
+      },
     };
   }
 
@@ -202,8 +219,9 @@ async function routeMetadata(path: string): Promise<Metadata> {
       const title = `${term.name} Tours & Private Journeys`;
       const description = clampDescription(
         decodeEntities(term.intro || term.description || "") ||
-          `Private, tailor-made journeys through ${term.name}, arranged around how you want to travel.`,
+          `Private, tailor-made journeys through ${term.name}, arranged around how you want to travel.`
       );
+      const img = term.image || defaultHubImage;
       return {
         title,
         description,
@@ -214,13 +232,34 @@ async function routeMetadata(path: string): Promise<Metadata> {
           description,
           url: path,
           type: "website",
-          images: term.image ? [{ url: term.image }] : undefined,
+          images: [{ url: img, width: 1200, height: 630, alt: title }],
+        },
+        twitter: {
+          card: "summary_large_image",
+          title,
+          description,
+          images: [img],
         },
       };
     }
   }
 
-  return { title: BRAND_NAME, alternates: { canonical: path } };
+  return {
+    title: BRAND_NAME,
+    alternates: { canonical: path },
+    openGraph: {
+      siteName: BRAND_NAME,
+      title: BRAND_NAME,
+      url: path,
+      type: "website",
+      images: [{ url: defaultHubImage, width: 1200, height: 630, alt: BRAND_NAME }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: BRAND_NAME,
+      images: [defaultHubImage],
+    },
+  };
 }
 
 /** Repeaters arrive as JSON strings when ACF free is in play. */
