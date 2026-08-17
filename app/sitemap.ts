@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllPathsSafe } from "@/lib/wp";
-import { SITE_URL } from "@/lib/site";
+import { isPrivatePath, SITE_URL } from "@/lib/site";
 
 const BASE = SITE_URL;
 
@@ -18,14 +18,11 @@ const PRIORITY: Record<string, number> = {
 
 export const revalidate = 3600;
 
-/* WordPress ships with a sample post and a sample page; the import carried
-   them across and the sitemap invited Google to index them. */
-const SAMPLE_CONTENT = /^\/(hello-world|sample-page)\/?$/i;
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const paths = await getAllPathsSafe();
   const entries = paths
-    .filter((item) => !SAMPLE_CONTENT.test(item.path))
+    /* Sample content and the WooCommerce leftovers - see isPrivatePath. */
+    .filter((item) => !isPrivatePath(item.path))
     .map((item) => ({
     url: `${BASE}${item.path}`,
     lastModified: item.modified ? new Date(item.modified) : new Date(),

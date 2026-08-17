@@ -21,7 +21,7 @@ import { BRAND_NAME } from "@/lib/site";
 import { EditBar } from "@/components/v2/EditBar";
 import { editPostUrl, editTargets, editTermUrl } from "@/lib/admin";
 import { breadcrumbSchema, collectionSchema, contentSchema, destinationSchema, reviewSchema, schemaScript } from "@/lib/schema";
-import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { isPrivatePath, SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 export const revalidate = 300;
 
@@ -94,7 +94,12 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical },
-    robots: { index: seo?.robots?.index !== false, follow: seo?.robots?.follow !== false },
+    /* A cart, a checkout and an order-received page came across with the
+       import and were indexable. Nothing is sold here, so they are empty
+       pages that tell Google the company's basket is empty. */
+    robots: isPrivatePath(path)
+      ? { index: false, follow: true }
+      : { index: seo?.robots?.index !== false, follow: seo?.robots?.follow !== false },
     openGraph: {
       siteName: BRAND_NAME,
       title,

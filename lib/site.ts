@@ -121,3 +121,28 @@ export function isDoomedUpload(url?: string | null) {
  */
 export const BRAND_LOGO_SOURCE =
   process.env.NEXT_PUBLIC_BRAND_LOGO === "wordpress" ? "wordpress" : "vector";
+
+/**
+ * Paths that exist only because WordPress and WooCommerce created them.
+ *
+ * A cart, a checkout, an order-received page and a "refund and returns"
+ * placeholder came across with the import. This site sells nothing: they are
+ * empty pages, and they were live, indexable, and listed in the sitemap —
+ * which tells Google the company's shopping basket is empty. WordPress's own
+ * sample post and page are here for the same reason.
+ *
+ * Kept reachable rather than redirected: an old link to one should land
+ * somewhere rather than 404, it just should not be in an index.
+ */
+const PRIVATE_PATHS = [
+  /^\/(cart|checkout|order-received|refund_returns|refund-returns)\/?$/i,
+  /^\/(hello-world|sample-page)\/?$/i,
+  /^\/thank-you\/?$/i,
+  /^\/my-account\//i,
+];
+
+/** True for a page that should carry noindex and stay out of the sitemap. */
+export function isPrivatePath(path: string) {
+  const clean = path.split("?")[0].split("#")[0];
+  return PRIVATE_PATHS.some((re) => re.test(clean));
+}
