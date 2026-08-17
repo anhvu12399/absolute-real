@@ -513,7 +513,14 @@ export default function HomeTemplateV2({
             )}
             <h1 className="spine-headline">{heroHeadline}</h1>
             {hero.subtitle && <p className="spine-note">{clamp(hero.subtitle, 118)}</p>}
-            <Link href={toLocalHref(hero.link, "/plan-my-trip/")} className="spine-link">
+            {/* The visible label is whatever the slide says, often "Learn More",
+                which tells a crawler and a screen reader nothing about where it
+                goes. The headline names the destination, so it says it here. */}
+            <Link
+              href={toLocalHref(hero.link, "/plan-my-trip/")}
+              className="spine-link"
+              aria-label={`${String(hero.link_text || "See this journey")} — ${heroHeadline}`}
+            >
               {String(hero.link_text || "See this journey")}
               <ArrowSvg />
             </Link>

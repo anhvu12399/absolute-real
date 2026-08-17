@@ -1,7 +1,30 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import "leaflet/dist/leaflet.css";
+
+/**
+ * Leaflet's stylesheet, fetched when a map actually appears.
+ *
+ * It used to be a static `import`, and although the component itself is loaded
+ * with dynamic(..., { ssr: false }), the bundler still hoists an imported
+ * stylesheet into the route's CSS. That put 10KB of map styling in the <head>
+ * of the homepage — which has no map above the fold — where it blocked first
+ * paint for 629ms of a 3.3s FCP on mobile.
+ *
+ * The file is copied to /leaflet.css by hand; keep it in step when leaflet is
+ * upgraded (cp node_modules/leaflet/dist/leaflet.css public/leaflet.css).
+ */
+const LEAFLET_CSS = "/leaflet.css";
+
+function useLeafletStylesheet() {
+  useEffect(() => {
+    if (document.querySelector(`link[href="${LEAFLET_CSS}"]`)) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = LEAFLET_CSS;
+    document.head.appendChild(link);
+  }, []);
+}
 
 interface Stop {
   key: string;
@@ -169,6 +192,7 @@ export default function RealMapComponent({
   setActiveCity: (key: string) => void;
   showLines?: boolean;
 }) {
+  useLeafletStylesheet();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<Record<string, any>>({});
