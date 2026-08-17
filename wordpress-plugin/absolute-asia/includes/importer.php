@@ -1319,6 +1319,7 @@ add_action('rest_api_init', function () {
         if ($type === 'hub-pages') return rest_ensure_response(aat_seed_hub_pages());
         if ($type === 'legal-pages') return rest_ensure_response(aat_seed_legal_pages());
         if ($type === 'fill-defaults') return rest_ensure_response(aat_seed_frontend_defaults());
+        if ($type === 'fill-cards') return rest_ensure_response(aat_seed_card_tables());
         if ($type === 'rebrand') return rest_ensure_response(aat_rebrand_run(40));
         if ($type === 'fix-records') return rest_ensure_response(aat_cleanup_records());
         if ($type === 'fill-reset') return rest_ensure_response(aat_backfill_reset() + ['imported' => 0, 'done' => true]);
@@ -1416,6 +1417,7 @@ function aat_import_screen() {
             <button class="button aat-run" data-type="hub-pages">Bơm dữ liệu trang hub</button>
             <button class="button aat-run" data-type="legal-pages">Tạo trang Terms &amp; Conditions</button>
             <button class="button aat-run button-primary" data-type="fill-defaults">Bơm chữ mặc định của giao diện vào ô trống</button>
+            <button class="button aat-run button-primary" data-type="fill-cards">Ghi các bảng thẻ ra thành dòng sửa được</button>
             <button class="button" data-type="fill-reset" id="aat-fill-reset">Xét lại từ đầu</button>
         </p>
 
@@ -1601,7 +1603,7 @@ function aat_import_screen() {
                 /* `rebrand` is deliberately absent: renaming the sister agency
                    is a business decision, and it touches wording customers
                    wrote. It stays a separate button. */
-                ['menu', 'relink', 'fix-records', 'fill-images', 'fill-excerpts', 'fill-itineraries', 'hotel-images', 'seed-copy', 'hotel-copy', 'story', 'hub-pages', 'legal-pages', 'fill-defaults']
+                ['menu', 'relink', 'fix-records', 'fill-images', 'fill-excerpts', 'fill-itineraries', 'hotel-images', 'seed-copy', 'hotel-copy', 'story', 'hub-pages', 'legal-pages', 'fill-defaults', 'fill-cards']
             )); ?>;
 
             var $btn = $(this).prop('disabled', true).text('Đang chạy…');

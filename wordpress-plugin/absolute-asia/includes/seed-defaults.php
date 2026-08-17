@@ -127,13 +127,15 @@ function aat_seed_frontend_defaults() {
 
     $defaults = aat_frontend_defaults();
 
-    /* The homepage is a single page, found the way the REST layer finds it. */
-    $front = (int) get_option('page_on_front');
-    if ($front) {
-        $n = $apply($front, $defaults['homepage']);
+    /* The front page is a record in the private `homepage` CPT. Asking for
+       page_on_front finds nothing here, and the homepage would be skipped
+       without saying so. */
+    $home_post = aat_front_page_post();
+    if ($home_post) {
+        $n = $apply((int) $home_post->ID, $defaults['homepage']);
         $details[] = sprintf('trang chủ: %d field', $n);
     } else {
-        $details[] = 'trang chủ: chưa đặt Trang tĩnh ở Settings → Reading, bỏ qua';
+        $details[] = 'trang chủ: không tìm thấy bản ghi, bỏ qua';
     }
 
     foreach (aat_defaults_post_types() as $key => $types) {
