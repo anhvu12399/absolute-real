@@ -2697,19 +2697,63 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 @media (max-width: 768px) {
+  /* Chat now lives in .mobile-action-bar; the floating bubble would sit on
+     top of that full-width bar and duplicate its own job. */
   .whatsapp-floating-wrap {
-    bottom: 20px;
-    right: 18px;
-  }
-  .whatsapp-floating-btn {
-    padding: 10px;
-    border-radius: 50%;
-  }
-  .whatsapp-floating-label {
     display: none;
   }
-  .whatsapp-tooltip {
-    display: none;
-  }
+}
+
+/* ---------- mobile action bar ---------- */
+/*
+ * The bottom half of the same object the header is the top half of: same
+ * lacquer-to-black gradient, same hairline gold border, same weight of
+ * shadow — cast upward here because the bar sits at the opposite edge.
+ *
+ * Hidden entirely above the header's own mobile breakpoint (760px), where
+ * the header already carries a phone number and a "Plan Your Journey" button
+ * within reach of a pointer, so a second copy pinned to the viewport would
+ * just be more furniture.
+ */
+.mobile-action-bar{
+  display:none;
+  position:fixed; left:0; right:0; bottom:0; z-index:998;
+  background:linear-gradient(0deg, var(--chrome) 0%, var(--chrome-deep) 100%);
+  border-top:1px solid rgba(var(--chrome-gold-rgb),0.24);
+  box-shadow:0 -14px 32px rgba(0,0,0,0.4);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.mobile-action-item{
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:0.32rem; padding:0.68rem 0.4rem 0.6rem; text-decoration:none;
+  color:var(--chrome-dim); -webkit-tap-highlight-color:transparent;
+}
+.mobile-action-item + .mobile-action-item{ border-left:1px solid rgba(var(--chrome-gold-rgb),0.14); }
+.mobile-action-item svg{ width:21px; height:21px; flex:none; transition:color .2s ease; }
+.mobile-action-item span{
+  font-family:'Work Sans',sans-serif; font-size:0.64rem; letter-spacing:0.09em;
+  text-transform:uppercase; font-weight:600; transition:color .2s ease;
+}
+.mobile-action-item:active{ background:rgba(var(--chrome-gold-rgb),0.07); }
+.mobile-action-item:active svg, .mobile-action-item:active span{ color:var(--chrome-gold); }
+/* The enquiry form is the action worth a click over the other two, so its
+   icon is raised into a small gold seal rather than left level with them —
+   the same idea as the header's own brand mark. */
+.mobile-action-item[href*="plan-my-trip"] svg{
+  width:19px; height:19px; padding:9px; margin-top:-22px; box-sizing:content-box;
+  border-radius:50%; color:var(--chrome-deep);
+  background:linear-gradient(135deg, var(--chrome-gold), var(--chrome-gold-deep));
+  box-shadow:0 4px 14px rgba(var(--chrome-gold-rgb),0.45), 0 0 0 4px var(--chrome-deep);
+}
+.mobile-action-item[href*="plan-my-trip"] span{ color:var(--chrome-gold); font-weight:700; }
+
+@media (max-width:760px){
+  .mobile-action-bar{ display:flex; }
+  /* Room at the foot of every page so the fixed bar never sits over the
+     footer's last line — 4.4rem clears the bar itself, the rest is the
+     device's own safe-area inset. */
+  body{ padding-bottom:calc(4.4rem + env(safe-area-inset-bottom)); }
+  /* The admin-only edit control would otherwise sit under the new bar. */
+  .editbar{ bottom:calc(4.4rem + env(safe-area-inset-bottom) + 0.75rem); }
 }
 

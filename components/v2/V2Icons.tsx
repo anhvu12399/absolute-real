@@ -33,6 +33,16 @@ export function V2Icons() {
         <symbol id="i-phone" viewBox="0 0 24 24">
           <path d="M6 3h3l2 5-2.5 1.5a12 12 0 0 0 6 6L16 13l5 2v3a2 2 0 0 1-2 2C10.5 20 4 13.5 4 5a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
         </symbol>
+        <symbol id="i-chat" viewBox="0 0 24 24">
+          <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8A2.5 2.5 0 0 1 17.5 17H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 14.5Z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+        </symbol>
+        <symbol id="i-enquire" viewBox="0 0 24 24">
+          <path d="M8 4.5h8A1.5 1.5 0 0 1 17.5 6v13a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 19V6A1.5 1.5 0 0 1 8 4.5Z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+          <path d="M9.5 4.5V4a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 4v.5" fill="none" stroke="currentColor" strokeWidth="1.4"/>
+          <line x1="9" y1="10" x2="15" y2="10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+          <line x1="9" y1="13" x2="15" y2="13" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+          <line x1="9" y1="16" x2="12.5" y2="16" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+        </symbol>
         <symbol id="i-menu" viewBox="0 0 24 24">
           <line x1="3" y1="7" x2="21" y2="7" stroke="currentColor" strokeWidth="1.5"/>
           <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" strokeWidth="1.5"/>
