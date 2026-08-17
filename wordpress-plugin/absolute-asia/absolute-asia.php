@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Absolute Asia
  * Description: Single plugin for the headless site - content model, read-only bridge API for the Next.js frontend, importer for the legacy absoluteasiatours.com install, and signed revalidation.
- * Version: 3.9.0
+ * Version: 3.9.1
  * Author: Absolute Asia
  *
  * Replaces the earlier split into absolute-asia-core / absolute-asia-headless /
@@ -13,7 +13,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-define('AAT_VERSION', '3.9.0');
+define('AAT_VERSION', '3.9.1');
 define('AAT_PATH', plugin_dir_path(__FILE__));
 define('AAT_URL', plugin_dir_url(__FILE__));
 

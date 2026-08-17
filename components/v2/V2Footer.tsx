@@ -102,7 +102,14 @@ function columnsFromMenu(menu?: MenuItem[]) {
       /* Unfinished menu rows ("Image 2" → "/") read as broken links. */
       .filter((link) => !/^(image|logo|item|link)(\s*\d+)?$/i.test(link.label.trim()) || (link.href !== "/" && link.href !== "#")),
   })).filter((column) => column.links.length > 0);
-  return columns.some((column) => column.links.length) ? columns : FALLBACK_COLUMNS;
+  if (columns.length) return columns;
+
+  /* A flat footer menu — top-level links with nothing nested under them — used
+     to produce zero columns and fall back to the bundled list, so building one
+     in WordPress changed nothing on the page and said nothing about why. It is
+     shown as a single untitled column instead. */
+  const flat = tops.map((item) => ({ label: item.title, href: toLocalHref(item.url) }));
+  return flat.length ? [{ title: "", links: flat }] : FALLBACK_COLUMNS;
 }
 
 export function V2Footer({ site }: { site?: SitePayload | null }) {
@@ -152,8 +159,8 @@ export function V2Footer({ site }: { site?: SitePayload | null }) {
         </div>
 
         {columns.map((column) => (
-          <div className="footer-col" key={column.title}>
-            <h4>{column.title}</h4>
+          <div className="footer-col" key={column.title || "flat"}>
+            {column.title && <h4>{column.title}</h4>}
             <ul>
               {column.links.map((link) => (
                 <li key={link.href + link.label}><Link href={link.href}>{link.label}</Link></li>
