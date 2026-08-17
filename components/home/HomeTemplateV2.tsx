@@ -111,8 +111,15 @@ export default function HomeTemplateV2({
    * grid that grows every time you press a button.
    */
   const tabCards = (value: unknown, belongs: RegExp, fallback: any[]) => {
-    const kept = cards(value, []).filter((card: any) => belongs.test(String(card?.link || "")));
-    return (kept.length ? kept : fallback).slice(0, 6);
+    const authored = cards(value, []);
+    if (!authored.length) return fallback.slice(0, 6);
+
+    /* The filter guards against imported rows pointing at the wrong kind of
+       page. It must never throw away everything an editor typed: six rows
+       whose links did not match the pattern used to leave the tab showing the
+       auto-filled list instead, with nothing on either screen to say why. */
+    const kept = authored.filter((card: any) => belongs.test(String(card?.link || "")));
+    return (kept.length ? kept : authored).slice(0, 6);
   };
 
   const IS_PLACE = /^\/(places-to-go\/|[a-z-]+\/$)/;

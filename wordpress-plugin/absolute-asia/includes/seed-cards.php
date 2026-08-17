@@ -78,8 +78,12 @@ function aat_country_card_rows($limit = 6) {
             }
         }
 
-        $link = get_term_link($term);
-        if (is_wp_error($link)) continue;
+        /* The front end addresses a country as /vietnam/, not by WordPress's
+           own term archive at /country/vietnam/. Writing the archive URL here
+           produced six rows the homepage filtered straight back out, so the
+           tab kept showing the auto-filled list and editing the table did
+           nothing visible. */
+        $link = '/' . $term->slug . '/';
 
         $rows[] = [
             'image_url'   => $image,
@@ -120,6 +124,14 @@ function aat_repair_card_urls($field, $post_id) {
     $fixed = 0;
     foreach ($rows as $i => $row) {
         if (!is_array($row)) continue;
+
+        /* Country rows written with WordPress's term archive path. */
+        $link = (string) ($row['link'] ?? '');
+        if (preg_match('#^/country/([a-z0-9-]+)/?$#i', $link, $m)) {
+            $rows[$i]['link'] = '/' . strtolower($m[1]) . '/';
+            $fixed++;
+        }
+
         $desc = trim((string) ($row['description'] ?? ''));
         if ($desc === '' || strpos($desc, ' ') !== false) continue;
         if (!preg_match('#^(https?://|www\.)\S+$#i', $desc)) continue;
