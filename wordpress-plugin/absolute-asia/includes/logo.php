@@ -160,6 +160,15 @@ function aat_source_field() {
         </p>
     </form>
     <?php
+    if (function_exists('aat_source_is_self') && aat_source_is_self()) {
+        echo '<div class="notice notice-error inline" style="margin:12px 0;padding:10px 14px"><p>'
+            . '<strong>Ô này đang trỏ vào chính site này.</strong> Nút kiểm tra sẽ báo xanh vì nó đang đọc '
+            . 'chính nó. Các nút <em>import</em> đã bị khoá — chạy được thì chúng sẽ đọc toàn bộ dữ liệu ở '
+            . 'đây rồi ghi lại thành bài mới, tức nhân đôi cả kho. Các nút soạn nội dung và sửa dữ liệu '
+            . 'không đọc nguồn nên vẫn dùng bình thường.</p><p>Việc import đã xong từ trước, nên cách an '
+            . 'toàn nhất là để nguyên và không bấm nút import nào.</p></div>';
+    }
+
     $probe = wp_remote_get($current . '/wp-json/wp/v2/types', ['timeout' => 12]);
     if (is_wp_error($probe)) {
         printf('<p style="color:#b32d2e">Không kết nối được: %s</p>', esc_html($probe->get_error_message()));

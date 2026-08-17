@@ -1279,6 +1279,38 @@ add_action('admin_menu', function () {
     );
 });
 
+/**
+ * Refuse to import when the source is this very site.
+ *
+ * The legacy install's REST API now answers 404 on every route, so the source
+ * field cannot connect to it and it is tempting to point the field at this
+ * backend instead — the connection test turns green, because it is reading
+ * itself. Pressing an import button after that reads all 643 records and
+ * writes them back as new posts: the whole catalogue, twice.
+ *
+ * Seeders and repair tools do not read the source and are unaffected.
+ */
+function aat_source_is_self() {
+    $bare = function ($url) {
+        $host = strtolower((string) wp_parse_url($url, PHP_URL_HOST));
+        return preg_replace('/^www\./', '', $host);
+    };
+    $source = $bare(aat_configured_source());
+    return $source !== '' && $source === $bare(home_url());
+}
+
+/** Import types that read from the source site and so must be blocked. */
+function aat_reads_source($type) {
+    $local_only = [
+        'seed-copy', 'hotel-copy', 'story', 'hub-pages', 'legal-pages',
+        'fill-defaults', 'fill-cards', 'fill-images', 'fill-excerpts',
+        'fill-itineraries', 'hotel-images', 'fill-reset', 'relink',
+        'enrich-tours', 'enrich-hotels', 'enrich-places', 'enrich-articles',
+        'rebrand', 'fix-records',
+    ];
+    return !in_array($type, $local_only, true);
+}
+
 add_action('rest_api_init', function () {
     $admin = [
         'methods' => 'POST',
@@ -1286,6 +1318,15 @@ add_action('rest_api_init', function () {
     ];
     register_rest_route('absolute-asia/v1', '/import/run', $admin + ['callback' => function (WP_REST_Request $r) {
         $type = sanitize_text_field((string) $r['type']);
+
+        if (aat_reads_source($type) && aat_source_is_self()) {
+            return new WP_Error(
+                'aat_source_is_self',
+                'Nguồn import đang trỏ vào chính site này. Chạy sẽ đọc dữ liệu của chính nó và ghi lại thành bài mới — nhân đôi toàn bộ. Đổi ô "Nguồn import" sang địa chỉ WordPress cũ, hoặc bỏ qua vì đã import xong.',
+                ['status' => 400]
+            );
+        }
+
         if (in_array($type, ['seed-copy', 'hotel-copy', 'story', 'hub-pages'], true)) {
             $allowed = aat_require_absolute_profile();
             if (is_wp_error($allowed)) return $allowed;
