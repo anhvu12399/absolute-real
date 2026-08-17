@@ -68,6 +68,11 @@ const nextConfig: NextConfig = {
       { source: "/travel-guides/", destination: "/inspirations/", permanent: true },
       { source: "/things-to-do", destination: "/inspirations/", permanent: true },
       { source: "/things-to-do/", destination: "/inspirations/", permanent: true },
+      /* Auto-correct mistyped /asledit=1/ without question mark */
+      { source: "/asledit=1", destination: "/?asledit=1", permanent: false },
+      { source: "/asledit=1/", destination: "/?asledit=1", permanent: false },
+      { source: "/asledit=0", destination: "/?asledit=0", permanent: false },
+      { source: "/asledit=0/", destination: "/?asledit=0", permanent: false },
     ];
   },
   async rewrites() {
