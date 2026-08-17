@@ -383,7 +383,14 @@ export default function HomeTemplateV2({
     ...sharpest(cruises.filter((c) => !hotels.some((h) => h.id === c.id))).slice(0, 1),
   ];
 
-  const editorial = guides.slice(0, 3);
+  /* "Reading before you go" always showed the three newest guides and had no
+     field behind it, so the one editorial choice on the strip — which three —
+     could not be made in WordPress. Same card shape as the tabs, so the same
+     table edits it, and leaving it empty keeps the old behaviour. */
+  const editorial = useMemo(
+    () => cards(acf.home_editorial, guides).slice(0, 3),
+    [acf.home_editorial, guides],
+  );
 
   /* --- journeys carousel --- */
   const journeyTrackRef = useRef<HTMLDivElement>(null);
@@ -760,17 +767,17 @@ export default function HomeTemplateV2({
               />
             </div>
             <div className="editorial-grid reveal">
-              {editorial.map((item) => (
-                <Link href={item.path} key={item.id} className="editorial-card">
+              {editorial.map((item: any) => (
+                <Link href={item.link} key={item.link || item.title} className="editorial-card">
                   <span
-                    className={`editorial-photo ${item.featuredMedia?.url ? "" : "is-empty"}`}
-                    style={bg(item.featuredMedia?.url, "card")}
+                    className={`editorial-photo ${item.image_url ? "" : "is-empty"}`}
+                    style={bg(item.image_url, "card")}
                     aria-hidden="true"
                   />
                   <span className="editorial-body">
-                    <em>{item.categories?.find((c) => c.taxonomy === "country")?.name || "Guide"}</em>
+                    <em>{item.badge || "Guide"}</em>
                     <strong>{item.title}</strong>
-                    <span>{clamp(item.excerpt, 104)}</span>
+                    <span>{clamp(item.description, 104)}</span>
                   </span>
                 </Link>
               ))}

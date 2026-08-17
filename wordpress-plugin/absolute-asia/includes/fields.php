@@ -22,12 +22,12 @@ function aat_repeater_fields() {
         /* Tab 3 had a label field and a tab on the page but no cards field, so
            the third tab was the only one an editor could not set by hand. */
         'home_banner_slider', 'trust_items', 'home_tab_destinations', 'home_tab_journeys',
-        'home_tab_inspiration',
+        'home_tab_inspiration', 'home_editorial',
         'home_values', 'testimonials', 'team',
         // tour
         'itinerary', 'departure_dates', 'faqs', 'gallery', 'accommodation_options', 'experiences',
         // destination / hotel
-        'nearby_places', 'month_guide',
+        'nearby_places', 'month_guide', 'guides_cards',
         // page hubs
         'journeys', 'cruises', 'articles', 'story_milestones', 'pillars', 'why_reasons',
     ];
@@ -143,6 +143,7 @@ function aat_register_fields() {
             aat_text('field_aat_home_stay_eye', 'Stays & Cruises Eyebrow (HTML)', 'stay_eyebrow', ['default_value' => '<em>Stay</em> With Absolute Asia']),
             aat_text('field_aat_home_stay_head', 'Stays & Cruises Headline (HTML)', 'stay_headline', ['default_value' => 'Cruises and stays worth the detour']),
             aat_text('field_aat_home_insp_head', 'Inspiration Headline (HTML)', 'inspiration_headline', ['default_value' => 'Reading before you go']),
+            aat_repeater_field('field_aat_home_editorial', 'Inspiration Strip Cards (Auto-filled if empty)', 'home_editorial', 'home-cards', aat_fills_itself('bài cẩm nang')),
 
             aat_tab('tab_aat_home_map', 'Map & Core Values'),
             aat_text('field_aat_home_map_head', 'Map Headline (HTML allowed)', 'map_headline', ['default_value' => 'Your journey, <em>charted</em> by hand']),
@@ -311,6 +312,7 @@ function aat_register_fields() {
             aat_text('field_aat_place_route_eye', 'Route Eyebrow (HTML)', 'route_eyebrow'),
             aat_text('field_aat_place_guides_eye', 'Guides Eyebrow (HTML)', 'guides_eyebrow'),
             aat_text('field_aat_place_guides_head', 'Guides Heading', 'guides_heading'),
+            aat_repeater_field('field_aat_place_guides_cards', 'Guides Cards (Auto-filled if empty)', 'guides_cards', 'home-cards', aat_fills_itself('bài cẩm nang')),
             aat_text('field_aat_place_plan_eye', 'Planning Eyebrow (HTML)', 'planning_eyebrow'),
             aat_text('field_aat_place_plan_head', 'Planning Heading', 'planning_heading'),
             /* Drives the Journeys section heading. "Related Content" named

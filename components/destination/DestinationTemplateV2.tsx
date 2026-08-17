@@ -52,6 +52,18 @@ export default function DestinationTemplateV2({
      rendered Vietnam's copy under its own title. */
   const acfData = (data?.acf || {}) as Record<string, unknown>;
   const str = (value: unknown) => (typeof value === "string" ? value : "");
+
+  /* Repeaters travel as JSON in a textarea (ACF free has no repeater field). */
+  const parseRows = (value: unknown): Array<Record<string, string>> => {
+    if (Array.isArray(value)) return value as Array<Record<string, string>>;
+    if (typeof value !== "string" || !value.trim()) return [];
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
   const fullName = data?.title || "Asia";
   /* Imported titles read like headlines ("Seoul: A City That Never Stands
      Still"); inline labels want just the place. */
@@ -159,6 +171,7 @@ export default function DestinationTemplateV2({
       ? data.related.related_tours
       : tours;
   const relatedPlaces = data?.related?.related_places?.length ? data.related.related_places : places;
+
   const relatedHotels = data?.related?.related_hotels?.length ? data.related.related_hotels : hotels;
   const parse = (value: unknown) => {
     if (Array.isArray(value)) return value;
@@ -188,6 +201,29 @@ export default function DestinationTemplateV2({
     if (item.featuredMedia?.url || !countryPhotos.length) return item;
     return { ...item, featuredMedia: { url: countryPhotos[lent++ % countryPhotos.length], alt: "" } };
   };
+
+  /* "Read Before You Go" took the six newest guides and offered no way to
+     choose. An authored row wins; an empty table keeps the old behaviour, and
+     a row with no image of its own borrows the guide's photograph. */
+  const guideCards = (() => {
+    const authored = parseRows(acfData.guides_cards).filter((row) => row.title || row.link);
+    if (authored.length) {
+      return authored.slice(0, 6).map((row) => ({
+        image_url: row.image_url || "",
+        badge: row.badge || "Guide",
+        title: row.title || "",
+        description: row.description || "",
+        link: toLocalHref(row.link || ""),
+      }));
+    }
+    return guides.slice(0, 6).map(withPhoto).map((guide) => ({
+      image_url: guide.featuredMedia?.url || "",
+      badge: guide.type === "blog" ? "Story" : "Guide",
+      title: guide.title,
+      description: guide.excerpt,
+      link: guide.path,
+    }));
+  })();
 
   const mapHeadline = str(acfData.map_headline) || `${name}, charted by hand`;
   const mapDesc = str(acfData.map_description);
@@ -600,16 +636,16 @@ export default function DestinationTemplateV2({
               <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{text(acfData.guides_heading) || `Guides & Stories from ${name}`}</h2>
             </div>
             <div className="card-grid reveal" style={{ marginTop: "2.4rem" }}>
-              {guides.slice(0, 6).map(withPhoto).map((guide) => (
-                <Link href={guide.path} key={guide.id} className="offer-card" style={{ textDecoration: "none", color: "inherit" }}>
+              {guideCards.map((guide) => (
+                <Link href={guide.link} key={guide.link || guide.title} className="offer-card" style={{ textDecoration: "none", color: "inherit" }}>
                   <div
                     className="offer-photo ph"
-                    style={guide.featuredMedia?.url ? bg(guide.featuredMedia.url, "card") : undefined}
+                    style={guide.image_url ? bg(guide.image_url, "card") : undefined}
                   >
-                    <span className="tag-badge">{guide.type === "blog" ? "Story" : "Guide"}</span>
+                    <span className="tag-badge">{guide.badge}</span>
                   </div>
                   <h3>{guide.title}</h3>
-                  <p className="desc">{guide.excerpt}</p>
+                  <p className="desc">{guide.description}</p>
                   <span className="link-arrow">Read more<ArrowSvg /></span>
                 </Link>
               ))}
