@@ -1537,6 +1537,8 @@ function aat_import_screen() {
         <?php aat_foreign_field(); ?>
         <?php aat_founded_field(); ?>
 
+        <?php aat_revalidate_field(); ?>
+
         <?php aat_backend_noindex_field(); ?>
         <p>Nút <em>Sửa nước, bản trùng &amp; ảnh gán sai</em>: bài bị gán hai nước, bản trùng rỗng,
            mục không phải quốc gia trong lưới điểm đến — và soát lại toàn bộ ảnh mà plugin
