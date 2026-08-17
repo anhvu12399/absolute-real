@@ -336,6 +336,34 @@ export async function getAllPathsSafe(): Promise<PathRecord[]> {
  * that leads with a blank plate reads as broken rather than sparse. Full
  * listings should show everything; only curated strips call this.
  */
+/**
+ * Strip an archive list down to what a card actually renders.
+ *
+ * Anything handed to a client component is serialised into the HTML as React
+ * flight data, and the homepage was passing whole records: 50 of them, each
+ * carrying its full ACF set and body excerpt, for cards that show a photograph,
+ * a title and a line of text. That was 180KB of a 242KB document — three
+ * quarters of the page — and the browser cannot start on anything else until
+ * the document has arrived.
+ *
+ * Called at the boundary, after any sorting or filtering that needs the full
+ * record. Keep the field list in step with the templates: dropping one that a
+ * card reads makes it render blank rather than fail.
+ */
+export function slimForCards(items: ArchiveItem[]): ArchiveItem[] {
+  return items.map((item) => ({
+    id: item.id,
+    type: item.type,
+    slug: item.slug,
+    path: item.path,
+    title: item.title,
+    excerpt: item.excerpt,
+    duration: item.duration,
+    featuredMedia: item.featuredMedia,
+    categories: item.categories,
+  })) as ArchiveItem[];
+}
+
 export function illustratedFirst(items: ArchiveItem[]): ArchiveItem[] {
   const hasImage = (item: ArchiveItem) =>
     Boolean(item.featuredMedia?.url || (item.acf as Record<string, unknown>)?.hero_image);

@@ -64,6 +64,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en">
       <head>
+        {/* The two faces every page sets its type in. They are declared inside
+            a 99KB stylesheet, so the browser only learns they exist once that
+            file has downloaded and parsed — two round trips before the first
+            word can be painted in the right face. Only the latin subsets are
+            preloaded; the Vietnamese and extended ranges load on demand. */}
+        <link rel="preload" as="font" type="font/woff2" href="/fonts/playfair-latin.woff2" crossOrigin="anonymous" />
+        <link rel="preload" as="font" type="font/woff2" href="/fonts/work-sans-latin.woff2" crossOrigin="anonymous" />
         {WP_ORIGIN && (
           <>
             <link rel="dns-prefetch" href={WP_ORIGIN} />

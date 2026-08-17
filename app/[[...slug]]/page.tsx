@@ -16,7 +16,7 @@ import SingleArticleTemplateV2 from "@/components/article/SingleArticleTemplateV
 import StandardPageTemplateV2 from "@/components/page/StandardPageTemplateV2";
 import TaxonomyArchiveTemplate from "@/components/archive/TaxonomyArchiveTemplate";
 import type { ArchiveItem } from "@/lib/wp";
-import { decodeEntities, getAllPathsSafe, getArchiveSafe, getContentByPath, getSeo, getTermBySlug, getTermsSafe, getSiteDataSafe, illustratedFirst, realCountries, searchContent } from "@/lib/wp";
+import { decodeEntities, getAllPathsSafe, getArchiveSafe, getContentByPath, getSeo, getTermBySlug, getTermsSafe, getSiteDataSafe, illustratedFirst, realCountries, searchContent, slimForCards } from "@/lib/wp";
 import { BRAND_NAME } from "@/lib/site";
 import { EditBar } from "@/components/v2/EditBar";
 import { editPostUrl, editTargets, editTermUrl } from "@/lib/admin";
@@ -544,12 +544,12 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
         <EditBar targets={editTargets({ content })} />
         <HomeTemplateV2
           homeData={content}
-          tours={illustratedFirst(tours)}
-          places={illustratedFirst(places)}
-          hotels={illustratedFirst(hotels)}
+          tours={slimForCards(illustratedFirst(tours))}
+          places={slimForCards(illustratedFirst(places))}
+          hotels={slimForCards(illustratedFirst(hotels))}
           countries={realCountries(countryTerms)}
-          cruises={illustratedFirst(cruises)}
-          guides={illustratedFirst(guides)}
+          cruises={slimForCards(illustratedFirst(cruises))}
+          guides={slimForCards(illustratedFirst(guides))}
         />
       </>
     );
