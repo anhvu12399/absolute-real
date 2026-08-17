@@ -359,7 +359,7 @@ export default function DestinationTemplateV2({
 
           {/* Cinematic Wide Photo Frame */}
           <div style={{ position: "relative", width: "100%", height: "clamp(380px, 52vh, 560px)", borderRadius: "6px", overflow: "hidden", boxShadow: "0 20px 50px rgba(30,42,61,0.12)" }}>
-            {heroImage && <Image src={heroImage} alt="" fill priority loading="eager" fetchPriority="high" sizes="100vw" style={{ objectFit: "cover", objectPosition: "center 35%" }} />}
+            {heroImage && <Image data-preview="hero_image" src={heroImage} alt="" fill priority loading="eager" fetchPriority="high" sizes="100vw" style={{ objectFit: "cover", objectPosition: "center 35%" }} />}
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(14,20,28,0.15) 0%, rgba(14,20,28,0.78) 100%)" }} />
             
             <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "clamp(2rem, 4vw, 3.5rem)", zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1.5rem" }}>

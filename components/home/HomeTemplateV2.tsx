@@ -846,6 +846,7 @@ export default function HomeTemplateV2({
             <div className="center reveal">
               <h2
                 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}
+                data-preview="specialists_headline"
                 dangerouslySetInnerHTML={{ __html: specialistsHeadline }}
               />
             </div>
@@ -880,7 +881,7 @@ export default function HomeTemplateV2({
             <div className="center reveal">
               <p className="eyebrow"><em>What</em> Travelers Say</p>
               {reviewSummary && (
-                <div style={{ marginTop: "0.6rem" }} dangerouslySetInnerHTML={{ __html: reviewSummary }} />
+                <div style={{ marginTop: "0.6rem" }} data-preview="review_summary" dangerouslySetInnerHTML={{ __html: reviewSummary }} />
               )}
               {reviewLink && (
                 <a href={reviewLink} target="_blank" rel="noopener noreferrer" className="link-arrow" style={{ marginTop: "0.4rem", display: "inline-flex" }}>

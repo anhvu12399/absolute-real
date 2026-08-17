@@ -83,7 +83,7 @@ export function StandardPageTemplateV2({
                 <em>Private</em> Journeys
               </p>
               <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>
-                Explore Asia With Absolute Asia
+                Explore Asia With {BRAND_SHORT}
               </h2>
             </div>
             <div

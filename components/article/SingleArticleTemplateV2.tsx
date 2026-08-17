@@ -184,7 +184,7 @@ export default function SingleArticleTemplateV2({
               {category?.name || "Dispatch"}
             </span>
             <h1>{title}</h1>
-            {standfirst && <p className="dispatch-standfirst">{standfirst}</p>}
+            {standfirst && <p className="dispatch-standfirst" data-preview="intro_html">{standfirst}</p>}
 
             <div className="dispatch-meta">
               {published && <span>{published}</span>}

@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { SITE_URL, BRAND_NAME } from "@/lib/site";
+import { SITE_URL, BRAND_NAME, BRAND_PHONE, LEGAL_ENTITY } from "@/lib/site";
 
 export const revalidate = 3600;
 
 export async function GET() {
-  const content = `# ${BRAND_NAME} (Absolute Asia Tours)
+  const content = `# ${BRAND_NAME}
 
 > Private, luxury, 100% tailor-made journeys and private expeditions across 20+ destinations in Asia.
 
-## About Absolute Asia Tours
-- **Company:** Absolute Asia Tours (division of My Way Luxury Travel LLC, New York, USA).
+## About ${BRAND_NAME}
+- **Company:** ${LEGAL_ENTITY || BRAND_NAME}
 - **Specialization:** 100% custom-crafted private luxury travel itineraries throughout Asia.
 - **Experience:** Over 30 years of on-ground relationships, local knowledge, and private journey curation.
 - **Service Standard:** Dedicated private local guides, chauffeur-driven private vehicles, handpicked 5-star & boutique heritage hotels, 24/7 on-ground concierge support.
@@ -30,7 +30,7 @@ export async function GET() {
 ## Booking & Contact Information
 - **Custom Journey Planner:** ${SITE_URL}/plan-my-trip/
 - **Website:** ${SITE_URL}
-- **Concierge Phone:** (+1) 315 998 1998
+${BRAND_PHONE ? `- **Concierge Phone:** ${BRAND_PHONE}` : ""}
 - **WhatsApp Concierge:** Available 24/7 on the website.
 - **Guarantees:** 100% tailor-made, zero hidden fees, flexible postponement policies, 24/7 on-trip concierge.
 
@@ -40,7 +40,7 @@ export async function GET() {
 - [Boutique Hotels & Stays](${SITE_URL}/where-to-stay/)
 - [Luxury Cruises](${SITE_URL}/cruises/)
 - [Traveler Reviews](${SITE_URL}/why-us/reviews/)
-- [About Absolute Asia](${SITE_URL}/about-us/)
+- [About ${BRAND_NAME}](${SITE_URL}/about-us/)
 - [Plan Your Journey](${SITE_URL}/plan-my-trip/)
 - [Full XML Sitemap](${SITE_URL}/sitemap.xml)
 `;

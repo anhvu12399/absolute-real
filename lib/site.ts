@@ -146,3 +146,24 @@ export function isPrivatePath(path: string) {
   const clean = path.split("?")[0].split("#")[0];
   return PRIVATE_PATHS.some((re) => re.test(clean));
 }
+
+/**
+ * Facts about the company behind the site.
+ *
+ * These were literals scattered through the schema, the footer, the WhatsApp
+ * greeting and the llms.txt routes. Two problems with that. The phone number
+ * is already served by WordPress, so changing it there left three copies of
+ * the old one on the page. And the legal entity is a statement about who is
+ * liable — carried into a sister site's codebase unchanged, it publishes one
+ * company's registration under another company's name.
+ *
+ * Empty is the right default: a brand that has not stated its number should
+ * print nothing rather than somebody else's.
+ */
+export const BRAND_PHONE = (process.env.NEXT_PUBLIC_BRAND_PHONE || "").trim();
+
+/** The one-sentence legal footer, e.g. "X is a division of Y (DOS ID: …)." */
+export const LEGAL_ENTITY = (process.env.NEXT_PUBLIC_LEGAL_ENTITY || "").trim();
+
+/** How the company describes itself in one line, for schema and llms.txt. */
+export const BRAND_SUMMARY = (process.env.NEXT_PUBLIC_BRAND_SUMMARY || SITE_DESCRIPTION).trim();

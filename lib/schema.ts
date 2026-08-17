@@ -12,7 +12,7 @@
  */
 
 import type { ContentRecord } from "./types";
-import { BRAND_NAME, isDoomedUpload, SITE_URL, SOCIAL_LINKS } from "./site";
+import { BRAND_NAME, BRAND_PHONE, isDoomedUpload, SITE_URL, SOCIAL_LINKS } from "./site";
 
 type Json = Record<string, unknown>;
 
@@ -79,7 +79,7 @@ export function organizationSchema(opts: { logo?: string; phone?: string; descri
     ],
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: opts.phone || "(+1) 315 998 1998",
+      telephone: opts.phone || BRAND_PHONE,
       contactType: "travel concierge",
       areaServed: ["US", "CA", "GB", "AU", "NZ", "Worldwide"],
       availableLanguage: ["English"],

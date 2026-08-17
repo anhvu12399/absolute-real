@@ -1,5 +1,6 @@
 "use client";
 
+import { BRAND_NAME } from "@/lib/site";
 import { useEffect, useState } from "react";
 import type { SitePayload } from "@/lib/wp";
 
@@ -25,7 +26,7 @@ export function WhatsAppButton({ site }: { site?: SitePayload | null }) {
   // Clean number for WhatsApp international URL: keep only digits
   const cleanNumber = rawNumber.replace(/\D/g, "");
   const defaultMessage = encodeURIComponent(
-    "Hello Absolute Asia Tours, I would like to inquire about planning a private luxury journey."
+    `Hello ${BRAND_NAME}, I would like to inquire about planning a private luxury journey.`
   );
   const whatsappUrl = `https://wa.me/${cleanNumber}?text=${defaultMessage}`;
 

@@ -484,7 +484,7 @@ export default function SingleTourTemplateV2({
                 ))}
               </div>
               {text(acf.highlights_note) && (
-                <p className="tour-note">{text(acf.highlights_note)}</p>
+                <p className="tour-note" data-preview="highlights_note">{text(acf.highlights_note)}</p>
               )}
             </div>
           )}
@@ -791,7 +791,7 @@ export default function SingleTourTemplateV2({
           <div className="container">
             <div className="center reveal">
               <p className="eyebrow" style={{ justifyContent: "center" }}>{text(acf.faq_eyebrow) ? <span dangerouslySetInnerHTML={{ __html: text(acf.faq_eyebrow) }} /> : <><em>Good</em> to Know</>}</p>
-              <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }}>{text(acf.faq_title) || "Frequently Asked Questions"}</h2>
+              <h2 style={{ fontSize: "clamp(1.7rem,3vw,2.3rem)" }} data-preview="faq_title">{text(acf.faq_title) || "Frequently Asked Questions"}</h2>
             </div>
             <div className="reveal" style={{ maxWidth: "780px", margin: "2rem auto 0" }}>
               {faqs.map((faq, idx) => (

@@ -3,7 +3,7 @@ import { BrandMark } from "./BrandMark";
 import type { MenuItem, SitePayload } from "@/lib/wp";
 import { toLocalHref } from "@/lib/links";
 import Image from "next/image";
-import { BRAND_LOGO_SOURCE, BRAND_NAME, BRAND_SHORT, isDoomedUpload, SOCIAL_LINKS } from "@/lib/site";
+import { BRAND_LOGO_SOURCE, BRAND_NAME, BRAND_SHORT, isDoomedUpload, LEGAL_ENTITY, SOCIAL_LINKS } from "@/lib/site";
 
 /**
  * Footer columns come from the WordPress "footer" menu; these ship until it
@@ -17,7 +17,7 @@ import { BRAND_LOGO_SOURCE, BRAND_NAME, BRAND_SHORT, isDoomedUpload, SOCIAL_LINK
  */
 const FALLBACK_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string }> }> = [
   {
-    title: "Why Choose Absolute Asia",
+    title: `Why Choose ${BRAND_SHORT}`,
     links: [
       { label: "About Us", href: "/about-us/" },
       { label: "Meet the Team", href: "/meet-the-team/" },
@@ -84,11 +84,10 @@ const LEGAL_LINKS = [
   { label: "Meet the Team", href: "/meet-the-team/" },
 ];
 
-/* Who the company legally is. Required on the page, and it is also the answer
-   to the question a first-time visitor is quietly asking. */
-const LEGAL_ENTITY =
-  "Absolute Asia Tours is a division of My Way Luxury Travel LLC, a registered " +
-  "Limited Liability Company in the State of New York, USA (DOS ID: 7926729).";
+/* Who the company legally is — a statement about who is liable, so it comes
+   from configuration rather than the bundle. Carried into a sister site's
+   codebase as a literal, it publishes one company's registration under
+   another company's name. See NEXT_PUBLIC_LEGAL_ENTITY. */
 
 function columnsFromMenu(menu?: MenuItem[]) {
   if (!menu?.length) return FALLBACK_COLUMNS;
@@ -175,7 +174,7 @@ export function V2Footer({ site }: { site?: SitePayload | null }) {
             <Link key={link.href} href={link.href}>{link.label}</Link>
           ))}
         </nav>
-        <p className="footer-entity">{LEGAL_ENTITY}</p>
+        {LEGAL_ENTITY && <p className="footer-entity">{LEGAL_ENTITY}</p>}
         <span>© {new Date().getFullYear()} {name}. All rights reserved.</span>
       </div>
     </footer>

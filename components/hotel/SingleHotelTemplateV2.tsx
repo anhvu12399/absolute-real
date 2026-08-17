@@ -242,7 +242,7 @@ export default function SingleHotelTemplateV2({
           <div className="container hotel-brief">
             <div className="reveal">
               <span className="hotel-rule light" />
-              <h2>{str(acf.in_brief_title) || "In Brief"}</h2>
+              <h2 data-preview="in_brief_title">{str(acf.in_brief_title) || "In Brief"}</h2>
               {location && <p className="hotel-brief-sub">{location}</p>}
             </div>
 

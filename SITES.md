@@ -27,6 +27,7 @@ npm run site tenmoi
 |---|---|
 | Nhận diện | `NEXT_PUBLIC_BRAND_NAME`, `_SHORT`, `_TAGLINE`, `SITE_TITLE`, `SITE_DESCRIPTION` |
 | Logo | `NEXT_PUBLIC_BRAND_LOGO` — `vector` dùng dấu hiệu vẽ sẵn trong mã (chỉ Absolute Asia có), `wordpress` lấy logo từ CMS. Mặc định `vector`, nên site mới phải đặt `wordpress`. |
+| Pháp nhân & điện thoại | `NEXT_PUBLIC_LEGAL_ENTITY`, `NEXT_PUBLIC_BRAND_PHONE` — dòng pháp nhân ở chân trang và số điện thoại dự phòng. **Để trống ở site mới**: in nhầm pháp nhân của công ty khác là sai về pháp lý, không chỉ sai thương hiệu. Số điện thoại trong WordPress luôn được ưu tiên. |
 | Tên miền | `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_LEGACY_HOSTS` |
 | WordPress | `NEXT_PUBLIC_WP_URL`, `WORDPRESS_API_URL`, `WORDPRESS_ORIGIN` |
 | Khác | `NEXT_PUBLIC_SOCIALS`, `WORDPRESS_REVALIDATE_SECRET` |

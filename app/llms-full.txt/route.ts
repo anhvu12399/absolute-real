@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { SITE_URL, BRAND_NAME } from "@/lib/site";
+import { SITE_URL, BRAND_NAME, BRAND_PHONE, LEGAL_ENTITY } from "@/lib/site";
 import { getArchiveSafe } from "@/lib/wp";
 
 export const revalidate = 7200;
@@ -10,7 +10,7 @@ export async function GET() {
     getArchiveSafe({ type: "place_to_go", perPage: 50 }),
   ]);
 
-  let text = `# ${BRAND_NAME} (Absolute Asia Tours) — Full Knowledge Index for LLMs
+  let text = `# ${BRAND_NAME} — Full Knowledge Index for LLMs
 
 > Complete index of private luxury tours, destinations, boutique accommodations, and bespoke travel services in Asia.
 
@@ -51,7 +51,7 @@ export async function GET() {
 ## Contact & Enquiries
 - **Custom Journey Request:** ${SITE_URL}/plan-my-trip/
 - **Email:** mywaytravelinc@gmail.com
-- **Phone:** (+1) 315 998 1998
+${BRAND_PHONE ? `- **Phone:** ${BRAND_PHONE}` : ""}
 - **XML Sitemap:** ${SITE_URL}/sitemap.xml
 `;
 

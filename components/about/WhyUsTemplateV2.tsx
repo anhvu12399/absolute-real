@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ArchiveItem } from "@/lib/wp";
-import { BRAND_SHORT } from "@/lib/site";
+import { BRAND_PHONE, BRAND_SHORT } from "@/lib/site";
 import { bg, optimized } from "@/lib/images";
 
 type TeamMember = { photo?: string; name?: string; role?: string; bio?: string };
@@ -40,7 +40,7 @@ export default function WhyUsTemplateV2({ data, gallery = [] }: { data?: any; ga
   const heroBg = data?.featuredMedia?.url || gallery[0]?.featuredMedia?.url || "";
   /* The number here has to be the number that answers. It comes from the same
      field the rest of the site dials, not from the template. */
-  const phone = String(data?.acf?.specialist_phone || "(+1) 315 998 1998").trim();
+  const phone = String(data?.acf?.specialist_phone || BRAND_PHONE).trim();
   const tel = `tel:+${phone.replace(/\D/g, "")}`;
   const plates = gallery.filter((item) => item.featuredMedia?.url).slice(1, 5);
   return (
