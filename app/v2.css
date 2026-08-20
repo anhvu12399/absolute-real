@@ -21,11 +21,24 @@
      accents that repeat all over the site. Kept a separate token so the mark's
      gold stays reserved for the mark and the menu. */
   --brass:#B08F3A;
-  /* Taken from the logo's gold disc. `--gold` is the mark and the accents;
-     `--gold-deep` is the same hue darkened enough to read as small text on
-     cream, which the bright gold does not. */
-  --gold:#C2971F;
-  --gold-deep:#8A6C15;
+  /* Lacquer Gold. `--gold` is the mark and the accents; `--gold-deep` is the
+     same hue darkened enough to read as small text on cream, which the gold
+     itself does not.
+
+     Was #C2971F, taken straight from the logo's gold disc — a brighter, more
+     yellow gold. #B99652 is softer and browner, which sits better against the
+     lacquer red and the warm black this palette is built around, and reads as
+     gold leaf rather than as yellow.
+
+     Contrast checked, not assumed: on the button it carries #121A26 text at
+     6.28:1, against 6.44:1 for the old gold — both clear of the 4.5:1 AA
+     threshold, so the change costs nothing in legibility.
+
+     --gold-deep moved with it. Derived from the new gold rather than kept at
+     the old #8A6C15, which belonged to a hue that no longer exists here; it
+     also reads better on cream, 5.65:1 against the old 4.79:1. */
+  --gold:#B99652;
+  --gold-deep:#786235;
   --text-dim-on-cream:rgba(30,42,61,0.64);
   --text-dim-on-ink:rgba(239,233,220,0.66);
   --line-on-cream:rgba(30,42,61,0.14);
@@ -53,6 +66,13 @@
 /* ---------- reset ---------- */
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;}
+/* Overscrolling past the end of the page shows the root element's colour, not
+   the footer's, so dragging below a black footer revealed a band of cream —
+   the body's background, which the page never intends to show there. The
+   header at the top is the same lacquer black as the foot of the footer, so
+   painting the root that colour matches both ends. */
+html{background:var(--chrome-deep);}
+
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;} *{animation-duration:.001ms !important; transition-duration:.001ms !important;}}
 body{margin:0; background:var(--cream); color:var(--ink); font-family:var(--font-sans); font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased; overflow-x:clip;}
 img,svg{display:block; max-width:100%;}
@@ -110,7 +130,9 @@ svg:not([class]):not([width]):not([viewBox]){width:16px; height:16px;}
 .btn-fill-ink{background:var(--ink); color:var(--cream);}
 /* On the dark nav an ink button disappears into it; gold is the stop. */
 .site-nav .btn-fill-ink{background:var(--gold); color:#121A26; border-color:var(--gold);}
-.site-nav .btn-fill-ink:hover{background:#D9AE33; color:#121A26;}
+/* A 15% white tint of --gold, so the hover moves with the token instead of
+   drifting back toward the old brighter gold. 7.51:1 with #121A26. */
+.site-nav .btn-fill-ink:hover{background:#C4A66C; color:#121A26;}
 .btn-fill-ink:hover{background:var(--gold); color:var(--ink);}
 .btn-line-ink{background:transparent; color:var(--ink); border-color:var(--ink);}
 .btn-line-ink:hover{background:var(--ink); color:var(--cream);}
@@ -174,6 +196,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .site-nav.is-scrolled{box-shadow:0 14px 40px rgba(0,0,0,0.55); border-bottom-color:rgba(var(--chrome-gold-rgb),0.35);}
 .nav-inner{display:flex; align-items:center; justify-content:space-between; gap:1.5rem; padding:0.95rem 0;}
 .brand-mark{display:flex; align-items:center; gap:0.8rem; flex:none;}
+/* The seal is the logo mark, not a button — it keeps the chrome gold gradient
+   it was drawn with, matching app/icon.svg. Buttons moved to the flat Lacquer
+   Gold; the mark did not. */
 .seal{width:38px; height:38px; flex:none; background:linear-gradient(135deg, var(--chrome-gold), var(--chrome-gold-deep)); color:var(--chrome-deep); font-weight:700; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:1.24rem; letter-spacing:0; border-radius:50%; box-shadow:0 2px 10px rgba(var(--chrome-gold-rgb),0.35);}
 .brand-logo{height:44px; width:auto; flex:none; display:block;}
 @media (max-width:760px){.brand-logo{height:36px;}}
@@ -201,18 +226,23 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* CTA button on nav */
 .site-nav .btn-fill-ink{
-  background:linear-gradient(135deg, var(--chrome-gold), var(--chrome-gold-deep)) !important;
+  /* Flat Lacquer Gold, not the old two-stop gradient. A gradient made the
+     button read as two different golds depending on where the eye landed, and
+     neither matched --gold used by the buttons in the page body. One colour,
+     one gold. Contrast with --chrome-deep is 7.17:1 — better than the 6.68:1
+     the gradient's dark end gave. */
+  background:var(--gold) !important;
   color:var(--chrome-deep) !important;
   font-weight:600 !important;
   border:none !important;
   border-radius:4px !important;
   padding:0.72rem 1.4rem !important;
-  box-shadow:0 3px 12px rgba(var(--chrome-gold-rgb),0.3) !important;
+  box-shadow:0 3px 12px rgba(185,150,82,0.3) !important;
   transition:all 0.25s ease !important;
 }
 .site-nav .btn-fill-ink:hover{
-  background:linear-gradient(135deg, #f3d470, #d8a834) !important;
-  box-shadow:0 4px 16px rgba(var(--chrome-gold-rgb),0.45) !important;
+  background:#C4A66C !important;
+  box-shadow:0 4px 16px rgba(185,150,82,0.45) !important;
 }
 
 /* ═══ FULL WIDTH LUXURY MEGA MENU ═══ */
@@ -464,10 +494,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mobile-menu-phone strong{color:var(--chrome-text); font-weight:500;}
 .mobile-menu-foot .btn{
   width:100%; justify-content:center; text-align:center;
-  background:linear-gradient(135deg, var(--chrome-gold), var(--chrome-gold-deep));
+  background:var(--gold);
   color:var(--chrome-deep); font-weight:600; border:none;
   padding:0.75rem 1rem; border-radius:4px;
-  box-shadow:0 3px 14px rgba(var(--chrome-gold-rgb),0.3);
+  box-shadow:0 3px 14px rgba(185,150,82,0.3);
 }
 
 /* ---------- breadcrumb ---------- */
@@ -1089,7 +1119,7 @@ footer{
 .footer-brand p{color:var(--chrome-dim-2); margin:0.9rem 0 1.2rem; max-width:34ch; font-size:0.92rem;}
 .footer-newsletter{display:flex; gap:0; border:1px solid rgba(var(--chrome-gold-rgb),0.25); border-radius:4px; overflow:hidden;}
 .footer-newsletter input{flex:1; background:rgba(0,0,0,0.25); border:none; color:var(--chrome-text); padding:0.85rem 1rem; font-size:0.86rem;}
-.footer-newsletter button{border:none; border-left:1px solid rgba(var(--chrome-gold-rgb),0.25); background:linear-gradient(135deg, var(--chrome-gold), var(--chrome-gold-deep)); color:var(--chrome-deep); font-weight:600; padding:0 1.3rem; font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer;}
+.footer-newsletter button{border:none; border-left:1px solid rgba(var(--chrome-gold-rgb),0.25); background:var(--gold); color:var(--chrome-deep); font-weight:600; padding:0 1.3rem; font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer;}
 .footer-socials{display:flex; gap:1.2rem; margin-top:1.3rem;}
 .footer-socials a{font-size:0.78rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--chrome-dim-2); transition:color 0.2s;}
 .footer-socials a:hover{color:var(--chrome-gold);}
@@ -2742,7 +2772,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mobile-action-item[href*="plan-my-trip"] svg{
   width:19px; height:19px; padding:9px; margin-top:-22px; box-sizing:content-box;
   border-radius:50%; color:var(--chrome-deep);
-  background:linear-gradient(135deg, var(--chrome-gold), var(--chrome-gold-deep));
+  background:var(--gold);
   box-shadow:0 4px 14px rgba(var(--chrome-gold-rgb),0.45), 0 0 0 4px var(--chrome-deep);
 }
 .mobile-action-item[href*="plan-my-trip"] span{ color:var(--chrome-gold); font-weight:700; }

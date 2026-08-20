@@ -2,8 +2,8 @@
   "name": "absolute-asia-headless",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
+    "dev": "next dev",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
@@ -11,9 +11,14 @@
     "check": "npm run contract:check && npm run typecheck",
     "lighthouse": "node scripts/lighthouse.mjs",
     "site": "node scripts/site.mjs",
-    "index:submit": "node scripts/google-index.mjs"
+    "index:submit": "node scripts/google-index.mjs",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.2",
     "@types/leaflet": "^1.9.22",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
@@ -30,6 +35,7 @@
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "wrangler": "^4.124.0"
   }
 }

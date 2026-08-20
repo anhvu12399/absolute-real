@@ -49,6 +49,15 @@ add_action('rest_api_init', function () {
        fill their console with errors. */
     register_rest_route('absolute-asia/v1', '/me', $public + ['callback' => 'aat_rest_me']);
 
+    /* Page-view beacon. Public by necessity: it is called by every visitor's
+       browser, and the frontend is served from the edge where WordPress never
+       sees the request at all. */
+    register_rest_route('absolute-asia/v1', '/beacon', [
+        'methods'             => 'POST',
+        'callback'            => 'aat_rest_beacon',
+        'permission_callback' => '__return_true',
+    ]);
+
     /* Public lead inquiry submission endpoint */
     register_rest_route('absolute-asia/v1', '/lead', [
         'methods' => 'POST',
@@ -466,6 +475,11 @@ function aat_rest_site() {
         /* Who the company legally is. It lived only in a build-time variable
            on the host, which meant the one line on the site that states who is
            liable could not be corrected without a redeploy. */
+        /* Which build is answering. Published because the alternative is
+           guessing: a fix can be shipped, installed and still not take effect,
+           and without this there is no way to tell those cases apart from
+           outside WordPress. */
+        'pluginVersion' => defined('AAT_VERSION') ? AAT_VERSION : '',
         'legalEntity' => trim((string) get_option('aat_legal_entity', '')),
         'tagline' => trim((string) get_option('aat_tagline', '')),
         'whatsapp' => trim((string) get_option('aat_whatsapp', '')),
@@ -745,27 +759,26 @@ function aat_rest_submit_lead(WP_REST_Request $request) {
 
     $sent = wp_mail($to_email, $subject, $html, $headers);
 
-    // Also persist lead into WordPress options / log for 100% data safety
-    $leads = get_option('aat_received_leads', []);
-    if (!is_array($leads)) $leads = [];
-    $lead_record = [
-        'id' => wp_generate_uuid4(),
-        'date' => gmdate(DATE_ATOM),
-        'name' => $name,
-        'email' => $email,
-        'phone' => $phone,
+    /* The enquiry becomes an Order, not a row in an option.
+       It used to be appended to `aat_received_leads` and trimmed to the last
+       300 — which meant the 301st enquiry silently deleted the first, and none
+       of them were searchable, assignable or countable. An `order` post is a
+       first-class record: it has a date, an author, a status, a comment thread
+       for whoever follows it up, and it survives. */
+    $order_id = aat_store_order([
+        'name'        => $name,
+        'email'       => $email,
+        'phone'       => $phone,
         'destination' => $destination,
-        'message' => $message,
+        'message'     => $message,
         'source_path' => $source_path,
-        'details' => $details,
-        'email_sent' => (bool)$sent,
-    ];
-    array_unshift($leads, $lead_record);
-    update_option('aat_received_leads', array_slice($leads, 0, 300), false);
+        'details'     => $details,
+        'email_sent'  => (bool) $sent,
+    ]);
 
     return rest_ensure_response([
         'ok' => true,
-        'email_sent' => (bool)$sent,
-        'id' => $lead_record['id'],
+        'email_sent' => (bool) $sent,
+        'id' => $order_id ? (string) $order_id : wp_generate_uuid4(),
     ]);
 }
